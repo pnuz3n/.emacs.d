@@ -5,12 +5,11 @@
 
 ;; No startup screen
 (setq inhibit-splash-screen t)
-(tool-bar-mode -1)
 
 ;; Turn off mouse interface early in startup to avoid momentary display
-(if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
-(if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
-(if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
+;(if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
+;(if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
+;(if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 
 (setq settings-dir
       (expand-file-name "settings" user-emacs-directory))
@@ -75,7 +74,9 @@
 (global-set-key  (kbd "C-w")    'kill-this-buffer)
 (global-set-key  (kbd "C-§")    'shell-command)
 (global-set-key  (kbd "M-§")    'shell-command-on-region)
+
 (global-set-key  (kbd "M-<left>")  'pop-global-mark) ;; Navigate back
+(global-set-key  (kbd "C-c C-b")  'pop-global-mark) ;; Navigate back
 
 
 (global-set-key (kbd "s-<return>") 'set-rectangular-region-anchor)
@@ -85,6 +86,15 @@
 (global-set-key (kbd "s-,") 'mc/mark-previous-like-this)
 (global-set-key (kbd "s-m") 'mc/mark-more-like-this-extended)
 
+(global-set-key (kbd "C-c <return>") 'set-rectangular-region-anchor)
+(global-set-key (kbd "C-c c") 'mc/edit-lines)
+(global-set-key (kbd "C-c a") 'mc/mark-all-like-this)
+(global-set-key (kbd "C-c .") 'mc/mark-next-like-this)
+(global-set-key (kbd "C-c ,") 'mc/mark-previous-like-this)
+(global-set-key (kbd "C-c m") 'mc/mark-more-like-this-extended)
+
+
+
 
 (global-unset-key (kbd "C-<SPC>"))
 (global-set-key (kbd "C-<SPC>") 'set-mark-command)
@@ -92,6 +102,11 @@
 (global-set-key (kbd "s-<mouse-1>") 'mc/add-cursor-on-click)
 
 ; Moving from window to window using arrows
+(global-set-key (kbd "C-c <left>")  'windmove-left)
+(global-set-key (kbd "C-c <right>") 'windmove-right)
+(global-set-key (kbd "C-c <up>")    'windmove-up)
+(global-set-key (kbd "C-c <down>")  'windmove-down)
+
 (global-set-key (kbd "s-<left>")  'windmove-left)
 (global-set-key (kbd "s-<right>") 'windmove-right)
 (global-set-key (kbd "s-<up>")    'windmove-up)
