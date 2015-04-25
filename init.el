@@ -68,15 +68,11 @@
  )
 
 
-(global-set-key  (kbd "C-z")    'undo)
+
 (global-set-key (kbd "C-,") 'backward-paragraph)
 (global-set-key (kbd "C-.") 'forward-paragraph) 
-(global-set-key  (kbd "C-w")    'kill-this-buffer)
 (global-set-key  (kbd "C-§")    'shell-command)
 (global-set-key  (kbd "M-§")    'shell-command-on-region)
-
-(global-set-key  (kbd "M-<left>")  'pop-global-mark) ;; Navigate back
-(global-set-key  (kbd "C-c C-b")  'pop-global-mark) ;; Navigate back
 
 
 (global-set-key (kbd "s-<return>") 'set-rectangular-region-anchor)
