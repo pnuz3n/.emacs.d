@@ -25,7 +25,7 @@
 
 ;; Conclude init by setting up specifics for the current user
 (when (file-exists-p settings-dir)
-(mapc 'load (directory-files settings-dir nil "^[^#].*el$")))
+  (mapc 'load (directory-files settings-dir nil "^[^#].*el$")))
 
 
 
@@ -34,7 +34,7 @@
 
 ;; No passwords show in shell
 (add-hook 'comint-output-filter-functions
-   'comint-watch-for-password-prompt)
+          'comint-watch-for-password-prompt)
 
 
 
@@ -51,6 +51,21 @@
   (delete-trailing-whitespace)
   (indent-region (point-min) (point-max) nil)
   (untabify (point-min) (point-max)))
+
+(defun previous-line-insert-newline ()
+  "Moves line up and creates empty line"
+  (interactive)
+  (previous-line)
+  (end-of-line)
+  (newline-and-indent)
+  )
+
+(defun next-line-insert-newline ()
+  "Moves line up and creates empty line"
+  (interactive)
+  (end-of-line)
+  (newline-and-indent)
+  )
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -70,7 +85,7 @@
 
 
 (global-set-key (kbd "C-,") 'backward-paragraph)
-(global-set-key (kbd "C-.") 'forward-paragraph) 
+(global-set-key (kbd "C-.") 'forward-paragraph)
 (global-set-key  (kbd "C-§")    'shell-command)
 (global-set-key  (kbd "M-§")    'shell-command-on-region)
 
@@ -90,14 +105,17 @@
 (global-set-key (kbd "C-c m") 'mc/mark-more-like-this-extended)
 
 
+(global-set-key (kbd "M-n") 'next-line-insert-newline)
+(global-set-key (kbd "M-p") 'previous-line-insert-newline)
 
+(global-set-key (kbd "C-c f") 'iwb)
 
 (global-unset-key (kbd "C-<SPC>"))
 (global-set-key (kbd "C-<SPC>") 'set-mark-command)
 
 (global-set-key (kbd "s-<mouse-1>") 'mc/add-cursor-on-click)
 
-; Moving from window to window using arrows
+;; Moving from window to window using arrows
 (global-set-key (kbd "C-c <left>")  'windmove-left)
 (global-set-key (kbd "C-c <right>") 'windmove-right)
 (global-set-key (kbd "C-c <up>")    'windmove-up)
@@ -107,3 +125,16 @@
 (global-set-key (kbd "s-<right>") 'windmove-right)
 (global-set-key (kbd "s-<up>")    'windmove-up)
 (global-set-key (kbd "s-<down>")  'windmove-down)
+
+
+
+
+
+
+
+
+
+
+
+
+
