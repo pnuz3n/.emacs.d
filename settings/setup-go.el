@@ -20,8 +20,9 @@
        (el-get-bundle go-autocomplete)
        (require 'go-autocomplete)
 
-
-       (add-hook 'before-save-hook 'gofmt-before-save)
-       )
+       (add-hook 'go-mode-hook 
+                 (lambda ()
+                         (add-hook 'before-save-hook 'gofmt-before-save))
+                 ))
 
 (if (system-has-go) (setup-go))
