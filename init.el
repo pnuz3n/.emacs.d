@@ -17,6 +17,8 @@
       (expand-file-name "lisp" user-emacs-directory))
 
 
+(server-start)
+
 (add-to-list 'load-path lisp-dir)
 (add-to-list 'load-path settings-dir)
 
