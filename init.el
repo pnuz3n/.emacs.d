@@ -16,6 +16,8 @@
 (setq lisp-dir
       (expand-file-name "lisp" user-emacs-directory))
 
+(setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
+(setq version-control t)
 
 (server-start)
 
