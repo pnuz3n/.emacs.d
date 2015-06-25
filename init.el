@@ -86,7 +86,8 @@
  ;; If there is more than one, they won't work right.
  )
 
-
+(setq line-move-visual nil)
+(put 'scroll-left 'disabled nil)
 
 (global-set-key (kbd "C-,") 'backward-paragraph)
 (global-set-key (kbd "C-.") 'forward-paragraph)
@@ -108,7 +109,6 @@
 (global-set-key (kbd "C-c ,") 'mc/mark-previous-like-this)
 (global-set-key (kbd "C-c m") 'mc/mark-more-like-this-extended)
 
-
 (global-set-key (kbd "M-n") 'next-line-insert-newline)
 (global-set-key (kbd "M-p") 'previous-line-insert-newline)
 
@@ -129,16 +129,3 @@
 (global-set-key (kbd "s-<right>") 'windmove-right)
 (global-set-key (kbd "s-<up>")    'windmove-up)
 (global-set-key (kbd "s-<down>")  'windmove-down)
-
-
-
-
-
-
-
-
-
-
-
-
-
