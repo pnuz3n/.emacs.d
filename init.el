@@ -1,3 +1,4 @@
+
 (setq inhibit-startup-message t)
 
 ;; No tabs
@@ -26,6 +27,8 @@
 
 (load "setup-el-get")
 
+;; (load "/home/vagrant/.emacs.d/ladatut/robot-mode/robot-mode.el")
+
 
 ;; Conclude init by setting up specifics for the current user
 (when (file-exists-p settings-dir)
@@ -47,7 +50,9 @@
 ;;; turn on syntax highlighting
 (global-font-lock-mode 1)
 
-
+;; Mustache mode
+(add-to-list 'load-path "~/.emacs.d/ladatut")
+(require 'mustache-mode)
 
 (defun iwb ()
   "indent whole buffer"
@@ -129,3 +134,6 @@
 (global-set-key (kbd "s-<right>") 'windmove-right)
 (global-set-key (kbd "s-<up>")    'windmove-up)
 (global-set-key (kbd "s-<down>")  'windmove-down)
+
+(put 'upcase-region 'disabled nil)
+(put 'scroll-left 'disabled nil)
