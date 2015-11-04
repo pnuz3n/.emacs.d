@@ -18,7 +18,13 @@
       (expand-file-name "lisp" user-emacs-directory))
 
 (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
-(setq version-control t)
+(setq
+  delete-old-versions t
+  kept-new-versions 6
+  kept-old-versions 2
+  version-control t
+  backup-by-copying t
+)
 
 (server-start)
 
