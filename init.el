@@ -42,9 +42,6 @@
 
 
 
-
-
-
 ;; No passwords show in shell
 (add-hook 'comint-output-filter-functions
           'comint-watch-for-password-prompt)
@@ -83,58 +80,42 @@
   )
 
 (custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
  '(browse-url-browser-function (quote browse-url-chromium))
- '(httpd-port 8808))
-
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+)
 
 (setq line-move-visual nil)
 (put 'scroll-left 'disabled nil)
 
-(global-set-key (kbd "C-,") 'backward-paragraph)
-(global-set-key (kbd "C-.") 'forward-paragraph)
-(global-set-key  (kbd "C-§")    'shell-command)
-(global-set-key  (kbd "M-§")    'shell-command-on-region)
+;; (global-set-key (kbd "C-,") 'backward-paragraph)
+;; (global-set-key (kbd "C-.") 'forward-paragraph)
+;; (global-set-key  (kbd "C-`")    'shell-command)
+;; (global-set-key  (kbd "M-`")    'shell-command-on-region)
 
-
-(global-set-key (kbd "s-<return>") 'set-rectangular-region-anchor)
-(global-set-key (kbd "s-c") 'mc/edit-lines)
-(global-set-key (kbd "s-a") 'mc/mark-all-like-this)
-(global-set-key (kbd "s-.") 'mc/mark-next-like-this)
-(global-set-key (kbd "s-,") 'mc/mark-previous-like-this)
-(global-set-key (kbd "s-m") 'mc/mark-more-like-this-extended)
-
-(global-set-key (kbd "C-c <return>") 'set-rectangular-region-anchor)
-(global-set-key (kbd "C-c c") 'mc/edit-lines)
-(global-set-key (kbd "C-c a") 'mc/mark-all-like-this)
-(global-set-key (kbd "C-c .") 'mc/mark-next-like-this)
-(global-set-key (kbd "C-c ,") 'mc/mark-previous-like-this)
-(global-set-key (kbd "C-c m") 'mc/mark-more-like-this-extended)
-
-(global-set-key (kbd "M-n") 'next-line-insert-newline)
-(global-set-key (kbd "M-p") 'previous-line-insert-newline)
+;; These need some more tought sou they dont`t override org-mode keys
+;; (global-set-key (kbd "C-c <return>") 'set-rectangular-region-anchor)
+;; (global-set-key (kbd "C-c c") 'mc/edit-lines)
+;; (global-set-key (kbd "C-c a") 'mc/mark-all-like-this)
+;; (global-set-key (kbd "C-c .") 'mc/mark-next-like-this)
+;; (global-set-key (kbd "C-c ,") 'mc/mark-previous-like-this)
+;; (global-set-key (kbd "C-c m") 'mc/mark-more-like-this-extended)
 
 (global-set-key (kbd "C-c f") 'iwb)
-
-(global-unset-key (kbd "C-<SPC>"))
-(global-set-key (kbd "C-<SPC>") 'set-mark-command)
-
-(global-set-key (kbd "s-<mouse-1>") 'mc/add-cursor-on-click)
 
 ;; Moving from window to window using arrows
 (global-set-key (kbd "C-c <left>")  'windmove-left)
 (global-set-key (kbd "C-c <right>") 'windmove-right)
 (global-set-key (kbd "C-c <up>")    'windmove-up)
 (global-set-key (kbd "C-c <down>")  'windmove-down)
+
+(global-set-key (kbd "M-n") 'next-line-insert-newline)
+(global-set-key (kbd "M-p") 'previous-line-insert-newline)
+
+
+
+(global-unset-key (kbd "C-<SPC>"))
+(global-set-key (kbd "C-<SPC>") 'set-mark-command)
+
+
 
 (global-set-key (kbd "s-<left>")  'windmove-left)
 (global-set-key (kbd "s-<right>") 'windmove-right)

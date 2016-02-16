@@ -9,7 +9,7 @@
 )
 
 ;; Don`t confirm plant uml runs for conviency.
-(let ((default-confirm org-confirm-babel-evaluate))
+(lexical-let ((default-confirm org-confirm-babel-evaluate))
  (defun my-org-confirm-babel-evaluate (lang body)
            (if (string= lang "plantuml") nil default-confirm))
  (setq org-confirm-babel-evaluate 'my-org-confirm-babel-evaluate)

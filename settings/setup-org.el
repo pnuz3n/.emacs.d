@@ -6,5 +6,6 @@
    (makefile . t)
    (sh . t)
    (js . t)
-   (emacs-lisp . nil)
+   (plantuml . t)
+   (emacs-lisp . t)
    ))
