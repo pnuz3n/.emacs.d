@@ -1,12 +1,41 @@
-(setq inhibit-startup-message t)
-(setq inhibit-splash-screen t)
+#+TITLE: Emacs initialization
 
+* Emacs Initialization
+:PROPERTIES:
+:tangle: init.el
+:END:
+
+This document describes how Emacs is initialized.
+
+** Minimalistic user interface
+
+Emacs shows startup screen. It gets anoying after a while, so they
+need to be turned off.
+
+#+BEGIN_SRC emacs-lisp
+  (setq inhibit-startup-message t)
+  (setq inhibit-splash-screen t)
+#+END_SRC
+
+After getting used to the keyboard interface the menus and such just
+takes valuable screen space. So mouse interface is turned off.
+This is done early in the initialization to prevent momentary display.
+
+#+BEGIN_SRC emacs-lisp
 (if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
 (if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
 (if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
+#+END_SRC
 
+** No tabs
+
+#+BEGIN_SRC emacs-lisp
 (setq-default indent-tabs-mode nil)
+#+END_SRC
 
+** Backups
+
+#+BEGIN_SRC emacs-lisp
 (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
 (setq
   delete-old-versions t
@@ -15,9 +44,17 @@
   version-control t
   backup-by-copying t
 )
+#+END_SRC
 
+** Emacsclient server
+
+#+BEGIN_SRC emacs-lisp
 (server-start)
+#+END_SRC
 
+** Elget
+
+#+BEGIN_SRC emacs-lisp
 (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
 
 (unless (require 'el-get nil 'noerror)
@@ -35,11 +72,23 @@
 
 (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get-user/recipes")
 (el-get 'sync)
+#+END_SRC
 
+
+** No passwords in shell
+
+#+BEGIN_SRC emacs-lisp
 ;; No passwords show in shell
 (add-hook 'comint-output-filter-functions
           'comint-watch-for-password-prompt)
+#+END_SRC
 
+
+
+** Misc
+
+
+#+BEGIN_SRC emacs-lisp
 ;;; turn on syntax highlighting
 (global-font-lock-mode 1)
 
@@ -115,6 +164,9 @@
 (put 'upcase-region 'disabled nil)
 (put 'scroll-left 'disabled nil)
 
+#+END_SRC
+** setup-acejump.el
+#+BEGIN_SRC emacs-lisp
 (el-get-bundle ace-jump-mode)
 
 (add-hook 'comint-mode-hook
@@ -136,24 +188,35 @@
   '(ace-jump-mode-enable-mark-sync))
 (define-key global-map (kbd "C-x SPC") 'ace-jump-mode-pop-mark)
 (define-key global-map (kbd "C-.") 'ace-jump-mode)
-
-
-
+#+END_SRC
+** setup-autocomplete.el
+#+BEGIN_SRC emacs-lisp
+#+END_SRC
+** setup-cedet.el
+#+BEGIN_SRC emacs-lisp
 ;; Load CEDET
 (el-get-bundle cedet)
-
+#+END_SRC
+** setup-csv.el
+#+BEGIN_SRC emacs-lisp
 ;; CSV Mode
 (el-get-bundle csv-mode)
 (require 'csv-mode)
-
+#+END_SRC
+** setup-docker-mode.el
+#+BEGIN_SRC emacs-lisp
 (el-get-bundle dockerfile-mode)
 ;;; Dockerfile mode
 (require 'dockerfile-mode)
 (add-to-list 'auto-mode-alist '("Dockerfile\\'" . dockerfile-mode))
-
+#+END_SRC
+** setup-edit-server.el
+#+BEGIN_SRC emacs-lisp
 (el-get-bundle edit-server)
 (edit-server-start)
-
+#+END_SRC
+** setup-erlang.el
+#+BEGIN_SRC emacs-lisp
 (defun erl-exists () "Tests wether go is installed or not" 
   (= (call-process "which" nil nil nil "erl") 0)
 )
@@ -164,11 +227,15 @@
 )
 
 (if (erl-exists) (erl-setup))
-
+#+END_SRC
+** setup-expand-region.el
+#+BEGIN_SRC emacs-lisp
 (el-get-bundle expand-region)
 (require 'expand-region)
 (global-set-key (kbd "C-+") 'er/expand-region)
-
+#+END_SRC
+** setup-go.el
+#+BEGIN_SRC emacs-lisp
 (defun system-has-go () "Tests wether go is installed or not" 
        (condition-case nil
            (progn
@@ -216,7 +283,9 @@
                  ))
 
 (if (system-has-go) (setup-go))
-
+#+END_SRC
+** setup-idea.el
+#+BEGIN_SRC emacs-lisp
 ;; Idea related shortcuts
 
 (defun idea-open-file (s) "Opens file in idea"
@@ -225,15 +294,24 @@
        (start-process "" nil "idea" s)
        )
 
+#+END_SRC
+** setup-jira.el
+#+BEGIN_SRC emacs-lisp
 (el-get-bundle org-jira)
 (setq org-jira-working-dir "~/org/jira")
-
+#+END_SRC
+** setup-multicursore.el
+#+BEGIN_SRC emacs-lisp
 (el-get-bundle multiple-cursors)
-
+#+END_SRC
+** setup-mysql.el
+#+BEGIN_SRC emacs-lisp
 ;; Allows changing port used to connect MySQL-database
 ;(setq sql-mysql-login-params (append sql-mysql-login-params '(port)))
 ;(setq sql-port 3306)
-
+#+END_SRC
+** setup-org.el
+#+BEGIN_SRC emacs-lisp
 (el-get-bundle org)
 ;; active Babel languages
 (org-babel-do-load-languages
@@ -245,6 +323,9 @@
    (plantuml . t)
    (emacs-lisp . t)
    ))
+#+END_SRC
+** setup-plantuml.el
+#+BEGIN_SRC emacs-lisp
 
 ;; Donwload plantuml.jar if missing and use it.
 (let ((plantuml-jar "~/.emacs.d/plantuml.jar"))
@@ -261,11 +342,18 @@
            (if (string= lang "plantuml") nil default-confirm))
  (setq org-confirm-babel-evaluate 'my-org-confirm-babel-evaluate)
 )
-
+#+END_SRC
+** setup-tramp.el
+#+BEGIN_SRC emacs-lisp
 (el-get-bundle tramp)
-
+#+END_SRC
+** setup-yaml.el
+#+BEGIN_SRC emacs-lisp
 (el-get-bundle yaml-mode)
 
+#+END_SRC
+** setup-yasnippet-and-ac.el
+#+BEGIN_SRC emacs-lisp
 (el-get-bundle yasnippet)
 (el-get-bundle auto-complete)
 (el-get-bundle auto-complete-yasnippet)
@@ -311,3 +399,4 @@
  (defadvice ac-fallback-command (around no-yasnippet-fallback activate)
       (let ((yas-fallback-behavior nil))
         ad-do-it))
+#+END_SRC
