@@ -27,6 +27,12 @@ This is done early in the initialization to prevent momentary display.
 (if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 #+END_SRC
 
+** Lisp files
+
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'load-path "~/.emacs.d/lisp/")
+#+END_SRC
+
 ** No tabs
 
 #+BEGIN_SRC emacs-lisp
@@ -45,6 +51,15 @@ This is done early in the initialization to prevent momentary display.
   backup-by-copying t
 )
 #+END_SRC
+
+** Browser
+
+
+#+BEGIN_SRC emacs-lisp
+  (when (eq system-type 'darwin)
+    (setq browse-url-browser-function 'browse-url-default-macosx-browser))
+#+END_SRC
+
 
 ** Emacsclient server
 
@@ -82,7 +97,50 @@ This is done early in the initialization to prevent momentary display.
 (add-hook 'comint-output-filter-functions
           'comint-watch-for-password-prompt)
 #+END_SRC
+** New prefix key Control-q
 
+~Control-q~ is bound to ~quoted-insert~ by default. That command is
+not use so often and the key is perfectly located for prefix key.
+So it is unset here to allow it to be re-used later.
+
+#+BEGIN_SRC emacs-lisp
+  (global-unset-key (kbd "C-q"))
+#+END_SRC
+
+** Org-mode
+
+Install org mode through [[Elget]].
+
+#+BEGIN_SRC emacs-lisp
+(el-get-bundle org)
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-agenda-files "~/org/agenda")
+#+END_SRC
+
+
+Setup default keys (see [[http://orgmode.org/org.html#Activation][Org mode activation]]). There has not been any
+reason to change them yet.
+#+BEGIN_SRC emacs-lisp
+  (global-set-key "\C-cl" 'org-store-link)
+  (global-set-key "\C-ca" 'org-agenda)
+  (global-set-key "\C-cc" 'org-capture)
+  (global-set-key "\C-cb" 'org-iswitchb)
+#+END_SRC
+
+Active babel languages.
+#+BEGIN_SRC emacs-lisp
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '(
+   (makefile . t)
+   (sh . t)
+   (js . t)
+   (plantuml . t)
+   (emacs-lisp . t)
+   ))
+#+END_SRC
 
 
 ** Misc
@@ -117,10 +175,6 @@ This is done early in the initialization to prevent momentary display.
   (end-of-line)
   (newline-and-indent)
   )
-
-(custom-set-variables
- '(browse-url-browser-function (quote browse-url-chromium))
-)
 
 (setq line-move-visual nil)
 (put 'scroll-left 'disabled nil)
@@ -165,29 +219,29 @@ This is done early in the initialization to prevent momentary display.
 (put 'scroll-left 'disabled nil)
 
 #+END_SRC
-** setup-acejump.el
+** Ace Jump
 #+BEGIN_SRC emacs-lisp
-(el-get-bundle ace-jump-mode)
+  (el-get-bundle ace-jump-mode)
 
-(add-hook 'comint-mode-hook
-               (lambda ()
-                 (define-key comint-mode-map (kbd "C-c j") 'ace-jump-mode)
-                 (define-key comint-mode-map (kbd "<C-return>") 'comint-accumulate)
-                ))
+  (add-hook 'comint-mode-hook
+                 (lambda ()
+                   (define-key comint-mode-map (kbd "C-.") 'ace-jump-mode)
+                   (define-key comint-mode-map (kbd "<C-return>") 'comint-accumulate)
+                  ))
 
                  
-;; 
-;; enable a more powerful jump back function from ace jump mode
-;;
-(autoload
-  'ace-jump-mode-pop-mark
-  "ace-jump-mode"
-  "Ace jump back:-)"
-  t)
-(eval-after-load "ace-jump-mode"
-  '(ace-jump-mode-enable-mark-sync))
-(define-key global-map (kbd "C-x SPC") 'ace-jump-mode-pop-mark)
-(define-key global-map (kbd "C-.") 'ace-jump-mode)
+  ;; 
+  ;; enable a more powerful jump back function from ace jump mode
+  ;;
+  (autoload
+    'ace-jump-mode-pop-mark
+    "ace-jump-mode"
+    "Ace jump back:-)"
+    t)
+  (eval-after-load "ace-jump-mode"
+    '(ace-jump-mode-enable-mark-sync))
+  (define-key global-map (kbd "C-q q") 'ace-jump-mode-pop-mark)
+  (define-key global-map (kbd "C-.") 'ace-jump-mode)
 #+END_SRC
 ** setup-autocomplete.el
 #+BEGIN_SRC emacs-lisp
@@ -309,20 +363,6 @@ This is done early in the initialization to prevent momentary display.
 ;; Allows changing port used to connect MySQL-database
 ;(setq sql-mysql-login-params (append sql-mysql-login-params '(port)))
 ;(setq sql-port 3306)
-#+END_SRC
-** setup-org.el
-#+BEGIN_SRC emacs-lisp
-(el-get-bundle org)
-;; active Babel languages
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '(
-   (makefile . t)
-   (sh . t)
-   (js . t)
-   (plantuml . t)
-   (emacs-lisp . t)
-   ))
 #+END_SRC
 ** setup-plantuml.el
 #+BEGIN_SRC emacs-lisp

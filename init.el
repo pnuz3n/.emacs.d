@@ -5,6 +5,8 @@
 (if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
 (if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 
+(add-to-list 'load-path "~/.emacs.d/lisp/")
+
 (setq-default indent-tabs-mode nil)
 
 (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
@@ -15,6 +17,9 @@
   version-control t
   backup-by-copying t
 )
+
+(when (eq system-type 'darwin)
+  (setq browse-url-browser-function 'browse-url-default-macosx-browser))
 
 (server-start)
 
@@ -39,6 +44,27 @@
 ;; No passwords show in shell
 (add-hook 'comint-output-filter-functions
           'comint-watch-for-password-prompt)
+
+(global-unset-key (kbd "C-q"))
+
+(el-get-bundle org)
+
+(setq org-agenda-files "~/org/agenda")
+
+(global-set-key "\C-cl" 'org-store-link)
+(global-set-key "\C-ca" 'org-agenda)
+(global-set-key "\C-cc" 'org-capture)
+(global-set-key "\C-cb" 'org-iswitchb)
+
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '(
+   (makefile . t)
+   (sh . t)
+   (js . t)
+   (plantuml . t)
+   (emacs-lisp . t)
+   ))
 
 ;;; turn on syntax highlighting
 (global-font-lock-mode 1)
@@ -68,10 +94,6 @@
   (end-of-line)
   (newline-and-indent)
   )
-
-(custom-set-variables
- '(browse-url-browser-function (quote browse-url-chromium))
-)
 
 (setq line-move-visual nil)
 (put 'scroll-left 'disabled nil)
@@ -119,11 +141,11 @@
 
 (add-hook 'comint-mode-hook
                (lambda ()
-                 (define-key comint-mode-map (kbd "C-c j") 'ace-jump-mode)
+                 (define-key comint-mode-map (kbd "C-.") 'ace-jump-mode)
                  (define-key comint-mode-map (kbd "<C-return>") 'comint-accumulate)
                 ))
 
-                 
+               
 ;; 
 ;; enable a more powerful jump back function from ace jump mode
 ;;
@@ -134,7 +156,7 @@
   t)
 (eval-after-load "ace-jump-mode"
   '(ace-jump-mode-enable-mark-sync))
-(define-key global-map (kbd "C-x SPC") 'ace-jump-mode-pop-mark)
+(define-key global-map (kbd "C-q q") 'ace-jump-mode-pop-mark)
 (define-key global-map (kbd "C-.") 'ace-jump-mode)
 
 
@@ -233,18 +255,6 @@
 ;; Allows changing port used to connect MySQL-database
 ;(setq sql-mysql-login-params (append sql-mysql-login-params '(port)))
 ;(setq sql-port 3306)
-
-(el-get-bundle org)
-;; active Babel languages
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '(
-   (makefile . t)
-   (sh . t)
-   (js . t)
-   (plantuml . t)
-   (emacs-lisp . t)
-   ))
 
 ;; Donwload plantuml.jar if missing and use it.
 (let ((plantuml-jar "~/.emacs.d/plantuml.jar"))
