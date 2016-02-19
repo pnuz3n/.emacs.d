@@ -5,7 +5,31 @@
 (if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
 (if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 
+(let ((elements (split-string (getenv "PATH") ":")))
+  (dolist (e elements)
+    (add-to-list 'exec-path e)))
+
 (add-to-list 'load-path "~/.emacs.d/lisp/")
+
+;; read gpg-agent environment
+
+(defun read-env-line (line)
+  "read a env line and post to environment"
+  (let ((key-value-pair (split-string line "=" t)))
+    (setenv (car key-value-pair) (car (last key-value-pair))))
+  )
+(defvar gpg-agent-info-file)
+(setq gpg-agent-info-file (concat (getenv "HOME") "/.gpg-agent-info"))
+
+(when (and
+       (eq system-type 'darwin)
+       (file-exists-p gpg-agent-info-file))
+      (with-temp-buffer
+        (progn
+          (insert-file-contents gpg-agent-info-file)
+          (mapc 'read-env-line (split-string (buffer-string) "\n" t)))
+        )
+  )
 
 (setq-default indent-tabs-mode nil)
 
@@ -19,7 +43,7 @@
 )
 
 (when (eq system-type 'darwin)
-  (setq browse-url-browser-function 'browse-url-default-macosx-browser))
+   (setq browse-url-browser-function 'browse-url-default-macosx-browser))
 
 (server-start)
 
@@ -49,7 +73,11 @@
 
 (el-get-bundle org)
 
-(setq org-agenda-files "~/org/agenda")
+(setq org-directory "~/org")
+(setq org-agenda-files (concat org-directory "/agenda"))
+(setq org-default-notes-file (concat org-directory "/notes.org.gpg"))
+
+(setq org-archive-location (concat org-directory "/archive.org.gpg::* From %s"))
 
 (global-set-key "\C-cl" 'org-store-link)
 (global-set-key "\C-ca" 'org-agenda)
@@ -214,7 +242,6 @@
 
 (defun setup-go () "Install go environment with el-get"
        (el-get-bundle go-mode)
-       (el-get-bundle let-alist)
        (el-get-bundle dash)
        
        ;; Require makeinfo which major version is 5 ore more

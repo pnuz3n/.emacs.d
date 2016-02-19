@@ -1,5 +1,4 @@
 #+TITLE: Emacs initialization
-
 * Emacs Initialization
 :PROPERTIES:
 :tangle: init.el
@@ -27,12 +26,54 @@ This is done early in the initialization to prevent momentary display.
 (if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 #+END_SRC
 
+** Exec path
+
+At least in MacOS there is problems of ~exec-path~ being insufficient.
+The main hedeach this causes is that gpg is not found and encrypted
+files can not be opened or saved.
+
+Following code will extract exec-path from ~PATH~ variable.
+
+#+BEGIN_SRC emacs-lisp
+(let ((elements (split-string (getenv "PATH") ":")))
+  (dolist (e elements)
+    (add-to-list 'exec-path e)))
+#+END_SRC
+
 ** Lisp files
 
 #+BEGIN_SRC emacs-lisp
 (add-to-list 'load-path "~/.emacs.d/lisp/")
 #+END_SRC
 
+** Using GPG-Agent in MacOS
+
+MacOS environment is "funny" thing there is different for shell and
+different for applications. The gpg-agent can be configured to be
+launched during login ([[http://www.weinschenker.name/2013-10-08/use-gpgtools-for-ssh-logins-on-mac-os-x/][how-to]]), but emacs does not receive the related
+environment variables. Following code fixes this issue.
+
+#+BEGIN_SRC emacs-lisp
+  ;; read gpg-agent environment
+
+  (defun read-env-line (line)
+    "read a env line and post to environment"
+    (let ((key-value-pair (split-string line "=" t)))
+      (setenv (car key-value-pair) (car (last key-value-pair))))
+    )
+  (defvar gpg-agent-info-file)
+  (setq gpg-agent-info-file (concat (getenv "HOME") "/.gpg-agent-info"))
+
+  (when (and
+         (eq system-type 'darwin)
+         (file-exists-p gpg-agent-info-file))
+        (with-temp-buffer
+          (progn
+            (insert-file-contents gpg-agent-info-file)
+            (mapc 'read-env-line (split-string (buffer-string) "\n" t)))
+          )
+    )
+#+END_SRC
 ** No tabs
 
 #+BEGIN_SRC emacs-lisp
@@ -57,7 +98,7 @@ This is done early in the initialization to prevent momentary display.
 
 #+BEGIN_SRC emacs-lisp
   (when (eq system-type 'darwin)
-    (setq browse-url-browser-function 'browse-url-default-macosx-browser))
+     (setq browse-url-browser-function 'browse-url-default-macosx-browser))
 #+END_SRC
 
 
@@ -115,8 +156,22 @@ Install org mode through [[Elget]].
 (el-get-bundle org)
 #+END_SRC
 
+Set up agenda functionality. Files are located under org-directory
+under home.
+
 #+BEGIN_SRC emacs-lisp
-  (setq org-agenda-files "~/org/agenda")
+(setq org-directory "~/org")
+(setq org-agenda-files (concat org-directory "/agenda"))
+(setq org-default-notes-file (concat org-directory "/notes.org.gpg"))
+#+END_SRC
+
+
+Set up archive file that is encrypted. By default entries would be archive
+to files postfixed by ~_archive~. This file is not encrypted and that could
+be a problem.
+
+#+BEGIN_SRC emacs-lisp
+(setq org-archive-location (concat org-directory "/archive.org.gpg::* From %s"))
 #+END_SRC
 
 
@@ -313,7 +368,6 @@ Active babel languages.
 
 (defun setup-go () "Install go environment with el-get"
        (el-get-bundle go-mode)
-       (el-get-bundle let-alist)
        (el-get-bundle dash)
        
        ;; Require makeinfo which major version is 5 ore more
