@@ -94,6 +94,12 @@
    (emacs-lisp . t)
    ))
 
+(setq org-log-into-drawer t)
+(setq org-todo-keywords
+       '((sequence "IN(i!)" "SOMEDAY(s!)" "WAIT(w@/!)" "TODO(t!)" "|" "DONE(d!)" "CANCELLED(c@)")))
+
+(setq org-log-done 'time)
+
 ;;; turn on syntax highlighting
 (global-font-lock-mode 1)
 

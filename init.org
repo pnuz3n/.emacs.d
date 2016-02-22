@@ -197,6 +197,37 @@ Active babel languages.
    ))
 #+END_SRC
 
+Following will add GTD type of state for the tasks and
+provide logging.
+#+BEGIN_SRC emacs-lisp
+(setq org-log-into-drawer t)
+(setq org-todo-keywords
+       '((sequence "IN(i!)" "SOMEDAY(s!)" "WAIT(w@/!)" "TODO(t!)" "|" "DONE(d!)" "CANCELLED(c@)")))
+#+END_SRC
+
+Log looks something like this under the task header line.
+#+BEGIN_EXAMPLE
+:LOGBOOK:
+- State "DONE"       from "SOMEDAY"    [2016-02-22 Mon 16:04]
+- State "SOMEDAY"    from "IN"         [2016-02-22 Mon 16:03]
+- State "IN"         from "WAIT"       [2016-02-22 Mon 16:03]
+:END:
+#+END_EXAMPLE
+
+This adds simple line that tells when the task has been closed.
+#+BEGIN_SRC emacs-lisp
+(setq org-log-done 'time)
+#+END_SRC
+
+** COMMENT Mobile org
+
+#+BEGIN_SRC emacs-lisp
+(setq org-mobile-directory "~/Dropbox/MobileOrg")
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(setq org-mobile-use-encryption nil)
+#+END_SRC
 
 ** Misc
 
