@@ -100,6 +100,10 @@
 
 (setq org-log-done 'time)
 
+(setq org-tags-exclude-from-inheritance '("PROJECT"))
+(setq org-stuck-projects
+           '("+PROJECT/-MAYBE-DONE" ("TODO")))
+
 ;;; turn on syntax highlighting
 (global-font-lock-mode 1)
 

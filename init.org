@@ -219,6 +219,13 @@ This adds simple line that tells when the task has been closed.
 (setq org-log-done 'time)
 #+END_SRC
 
+Improve how the stuck projects are found.
+#+BEGIN_SRC emacs-lisp
+(setq org-tags-exclude-from-inheritance '("PROJECT"))
+(setq org-stuck-projects
+           '("+PROJECT/-MAYBE-DONE" ("TODO")))
+#+END_SRC
+
 ** COMMENT Mobile org
 
 #+BEGIN_SRC emacs-lisp
