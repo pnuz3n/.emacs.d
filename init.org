@@ -226,6 +226,19 @@ Improve how the stuck projects are found.
            '("+PROJECT/-MAYBE-DONE" ("TODO")))
 #+END_SRC
 
+Capture templates
+#+BEGIN_SRC emacs-lisp
+(setq org-capture-templates
+    '(
+      ("t"
+         "Task"
+         entry
+         (file+headline org-default-notes-file "Tasks")
+         "* IN %^{Title}\n  CREATED: %U\n  %i"
+         :empty-lines 1)
+      ))
+#+END_SRC
+
 ** COMMENT Mobile org
 
 #+BEGIN_SRC emacs-lisp
@@ -234,6 +247,14 @@ Improve how the stuck projects are found.
 
 #+BEGIN_SRC emacs-lisp
 (setq org-mobile-use-encryption nil)
+#+END_SRC
+
+** MacOS command keys as meta
+
+Accidentally pressin command key in MacOS is annoying so they are configured to be as meta-keys. 
+#+BEGIN_SRC
+(setq ns-command-modifier 'meta)
+(setq ns-right-command-modifier 'meta)
 #+END_SRC
 
 ** Misc
@@ -531,4 +552,12 @@ Improve how the stuck projects are found.
  (defadvice ac-fallback-command (around no-yasnippet-fallback activate)
       (let ((yas-fallback-behavior nil))
         ad-do-it))
+#+END_SRC
+** Run local init
+
+#+BEGIN_SRC emcas-lisp
+(setq local-init-file "~/.emacs.d/local-init.el")
+(if (file-exists-p local-init-file)
+(load local-init-file)
+)
 #+END_SRC

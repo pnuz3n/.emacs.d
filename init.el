@@ -1,3 +1,8 @@
+(setq local-init-file "~/.emacs.d/local-init.el")
+(if (file-exists-p local-init-file)
+(load local-init-file)
+)
+
 (setq inhibit-startup-message t)
 (setq inhibit-splash-screen t)
 
@@ -103,6 +108,16 @@
 (setq org-tags-exclude-from-inheritance '("PROJECT"))
 (setq org-stuck-projects
            '("+PROJECT/-MAYBE-DONE" ("TODO")))
+
+(setq org-capture-templates
+    '(
+      ("t"
+         "Task"
+         entry
+         (file+headline org-default-notes-file "Tasks")
+         "* IN %^{Title}\n  CREATED: %U\n  %i"
+         :empty-lines 1)
+      ))
 
 ;;; turn on syntax highlighting
 (global-font-lock-mode 1)
