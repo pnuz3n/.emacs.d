@@ -239,6 +239,13 @@ Capture templates
       ))
 #+END_SRC
 
+Refilling
+#+BEGIN_SRC emacs-lisp
+  (setq org-refile-targets '(
+                             (org-agenda-files . (:tag . "PROJECT")) ; Any project
+                             ))
+#+END_SRC
+
 ** COMMENT Mobile org
 
 #+BEGIN_SRC emacs-lisp

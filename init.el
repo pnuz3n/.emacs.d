@@ -119,6 +119,10 @@
          :empty-lines 1)
       ))
 
+(setq org-refile-targets '(
+                           (org-agenda-files . (:tag . "PROJECT")) ; Any project
+                           ))
+
 ;;; turn on syntax highlighting
 (global-font-lock-mode 1)
 
