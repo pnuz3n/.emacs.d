@@ -395,11 +395,21 @@
        (my-adjoin-to-list-or-symbol
         'fixed-pitch
         (face-attribute face :inherit))))
-    (list 'org-code 'org-block 'org-table))
+    (list 'org-code 'org-block 'org-table 'org-meta-line))
 
 (set-face-attribute 'variable-pitch nil :height 1.3 :family "Calibri")
 (set-face-attribute 'fixed-pitch nil :height 0.8 :family "Consolas")
 
+(add-hook 'org-mode-hook 'org-indent-mode)
+(add-hook 'org-mode-hook 'org-bullets-mode)
+(setq org-hide-leading-stars t)
+(setq line-spacing 0.25)
+(set-face-attribute 'org-tag nil :weight 'normal :height 0.8)
+(set-face-attribute 'org-todo nil :weight 'normal :height 150)
+(set-face-attribute 'org-priority nil :weight 'normal :height 100)
+(set-face-attribute 'org-todo nil :weight 'normal :height 100)
+(set-face-attribute 'org-done nil :weight 'normal :height 100)
+(set-face-attribute 'org-special-keyword nil :height 90)
 (set-face-attribute 'org-level-1 nil :height 1.3)
 (set-face-attribute 'org-level-2 nil :height 1.2)
 (set-face-attribute 'org-level-3 nil :height 1.1)
