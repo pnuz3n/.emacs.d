@@ -1,8 +1,3 @@
-(setq local-init-file "~/.emacs.d/local-init.el")
-(if (file-exists-p local-init-file)
-(load local-init-file)
-)
-
 (setq inhibit-startup-message t)
 (setq inhibit-splash-screen t)
 
@@ -105,7 +100,7 @@
 
 (setq org-log-done 'time)
 
-(setq org-tags-exclude-from-inheritance '("PROJECT"))
+(setq org-tags-exclude-from-inheritance '("PROJECT" "TARGET"))
 (setq org-stuck-projects
            '("+PROJECT/-MAYBE-DONE" ("TODO")))
 
@@ -120,7 +115,8 @@
       ))
 
 (setq org-refile-targets '(
-                           (org-agenda-files . (:tag . "PROJECT")) ; Any project
+                           (org-agenda-files . (:tag . "PROJECT"))
+                           (org-agenda-files . (:tag . "TARGET"))
                            ))
 
 ;;; turn on syntax highlighting
@@ -377,3 +373,38 @@
  (defadvice ac-fallback-command (around no-yasnippet-fallback activate)
       (let ((yas-fallback-behavior nil))
         ad-do-it))
+
+(el-get-install 'idea-darkula-theme)
+(push (substitute-in-file-name "~/.emacs.d/el-get/idea-darkula-theme/") custom-theme-load-path)
+(load-theme 'idea-darkula t)
+
+(add-hook 'text-mode-hook 'variable-pitch-mode)
+
+(defun my-adjoin-to-list-or-symbol (element list-or-symbol)
+  (let ((list (if (not (listp list-or-symbol))
+                  (list list-or-symbol)
+                list-or-symbol)))
+    (require 'cl-lib)
+    (cl-adjoin element list)))
+
+  (mapc
+    (lambda (face)
+      (set-face-attribute
+       face nil
+       :inherit
+       (my-adjoin-to-list-or-symbol
+        'fixed-pitch
+        (face-attribute face :inherit))))
+    (list 'org-code 'org-block 'org-table))
+
+(set-face-attribute 'variable-pitch nil :height 1.3 :family "Calibri")
+(set-face-attribute 'fixed-pitch nil :height 0.8 :family "Consolas")
+
+(set-face-attribute 'org-level-1 nil :height 1.3)
+(set-face-attribute 'org-level-2 nil :height 1.2)
+(set-face-attribute 'org-level-3 nil :height 1.1)
+
+(setq local-init-file "~/.emacs.d/local-init.el")
+(if (file-exists-p local-init-file)
+(load local-init-file)
+)

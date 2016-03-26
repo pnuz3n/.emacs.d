@@ -221,7 +221,7 @@ This adds simple line that tells when the task has been closed.
 
 Improve how the stuck projects are found.
 #+BEGIN_SRC emacs-lisp
-(setq org-tags-exclude-from-inheritance '("PROJECT"))
+(setq org-tags-exclude-from-inheritance '("PROJECT" "TARGET"))
 (setq org-stuck-projects
            '("+PROJECT/-MAYBE-DONE" ("TODO")))
 #+END_SRC
@@ -242,7 +242,8 @@ Capture templates
 Refilling
 #+BEGIN_SRC emacs-lisp
   (setq org-refile-targets '(
-                             (org-agenda-files . (:tag . "PROJECT")) ; Any project
+                             (org-agenda-files . (:tag . "PROJECT"))
+                             (org-agenda-files . (:tag . "TARGET"))
                              ))
 #+END_SRC
 
@@ -560,11 +561,70 @@ Accidentally pressin command key in MacOS is annoying so they are configured to 
       (let ((yas-fallback-behavior nil))
         ad-do-it))
 #+END_SRC
+** Theme
+
+Plain white theme gets old after a while. Emacs has support themes and there is [[https://emacsthemes.com/][gallery]] of them.
+Colors of IntelliJ Idea Darcula theme pleases the eye.
+
+#+BEGIN_SRC emacs-lisp
+  (el-get-install 'idea-darkula-theme)
+  (push (substitute-in-file-name "~/.emacs.d/el-get/idea-darkula-theme/") custom-theme-load-path)
+  (load-theme 'idea-darkula t)
+#+END_SRC
+
+** Fonts
+
+Editing a lot of text using fixed width font is not optimum situation. After a while of googling 
+I found a way to use variable length fonts (see [[https://yoo2080.wordpress.com/2013/05/30/monospace-font-in-tables-and-source-code-blocks-in-org-mode-proportional-font-in-other-parts/][the blog of Jisan Yoo]]).
+
+First we hook variable-pitch-mode
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'text-mode-hook 'variable-pitch-mode)
+#+END_SRC
+
+The problem is that I don't want code and tables to be variable width inside
+Org mode document. This can be archived by altering some faces
+used by the Org mode.
+
+#+BEGIN_SRC emacs-lisp
+  (defun my-adjoin-to-list-or-symbol (element list-or-symbol)
+    (let ((list (if (not (listp list-or-symbol))
+                    (list list-or-symbol)
+                  list-or-symbol)))
+      (require 'cl-lib)
+      (cl-adjoin element list)))
+
+    (mapc
+      (lambda (face)
+        (set-face-attribute
+         face nil
+         :inherit
+         (my-adjoin-to-list-or-symbol
+          'fixed-pitch
+          (face-attribute face :inherit))))
+      (list 'org-code 'org-block 'org-table))
+#+END_SRC
+
+Of course we can choose what kind of faces ~variable-pitch~ and ~fixed-pitch~ are.
+#+BEGIN_SRC emacs-lisp
+(set-face-attribute 'variable-pitch nil :height 1.3 :family "Calibri")
+(set-face-attribute 'fixed-pitch nil :height 0.8 :family "Consolas")
+#+END_SRC
+
+While we are at it we could make Org-mode headers a litle bit bigger.
+#+BEGIN_SRC emacs-lisp
+(set-face-attribute 'org-level-1 nil :height 1.3)
+(set-face-attribute 'org-level-2 nil :height 1.2)
+(set-face-attribute 'org-level-3 nil :height 1.1)
+#+END_SRC
+
 ** Run local init
 
-#+BEGIN_SRC emcas-lisp
-(setq local-init-file "~/.emacs.d/local-init.el")
-(if (file-exists-p local-init-file)
-(load local-init-file)
-)
+Finally after all the other initializations
+
+#+BEGIN_SRC emacs-lisp
+  (setq local-init-file "~/.emacs.d/local-init.el")
+  (if (file-exists-p local-init-file)
+  (load local-init-file)
+  )
 #+END_SRC
