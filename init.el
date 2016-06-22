@@ -1,3 +1,8 @@
+(setq local-pre-init-file "~/.emacs.d/local-pre-init.el")
+(if (file-exists-p local-pre-init-file)
+(load local-pre-init-file)
+)
+
 (setq inhibit-startup-message t)
 (setq inhibit-splash-screen t)
 
@@ -8,6 +13,8 @@
 (let ((elements (split-string (getenv "PATH") ":")))
   (dolist (e elements)
     (add-to-list 'exec-path e)))
+
+(add-to-list 'exec-path "~/bin")
 
 (add-to-list 'load-path "~/.emacs.d/lisp/")
 
@@ -75,7 +82,7 @@
 
 (setq org-directory "~/org")
 (setq org-agenda-files (concat org-directory "/agenda"))
-(setq org-default-notes-file (concat org-directory "/notes.org.gpg"))
+(setq org-default-notes-file (concat org-directory "/refile.org.gpg"))
 
 (setq org-archive-location (concat org-directory "/archive.org.gpg::* From %s"))
 
@@ -88,7 +95,7 @@
  'org-babel-load-languages
  '(
    (makefile . t)
-   (sh . t)
+   (shell . t)
    (js . t)
    (plantuml . t)
    (emacs-lisp . t)
@@ -96,7 +103,7 @@
 
 (setq org-log-into-drawer t)
 (setq org-todo-keywords
-       '((sequence "IN(i!)" "SOMEDAY(s!)" "WAIT(w@/!)" "TODO(t!)" "|" "DONE(d!)" "CANCELLED(c@)")))
+'((sequence "IN(i!)" "SOMEDAY(s!)" "WAIT(w@/!)" "TODO(t!)" "NEXT(n!)" "|" "DONE(d!)" "CANCELLED(c@)")))
 
 (setq org-log-done 'time)
 
@@ -105,13 +112,17 @@
            '("+PROJECT/-MAYBE-DONE" ("TODO")))
 
 (setq org-capture-templates
-    '(
-      ("t"
+      '(
+        ("t"
          "Task"
          entry
          (file+headline org-default-notes-file "Tasks")
          "* IN %^{Title}\n  CREATED: %U\n  %i"
          :empty-lines 1)
+
+        ("j" "Journal" entry (file+datetree "~/org/diary.org.gpg")
+       "* %^{Title}\n\n%?\n%U" :clock-in t :clock-resume t)
+  
       ))
 
 (setq org-refile-targets '(
@@ -271,12 +282,12 @@
        
        ;; Require makeinfo which major version is 5 ore more
        (if (< 4 (car (makeinfo-version)))
-           (
+           (progn
            (el-get-bundle flycheck)   
-         ;; go get github.com/dougm/goflymake
-         (add-to-list 'load-path "~/src/github.com/dougm/goflymake")
-         (require 'go-flycheck))
-       )
+           ;; go get github.com/dougm/goflymake
+           (add-to-list 'load-path "~/src/github.com/dougm/goflymake")
+           (require 'go-flycheck))
+           ))
 
        
 

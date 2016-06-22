@@ -1,10 +1,35 @@
+
 #+TITLE: Emacs initialization
+
 * Emacs Initialization
 :PROPERTIES:
 :tangle: init.el
 :END:
 
 This document describes how Emacs is initialized.
+** Run local pre-initialization
+
+Run machine dependant initialization file before running the common
+setup. This script could be used to set up proxies.
+
+#+BEGIN_SRC emacs-lisp
+  (setq local-pre-init-file "~/.emacs.d/local-pre-init.el")
+  (if (file-exists-p local-pre-init-file)
+  (load local-pre-init-file)
+  )
+#+END_SRC
+
+Following kind of sniplet can be used to set up proxy. It tries to
+ping the host and if it succeseed in on second it setups environment
+variables. El-get will run git and without those variables cloning
+repositories will fail.
+
+#+BEGIN_EXAMPLE emacs-list
+(if (= 0 (call-process "ping" nil nil nil "-W" "1" "-c" "1" "1.2.3.4"))
+  (setenv "http_proxy" "1.2.3.4:8080")
+  (setenv "https_proxy" "1.2.3.4:8080")
+)
+#+END_EXAMPLE
 
 ** Minimalistic user interface
 
@@ -38,6 +63,12 @@ Following code will extract exec-path from ~PATH~ variable.
 (let ((elements (split-string (getenv "PATH") ":")))
   (dolist (e elements)
     (add-to-list 'exec-path e)))
+#+END_SRC
+
+In some cases ~bin~ directory in home directory is missing in the ~exec-path~.
+
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'exec-path "~/bin")
 #+END_SRC
 
 ** Lisp files
@@ -162,7 +193,7 @@ under home.
 #+BEGIN_SRC emacs-lisp
 (setq org-directory "~/org")
 (setq org-agenda-files (concat org-directory "/agenda"))
-(setq org-default-notes-file (concat org-directory "/notes.org.gpg"))
+(setq org-default-notes-file (concat org-directory "/refile.org.gpg"))
 #+END_SRC
 
 
@@ -190,7 +221,7 @@ Active babel languages.
  'org-babel-load-languages
  '(
    (makefile . t)
-   (sh . t)
+   (shell . t)
    (js . t)
    (plantuml . t)
    (emacs-lisp . t)
@@ -202,7 +233,7 @@ provide logging.
 #+BEGIN_SRC emacs-lisp
 (setq org-log-into-drawer t)
 (setq org-todo-keywords
-       '((sequence "IN(i!)" "SOMEDAY(s!)" "WAIT(w@/!)" "TODO(t!)" "|" "DONE(d!)" "CANCELLED(c@)")))
+'((sequence "IN(i!)" "SOMEDAY(s!)" "WAIT(w@/!)" "TODO(t!)" "NEXT(n!)" "|" "DONE(d!)" "CANCELLED(c@)")))
 #+END_SRC
 
 Log looks something like this under the task header line.
@@ -228,15 +259,19 @@ Improve how the stuck projects are found.
 
 Capture templates
 #+BEGIN_SRC emacs-lisp
-(setq org-capture-templates
-    '(
-      ("t"
-         "Task"
-         entry
-         (file+headline org-default-notes-file "Tasks")
-         "* IN %^{Title}\n  CREATED: %U\n  %i"
-         :empty-lines 1)
-      ))
+  (setq org-capture-templates
+        '(
+          ("t"
+           "Task"
+           entry
+           (file+headline org-default-notes-file "Tasks")
+           "* IN %^{Title}\n  CREATED: %U\n  %i"
+           :empty-lines 1)
+
+          ("j" "Journal" entry (file+datetree "~/org/diary.org.gpg")
+         "* %^{Title}\n\n%?\n%U" :clock-in t :clock-resume t)
+    
+        ))
 #+END_SRC
 
 Refilling
@@ -439,12 +474,12 @@ Accidentally pressin command key in MacOS is annoying so they are configured to 
        
        ;; Require makeinfo which major version is 5 ore more
        (if (< 4 (car (makeinfo-version)))
-           (
+           (progn
            (el-get-bundle flycheck)   
-         ;; go get github.com/dougm/goflymake
-         (add-to-list 'load-path "~/src/github.com/dougm/goflymake")
-         (require 'go-flycheck))
-       )
+           ;; go get github.com/dougm/goflymake
+           (add-to-list 'load-path "~/src/github.com/dougm/goflymake")
+           (require 'go-flycheck))
+           ))
 
        
 
