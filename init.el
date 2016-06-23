@@ -280,7 +280,7 @@
        (el-get-bundle go-mode)
        (el-get-bundle dash)
        
-       ;; Require makeinfo which major version is 5 ore more
+       ;; Require makeinfo which major version is 5 or more
        (if (< 4 (car (makeinfo-version)))
            (progn
            (el-get-bundle flycheck)   
@@ -298,7 +298,7 @@
        (add-hook 'go-mode-hook 
                  (lambda ()
                          (add-hook 'before-save-hook 'gofmt-before-save))
-                 ))
+                 )
 
 (if (system-has-go) (setup-go))
 

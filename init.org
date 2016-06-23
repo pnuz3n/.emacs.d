@@ -472,7 +472,7 @@ Accidentally pressin command key in MacOS is annoying so they are configured to 
        (el-get-bundle go-mode)
        (el-get-bundle dash)
        
-       ;; Require makeinfo which major version is 5 ore more
+       ;; Require makeinfo which major version is 5 or more
        (if (< 4 (car (makeinfo-version)))
            (progn
            (el-get-bundle flycheck)   
@@ -490,7 +490,7 @@ Accidentally pressin command key in MacOS is annoying so they are configured to 
        (add-hook 'go-mode-hook 
                  (lambda ()
                          (add-hook 'before-save-hook 'gofmt-before-save))
-                 ))
+                 )
 
 (if (system-has-go) (setup-go))
 #+END_SRC
