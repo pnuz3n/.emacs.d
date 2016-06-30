@@ -1,0 +1,4 @@
+(:name idea-darkula-theme
+       :description "Idea Darkula Theme"
+       :type github
+       :pkgname "fourier/idea-darkula-theme")
