@@ -1,8 +1,8 @@
 
 #+TITLE: Emacs initialization
 
-* Emacs Initialization
-:PROPERTIES:
+* EMacs Initialization
+:Properties:
 :tangle: init.el
 :END:
 
@@ -636,6 +636,10 @@ recucled to change the buffer.
   "When running `quit-window', always kill the buffer."
   (ad-set-arg 0 t))
 (ad-activate 'quit-window)
+#+end_src
+** Default column width 120 characters
+#+begin_src emacs-lisp
+(setq default-fill-column 120)
 #+end_src
 ** Theme
 

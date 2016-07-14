@@ -406,6 +406,8 @@
                            (mode . term-mode)
                            ))))))
 
+(setq default-fill-column 120)
+
 (el-get-install 'idea-darkula-theme)
 (push (substitute-in-file-name "~/.emacs.d/el-get/idea-darkula-theme/") custom-theme-load-path)
 (load-theme 'idea-darkula t)
