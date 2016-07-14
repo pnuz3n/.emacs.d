@@ -225,6 +225,7 @@ Active babel languages.
    (js . t)
    (plantuml . t)
    (emacs-lisp . t)
+   (ditaa . t)
    ))
 #+END_SRC
 
@@ -596,6 +597,46 @@ Accidentally pressin command key in MacOS is annoying so they are configured to 
       (let ((yas-fallback-behavior nil))
         ad-do-it))
 #+END_SRC
+** Buffer switching
+
+One common task is to switch between two buffers.
+Suspend frame is not very usefull command so, it is
+recucled to change the buffer.
+
+#+begin_src emacs-lisp
+(global-set-key (kbd "C-z")  'mode-line-other-buffer)
+#+end_src
+
+** IBuffers
+
+#+begin_src emacs-lisp
+   (global-set-key (kbd "C-x C-b") 'ibuffer)
+   (autoload 'ibuffer "ibuffer" "List buffers." t)
+
+    (setq ibuffer-saved-filter-groups
+            (quote (("default"
+                     ("dired" (mode . dired-mode))
+                     ("org" (or
+                             (mode . org-mode)
+                             (mode . org-agenda-mode)                           
+                             ))
+                     ("emacs" (or
+                               (name . "^\\*scratch\\*$")
+                               (name . "^\\*Messages\\*$")))
+                     ("shell" (or
+                              (mode . shell-mode)
+                              (mode . term-mode)
+                              ))))))
+
+#+end_src
+** COMMENT Kill buffer instead of burying it
+
+#+begin_src emacs-lisp
+(defadvice quit-window (before quit-window-always-kill)
+  "When running `quit-window', always kill the buffer."
+  (ad-set-arg 0 t))
+(ad-activate 'quit-window)
+#+end_src
 ** Theme
 
 Plain white theme gets old after a while. Emacs has support themes and there is [[https://emacsthemes.com/][gallery]] of them.

@@ -99,6 +99,7 @@
    (js . t)
    (plantuml . t)
    (emacs-lisp . t)
+   (ditaa . t)
    ))
 
 (setq org-log-into-drawer t)
@@ -384,6 +385,26 @@
  (defadvice ac-fallback-command (around no-yasnippet-fallback activate)
       (let ((yas-fallback-behavior nil))
         ad-do-it))
+
+(global-set-key (kbd "C-z")  'mode-line-other-buffer)
+
+(global-set-key (kbd "C-x C-b") 'ibuffer)
+(autoload 'ibuffer "ibuffer" "List buffers." t)
+
+ (setq ibuffer-saved-filter-groups
+         (quote (("default"
+                  ("dired" (mode . dired-mode))
+                  ("org" (or
+                          (mode . org-mode)
+                          (mode . org-agenda-mode)                           
+                          ))
+                  ("emacs" (or
+                            (name . "^\\*scratch\\*$")
+                            (name . "^\\*Messages\\*$")))
+                  ("shell" (or
+                           (mode . shell-mode)
+                           (mode . term-mode)
+                           ))))))
 
 (el-get-install 'idea-darkula-theme)
 (push (substitute-in-file-name "~/.emacs.d/el-get/idea-darkula-theme/") custom-theme-load-path)
