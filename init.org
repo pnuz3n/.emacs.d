@@ -1,7 +1,7 @@
 
 #+TITLE: Emacs initialization
 
-* EMacs Initialization
+* Emacs Initialization
 :Properties:
 :tangle: init.el
 :END:
@@ -309,7 +309,6 @@ Accidentally pressin command key in MacOS is annoying so they are configured to 
 (global-font-lock-mode 1)
 
 ;; Mustache mode
-(add-to-list 'load-path "~/.emacs.d/ladatut")
 (require 'mustache-mode)
 
 (defun iwb ()
@@ -707,6 +706,22 @@ While we are at it we could make Org-mode look a little better in general.
 (set-face-attribute 'org-level-2 nil :height 1.2)
 (set-face-attribute 'org-level-3 nil :height 1.1)
 #+END_SRC
+
+** Don't confirm kills
+
+#+begin_src
+(global-set-key (kbd "C-x k") 'kill-this-buffer)
+(setq kill-buffer-query-functions '())
+#+end_src
+
+** Protocol Buffers  mode
+
+[[https://developers.google.com/protocol-buffers/docs/overview][Google Protocol Buffers]] is way to serialize data. It uses "proto" files to describe serialization format.
+
+#+begin_src emacs-lisp
+(require 'protobuf-mode)
+(add-to-list 'auto-mode-alist '("\\.proto\\'" . protobuf-mode))
+#+end_src
 
 ** Run local init
 

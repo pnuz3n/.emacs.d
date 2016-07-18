@@ -135,7 +135,6 @@
 (global-font-lock-mode 1)
 
 ;; Mustache mode
-(add-to-list 'load-path "~/.emacs.d/ladatut")
 (require 'mustache-mode)
 
 (defun iwb ()
@@ -447,6 +446,9 @@
 (set-face-attribute 'org-level-1 nil :height 1.3)
 (set-face-attribute 'org-level-2 nil :height 1.2)
 (set-face-attribute 'org-level-3 nil :height 1.1)
+
+(require 'protobuf-mode)
+(add-to-list 'auto-mode-alist '("\\.proto\\'" . protobuf-mode))
 
 (setq local-init-file "~/.emacs.d/local-init.el")
 (if (file-exists-p local-init-file)
