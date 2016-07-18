@@ -375,7 +375,33 @@ Accidentally pressin command key in MacOS is annoying so they are configured to 
 (put 'upcase-region 'disabled nil)
 (put 'scroll-left 'disabled nil)
 
+(global-set-key (kbd "C-q o")  'find-file-at-point)
+
+
 #+END_SRC
+
+** Convient way to create new shell
+
+I often need shell. But default ~M-x shell~ will throw back to the already created shell. Many times this is not what I want.
+
+#+begin_src emacs-lisp
+(defun new-shell ()
+  (interactive)
+
+  (let (
+        (currentbuf (get-buffer-window (current-buffer)))
+        (newbuf     (generate-new-buffer-name "*shell*"))
+       )
+   (generate-new-buffer newbuf)
+   (set-window-dedicated-p currentbuf nil)
+   (set-window-buffer currentbuf newbuf)
+   (shell newbuf)
+  )
+)
+
+(global-set-key (kbd "C-q s")  'new-shell)
+#+end_src
+ 
 ** Ace Jump
 #+BEGIN_SRC emacs-lisp
   (el-get-bundle ace-jump-mode)
