@@ -14,8 +14,8 @@ col=$3
        ;; works, tab context doesn't
        (when (not (string= \"\" \"$line\"))
          (goto-char (point-min))
-         (forward-line (1- $2))
-         (forward-char (1- $3)))
+         (forward-line (1- $line))
+         (forward-char (1- $col)))
 
        ;; Raise/focus our window; depends on the windowing system
        (if (string-equal system-type \"darwin\")
@@ -24,5 +24,3 @@ col=$3
 ​
        ;; Automatically pick up changes made in IntelliJ
        (auto-revert-mode t))"
-
-     )"
