@@ -203,7 +203,6 @@
 
 (global-set-key (kbd "C-q o")  'find-file-at-point)
 
-
 (defun new-shell ()
   (interactive)
 
@@ -211,7 +210,6 @@
         (currentbuf (get-buffer-window (current-buffer)))
         (newbuf     (generate-new-buffer-name "*shell*"))
        )
-
    (generate-new-buffer newbuf)
    (set-window-dedicated-p currentbuf nil)
    (set-window-buffer currentbuf newbuf)
@@ -469,6 +467,17 @@
 
 (require 'protobuf-mode)
 (add-to-list 'auto-mode-alist '("\\.proto\\'" . protobuf-mode))
+
+(defun open-buffer-curent-idea ()
+  ""
+  (interactive)
+  (call-process "idea" nil nil nil (buffer-file-name))
+  (if (string-equal system-type "darwin")
+      (ns-do-applescript "tell application \"IntelliJ Idea\" to activate")
+    )
+)
+
+(global-set-key (kbd "C-q C-o")  'open-buffer-curent-idea)
 
 (setq local-init-file "~/.emacs.d/local-init.el")
 (if (file-exists-p local-init-file)

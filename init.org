@@ -749,6 +749,20 @@ While we are at it we could make Org-mode look a little better in general.
 (add-to-list 'auto-mode-alist '("\\.proto\\'" . protobuf-mode))
 #+end_src
 
+** Open current buffer in idea
+#+begin_src emacs-lisp
+  (defun open-buffer-curent-idea ()
+    ""
+    (interactive)
+    (call-process "idea" nil nil nil (buffer-file-name))
+    (if (string-equal system-type "darwin")
+        (ns-do-applescript "tell application \"IntelliJ Idea\" to activate")
+      )
+  )
+
+  (global-set-key (kbd "C-q C-o")  'open-buffer-curent-idea)
+#+end_src
+
 ** Run local init
 
 Finally after all the other initializations
