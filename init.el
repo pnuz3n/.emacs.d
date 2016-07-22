@@ -40,6 +40,8 @@
 
 (setq-default indent-tabs-mode nil)
 
+(transient-mark-mode 0)
+
 (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
 (setq
   delete-old-versions t

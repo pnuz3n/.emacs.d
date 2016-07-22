@@ -110,6 +110,14 @@ environment variables. Following code fixes this issue.
 #+BEGIN_SRC emacs-lisp
 (setq-default indent-tabs-mode nil)
 #+END_SRC
+** No transient mark by default
+
+Following disables [[https://www.emacswiki.org/emacs/TransientMarkMode][transient mark mode]]. This means that text is not selected by default like in "normal" editors.
+This allows more convient text editing while it requires some practice.
+
+#+BEGIN_SRC emacs-lisp
+(transient-mark-mode 0)
+#+END_SRC
 
 ** Backups
 
