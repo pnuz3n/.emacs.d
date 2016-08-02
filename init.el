@@ -1,10 +1,3 @@
-
-;; Added by Package.el.  This must come before configurations of
-;; installed packages.  Don't delete this line.  If you don't want it,
-;; just comment it out by adding a semicolon to the start of the line.
-;; You may delete these explanatory comments.
-(package-initialize)
-
 (setq local-pre-init-file "~/.emacs.d/local-pre-init.el")
 (if (file-exists-p local-pre-init-file)
 (load local-pre-init-file)
@@ -462,8 +455,9 @@
 (set-face-attribute 'variable-pitch nil :height 1.3 :family "Calibri")
 (set-face-attribute 'fixed-pitch nil :height 0.8 :family "Consolas")
 
+(require 'org-bullets)
 (add-hook 'org-mode-hook 'org-indent-mode)
-(add-hook 'org-mode-hook 'org-bullets-mode)
+(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
 (setq org-hide-leading-stars t)
 (setq line-spacing 0.25)
 (set-face-attribute 'org-tag nil :weight 'normal :height 0.8)

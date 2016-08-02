@@ -736,8 +736,9 @@ Of course we can choose what kind of faces ~variable-pitch~ and ~fixed-pitch~ ar
 
 While we are at it we could make Org-mode look a little better in general.
 #+BEGIN_SRC emacs-lisp
+(require 'org-bullets)
 (add-hook 'org-mode-hook 'org-indent-mode)
-(add-hook 'org-mode-hook 'org-bullets-mode)
+(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
 (setq org-hide-leading-stars t)
 (setq line-spacing 0.25)
 (set-face-attribute 'org-tag nil :weight 'normal :height 0.8)
