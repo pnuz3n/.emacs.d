@@ -108,7 +108,10 @@
 
 (setq org-log-into-drawer t)
 (setq org-todo-keywords
-'((sequence "IN(i!)" "SOMEDAY(s!)" "WAIT(w@/!)" "TODO(t!)" "NEXT(n!)" "|" "DONE(d!)" "CANCELLED(c@)")))
+'(
+(sequence "IN(i!)" "SOMEDAY(s!)" "WAIT(w@/!)" "TODO(t!)" "NEXT(n!)" "|" "DONE(d!)" "CANCELLED(c@)")
+(sequence "|" "PHONE" "MEETING")
+))
 
 (setq org-log-done 'time)
 
@@ -118,17 +121,21 @@
 
 (setq org-capture-templates
       '(
-        ("t"
-         "Task"
-         entry
-         (file+headline org-default-notes-file "Tasks")
-         "* IN %^{Title}\n  CREATED: %U\n  %i"
+        ("t" "Task" entry (file+headline org-default-notes-file "Tasks")
+         "* IN %^{Title}\n  CREATED: %U\n  %i\n"
          :empty-lines 1)
 
-        ("j" "Journal" entry (file+datetree "~/org/diary.org.gpg")
-       "* %^{Title}\n\n%?\n%U" :clock-in t :clock-resume t)
-  
-      ))
+        ("m" "Meeting" entry (file+headline org-default-notes-file "Meetings")
+         "* MEETING %u %? :MEETING:\n CREATED: %U\n"
+         :clock-in t :clock-resume t  :empty-lines 1)
+
+        ("p" "Phone call" entry (file+headline org-default-notes-file "Meetings")
+         "* PHONE  %U %? :PHONE:\n CREATED: %U"
+         :clock-in t :clock-resume t  :empty-lines 1)
+
+       ("j" "Journal" entry (file+datetree "~/org/diary.org.gpg")
+         "* %U\n\n%?")
+   ))
 
 (setq org-refile-targets '(
                            (org-agenda-files . (:tag . "PROJECT"))
