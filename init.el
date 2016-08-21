@@ -120,22 +120,37 @@
            '("+PROJECT/-MAYBE-DONE" ("TODO")))
 
 (setq org-capture-templates
-      '(
-        ("t" "Task" entry (file+headline org-default-notes-file "Tasks")
-         "* IN %^{Title}\n  CREATED: %U\n  %i\n"
-         :empty-lines 1)
+        '(
+          ("t" "Task" entry (file+headline org-default-notes-file "Tasks")
+           "* IN %^{Title}\n  CREATED: %U\n  %i\n"
+           :empty-lines 1)
 
-        ("m" "Meeting" entry (file+headline org-default-notes-file "Meetings")
-         "* MEETING %u %? :MEETING:\n CREATED: %U\n"
-         :clock-in t :clock-resume t  :empty-lines 1)
+          ("n" "Note" entry (file+headline org-default-notes-file "Notes")
+           "* %? :NOTE:\n  CREATED: %U\n"
+           :empty-lines 1)
 
-        ("p" "Phone call" entry (file+headline org-default-notes-file "Meetings")
-         "* PHONE  %U %? :PHONE:\n CREATED: %U"
-         :clock-in t :clock-resume t  :empty-lines 1)
+          ("m" "Meeting" entry (file+headline org-default-notes-file "Meetings")
+           "* MEETING %u %? :MEETING:\n CREATED: %U\n"
+           :clock-in t :clock-resume t  :empty-lines 1)
 
-       ("j" "Journal" entry (file+datetree "~/org/diary.org.gpg")
-         "* %U\n\n%?")
-   ))
+          ("c" "Phone call" entry (file+headline org-default-notes-file "Calls")
+           "* PHONE  %U %? :PHONE:\n CREATED: %U"
+           :clock-in t :clock-resume t  :empty-lines 1)
+
+          ("j" "Journal" entry (file+datetree "~/org/diary.org.gpg")
+           "* %U\n\n%?")
+
+          ("p" "Org-protocol, Selection" entry (file+headline org-default-notes-file "Tasks")
+           "* IN Finnish note from %c :NOTE:captured:\n CREATED: %U\n\n From %c:\n\n#+BEGIN_QUOTE\n%i\n#+END_QUOTE\n\n"
+           :immediate-finish t)
+
+          ("L" "Org-protocol, Link" entry (file+headline org-default-notes-file "Tasks")
+           "* IN Review [[%:link][%:description]] :captured: \n CREATED: %U\n\n"
+:immediate-finish t)
+
+          ))
+
+(require 'org-protocol)
 
 (setq org-refile-targets '(
                            (org-agenda-files . (:tag . "PROJECT"))
