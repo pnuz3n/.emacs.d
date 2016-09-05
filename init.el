@@ -122,7 +122,7 @@
 (setq org-capture-templates
         '(
           ("t" "Task" entry (file+headline org-default-notes-file "Tasks")
-           "* IN %^{Title}\n  CREATED: %U\n  %i\n"
+           "* IN %?\n  CREATED: %U\n  %i\n"
            :empty-lines 1)
 
           ("n" "Note" entry (file+headline org-default-notes-file "Notes")
@@ -505,6 +505,15 @@
 )
 
 (global-set-key (kbd "C-q C-o")  'open-buffer-curent-idea)
+
+(defun pw/toggle-transparency ()
+  "Toggles frame transparency."
+  (interactive)
+  (if (equal '(100 100) (frame-parameter (selected-frame) 'alpha))
+      (set-frame-parameter (selected-frame) 'alpha '(10 10))
+    (set-frame-parameter (selected-frame) 'alpha '(100 100))))
+
+(global-set-key (kbd "C-x C-t")  'pw/toggle-transparency)
 
 (setq local-init-file "~/.emacs.d/local-init.el")
 (if (file-exists-p local-init-file)
