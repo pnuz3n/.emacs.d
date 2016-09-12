@@ -363,22 +363,6 @@
 ;(setq sql-mysql-login-params (append sql-mysql-login-params '(port)))
 ;(setq sql-port 3306)
 
-;; Donwload plantuml.jar if missing and use it.
-(let ((plantuml-jar "~/.emacs.d/plantuml.jar"))
-  (if (not (file-exists-p plantuml-jar))
-      (progn
-        (url-copy-file "http://downloads.sourceforge.net/project/plantuml/plantuml.jar?r=http%3A%2F%2Fplantuml.com%2Fdownload.html&ts=1441279540&use_mirror=netix" plantuml-jar)
-        ))
-  (setq org-plantuml-jar-path  (expand-file-name plantuml-jar))
-)
-
-;; Don`t confirm plant uml runs for conviency.
-(lexical-let ((default-confirm org-confirm-babel-evaluate))
- (defun my-org-confirm-babel-evaluate (lang body)
-           (if (string= lang "plantuml") nil default-confirm))
- (setq org-confirm-babel-evaluate 'my-org-confirm-babel-evaluate)
-)
-
 (el-get-bundle tramp)
 
 (el-get-bundle yaml-mode)
@@ -514,6 +498,26 @@
     (set-frame-parameter (selected-frame) 'alpha '(100 100))))
 
 (global-set-key (kbd "C-x C-t")  'pw/toggle-transparency)
+
+(defun pw/download-plantuml-jar-if-needed () ""
+       (let ((plantuml-jar "~/.emacs.d/plantuml.jar"))
+         (if (not (file-exists-p plantuml-jar))
+             (progn
+               (url-copy-file "http://downloads.sourceforge.net/project/plantuml/plantuml.jar?r=http%3A%2F%2Fplantuml.com%2Fdownload.html&ts=1441279540&use_mirror=netix" plantuml-jar)
+               ))
+         (expand-file-name plantuml-jar)))
+
+(setq org-plantuml-jar-path  (pw/download-plantuml-jar-if-needed))
+
+;; Don`t confirm plant uml runs for conviency.
+(lexical-let ((default-confirm org-confirm-babel-evaluate))
+  (defun my-org-confirm-babel-evaluate (lang body)
+    (if (string= lang "plantuml") nil default-confirm))
+  (setq org-confirm-babel-evaluate 'my-org-confirm-babel-evaluate)
+  )
+
+(el-get-install 'puml-mode)
+(setq org-plantuml-jar-path (pw/download-plantuml-jar-if-needed))
 
 (setq local-init-file "~/.emacs.d/local-init.el")
 (if (file-exists-p local-init-file)

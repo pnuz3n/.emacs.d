@@ -592,24 +592,7 @@ I often need shell. But default ~M-x shell~ will throw back to the already creat
 ;(setq sql-port 3306)
 #+END_SRC
 ** setup-plantuml.el
-#+BEGIN_SRC emacs-lisp
 
-;; Donwload plantuml.jar if missing and use it.
-(let ((plantuml-jar "~/.emacs.d/plantuml.jar"))
-  (if (not (file-exists-p plantuml-jar))
-      (progn
-        (url-copy-file "http://downloads.sourceforge.net/project/plantuml/plantuml.jar?r=http%3A%2F%2Fplantuml.com%2Fdownload.html&ts=1441279540&use_mirror=netix" plantuml-jar)
-        ))
-  (setq org-plantuml-jar-path  (expand-file-name plantuml-jar))
-)
-
-;; Don`t confirm plant uml runs for conviency.
-(lexical-let ((default-confirm org-confirm-babel-evaluate))
- (defun my-org-confirm-babel-evaluate (lang body)
-           (if (string= lang "plantuml") nil default-confirm))
- (setq org-confirm-babel-evaluate 'my-org-confirm-babel-evaluate)
-)
-#+END_SRC
 ** setup-tramp.el
 #+BEGIN_SRC emacs-lisp
 (el-get-bundle tramp)
@@ -822,6 +805,47 @@ and back to solid again.
       (set-frame-parameter (selected-frame) 'alpha '(100 100))))
 
   (global-set-key (kbd "C-x C-t")  'pw/toggle-transparency)
+#+end_src
+
+** PlantUML mode
+
+PlantUML works using JAR. Next is function that will load the jar if it is missing. Function returns the path where the
+jar was loaded.
+
+#+begin_src emacs-lisp
+  (defun pw/download-plantuml-jar-if-needed () ""
+         (let ((plantuml-jar "~/.emacs.d/plantuml.jar"))
+           (if (not (file-exists-p plantuml-jar))
+               (progn
+                 (url-copy-file "http://downloads.sourceforge.net/project/plantuml/plantuml.jar?r=http%3A%2F%2Fplantuml.com%2Fdownload.html&ts=1441279540&use_mirror=netix" plantuml-jar)
+                 ))
+           (expand-file-name plantuml-jar)))
+#+end_src
+
+Now we can set the PlantUML jar for org-mode.
+#+begin_src emacs-lisp
+  (setq org-plantuml-jar-path  (pw/download-plantuml-jar-if-needed))
+
+  ;; Don`t confirm plant uml runs for conviency.
+  (lexical-let ((default-confirm org-confirm-babel-evaluate))
+    (defun my-org-confirm-babel-evaluate (lang body)
+      (if (string= lang "plantuml") nil default-confirm))
+    (setq org-confirm-babel-evaluate 'my-org-confirm-babel-evaluate)
+    )
+#+end_src
+
+There is mode for Plant UML, but no el-get recipe for it. So we create one.
+#+begin_src emacs-lisp :mkdir yes :tangle el-get-user/recipes/puml-mode.rcp
+(:name puml-mode
+       :description "PlantUML Mode"
+       :type git
+       :url "https://github.com/skuro/puml-mode")
+#+end_src
+
+Now the recipe can be installed. It also needs to know where the jar is.
+#+begin_src emacs-lisp
+(el-get-install 'puml-mode)
+(setq org-plantuml-jar-path (pw/download-plantuml-jar-if-needed))
 #+end_src
 
 ** Run local init
