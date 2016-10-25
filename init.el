@@ -1,3 +1,10 @@
+
+;; Added by Package.el.  This must come before configurations of
+;; installed packages.  Don't delete this line.  If you don't want it,
+;; just comment it out by adding a semicolon to the start of the line.
+;; You may delete these explanatory comments.
+(package-initialize)
+
 (setq local-pre-init-file "~/.emacs.d/local-pre-init.el")
 (if (file-exists-p local-pre-init-file)
 (load local-pre-init-file)
@@ -15,6 +22,7 @@
     (add-to-list 'exec-path e)))
 
 (add-to-list 'exec-path "~/bin")
+(add-to-list 'exec-path "/usr/local/bin")
 
 (add-to-list 'load-path "~/.emacs.d/lisp/")
 

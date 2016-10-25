@@ -65,10 +65,12 @@ Following code will extract exec-path from ~PATH~ variable.
     (add-to-list 'exec-path e)))
 #+END_SRC
 
-In some cases ~bin~ directory in home directory is missing in the ~exec-path~.
+In some cases ~bin~ directory in home directory is missing in the ~exec-path~. Same thing goes to the
+~/usr/local/bin~. These are often used in my machines.
 
 #+BEGIN_SRC emacs-lisp
 (add-to-list 'exec-path "~/bin")
+(add-to-list 'exec-path "/usr/local/bin")
 #+END_SRC
 
 ** Lisp files
