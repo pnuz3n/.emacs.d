@@ -150,7 +150,23 @@ needs to be enabled.
      (setq browse-url-browser-function 'browse-url-default-macosx-browser))
 #+END_SRC
 
+** Calendar
 
+See http://orgmode.org/worg/org-faq.html#Appointments/Diary
+
+#+begin_src emacs-lisp
+
+(setq diary-file "~/org/diary")
+
+;; (calendar-set-date-style 'european)
+
+(setq calendar-week-start-day 1
+      calendar-view-diary-initially-flag t
+      calendar-mark-diary-entries-flag t)
+
+(add-hook 'diary-display-hook 'diary-fancy-display)
+
+#+end_src
 ** Emacsclient server
 
 #+BEGIN_SRC emacs-lisp
@@ -591,8 +607,6 @@ I often need shell. But default ~M-x shell~ will throw back to the already creat
 ;(setq sql-mysql-login-params (append sql-mysql-login-params '(port)))
 ;(setq sql-port 3306)
 #+END_SRC
-** setup-plantuml.el
-
 ** setup-tramp.el
 #+BEGIN_SRC emacs-lisp
 (el-get-bundle tramp)
@@ -844,8 +858,13 @@ There is mode for Plant UML, but no el-get recipe for it. So we create one.
 
 Now the recipe can be installed. It also needs to know where the jar is.
 #+begin_src emacs-lisp
-(el-get-install 'puml-mode)
-(setq org-plantuml-jar-path (pw/download-plantuml-jar-if-needed))
+  (el-get-install 'puml-mode)
+  (setq org-plantuml-jar-path (pw/download-plantuml-jar-if-needed))
+#+end_src
+
+As there is no plantuml-mode we need to set up puml-mode for plantuml.
+#+begin_src emacs-lisp
+  (add-to-list 'org-src-lang-modes '("plantuml" . puml))
 #+end_src
 
 ** Run local init

@@ -56,6 +56,16 @@
 (when (eq system-type 'darwin)
    (setq browse-url-browser-function 'browse-url-default-macosx-browser))
 
+(setq diary-file "~/org/diary")
+
+;; (calendar-set-date-style 'european)
+
+(setq calendar-week-start-day 1
+      calendar-view-diary-initially-flag t
+      calendar-mark-diary-entries-flag t)
+
+(add-hook 'diary-display-hook 'diary-fancy-display)
+
 (server-start)
 
 (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
@@ -518,6 +528,8 @@
 
 (el-get-install 'puml-mode)
 (setq org-plantuml-jar-path (pw/download-plantuml-jar-if-needed))
+
+(add-to-list 'org-src-lang-modes '("plantuml" . puml))
 
 (setq local-init-file "~/.emacs.d/local-init.el")
 (if (file-exists-p local-init-file)
