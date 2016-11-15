@@ -443,7 +443,8 @@ Accidentally pressin command key in MacOS is annoying so they are configured to 
 
 #+END_SRC
 
-** Convient way to create new shell
+** Shell stuff 
+*** Convient way to create new shell
 
 I often need shell. But default ~M-x shell~ will throw back to the already created shell. Many times this is not what I want.
 
@@ -464,7 +465,40 @@ I often need shell. But default ~M-x shell~ will throw back to the already creat
 
 (global-set-key (kbd "C-q s")  'new-shell)
 #+end_src
- 
+*** Jumping to the root directory of repository
+
+Sometimes it is convenient to jump to the root directory of the repository.
+
+#+begin_src emacs-lisp
+(defun pw/shell-cd-to-vc-root ()
+"Jumps to the root directory of version controled directory structure."
+  (interactive)
+  (let* ((proc (get-buffer-process (current-buffer)))
+         (pmark (process-mark proc))
+	 (started-at-pmark (= (point) (marker-position pmark)))         
+         (root (vc-root-dir))
+         (cmd (concat "cd " root)))
+    (save-excursion
+      (goto-char pmark)
+      (unless comint-process-echoes     
+         (insert cmd) (insert "\n"))
+      (sit-for 0)			; force redisplay      
+      (cd root)
+      (comint-send-string proc cmd)
+      (comint-send-string proc "\n")
+      (set-marker pmark (point))
+      )
+    
+    (if started-at-pmark (goto-char (marker-position pmark)))))
+#+end_src
+
+This function can be binded to key sequence when shell is activated.
+#+begin_src emacs-lisp
+  (add-hook 'comint-mode-hook (lambda ()
+                              (define-key comint-mode-map (kbd "C-q c r") 'pw/shell-cd-to-vc-root)
+                              ))
+
+#+end_src
 ** Ace Jump
 #+BEGIN_SRC emacs-lisp
   (el-get-bundle ace-jump-mode)

@@ -1,10 +1,3 @@
-
-;; Added by Package.el.  This must come before configurations of
-;; installed packages.  Don't delete this line.  If you don't want it,
-;; just comment it out by adding a semicolon to the start of the line.
-;; You may delete these explanatory comments.
-(package-initialize)
-
 (setq local-pre-init-file "~/.emacs.d/local-pre-init.el")
 (if (file-exists-p local-pre-init-file)
 (load local-pre-init-file)
@@ -262,6 +255,31 @@
 )
 
 (global-set-key (kbd "C-q s")  'new-shell)
+
+(defun pw/shell-cd-to-vc-root ()
+"Jumps to the root directory of version controled directory structure."
+  (interactive)
+  (let* ((proc (get-buffer-process (current-buffer)))
+         (pmark (process-mark proc))
+         (started-at-pmark (= (point) (marker-position pmark)))         
+         (root (vc-root-dir))
+         (cmd (concat "cd " root)))
+    (save-excursion
+      (goto-char pmark)
+      (unless comint-process-echoes     
+         (insert cmd) (insert "\n"))
+      (sit-for 0)                       ; force redisplay      
+      (cd root)
+      (comint-send-string proc cmd)
+      (comint-send-string proc "\n")
+      (set-marker pmark (point))
+      )
+    
+    (if started-at-pmark (goto-char (marker-position pmark)))))
+
+(add-hook 'comint-mode-hook (lambda ()
+                            (define-key comint-mode-map (kbd "C-q c r") 'pw/shell-cd-to-vc-root)
+                            ))
 
 (el-get-bundle ace-jump-mode)
 
