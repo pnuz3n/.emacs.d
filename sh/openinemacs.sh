@@ -5,7 +5,7 @@
 file=$1
 line=$2
 col=$3
-/usr/bin/emacsclient -e "(progn 
+emacsclient -e "(progn 
        (find-file \"$file\")
 
        ;; Jump to the same point as in IntelliJ
