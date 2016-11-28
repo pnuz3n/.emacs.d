@@ -277,8 +277,16 @@
     
     (if started-at-pmark (goto-char (marker-position pmark)))))
 
+(defun pw/dired-cd-to-vc-root ()
+(interactive)
+(find-file (vc-root-dir)))
+
 (add-hook 'comint-mode-hook (lambda ()
                             (define-key comint-mode-map (kbd "C-q c r") 'pw/shell-cd-to-vc-root)
+                            ))
+
+(add-hook 'dired-mode-hook (lambda ()
+                            (define-key dired-mode-map (kbd "C-q c r") 'pw/dired-cd-to-vc-root)
                             ))
 
 (el-get-bundle ace-jump-mode)
