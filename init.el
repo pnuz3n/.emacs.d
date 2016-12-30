@@ -1,3 +1,10 @@
+
+;; Added by Package.el.  This must come before configurations of
+;; installed packages.  Don't delete this line.  If you don't want it,
+;; just comment it out by adding a semicolon to the start of the line.
+;; You may delete these explanatory comments.
+;; (package-initialize)
+
 (setq local-pre-init-file "~/.emacs.d/local-pre-init.el")
 (if (file-exists-p local-pre-init-file)
 (load local-pre-init-file)
@@ -67,6 +74,7 @@
 
 (add-hook 'diary-display-hook 'diary-fancy-display)
 
+(setq server-socket-dir "~/.emacs.d/server")
 (server-start)
 
 (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
@@ -312,9 +320,6 @@
 (define-key global-map (kbd "C-.") 'ace-jump-mode)
 
 
-
-;; Load CEDET
-(el-get-bundle cedet)
 
 ;; CSV Mode
 (el-get-bundle csv-mode)

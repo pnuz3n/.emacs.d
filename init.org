@@ -172,6 +172,7 @@ See http://orgmode.org/worg/org-faq.html#Appointments/Diary
 ** Emacsclient server
 
 #+BEGIN_SRC emacs-lisp
+(setq server-socket-dir "~/.emacs.d/server")
 (server-start)
 #+END_SRC
 
@@ -535,7 +536,7 @@ This function can be binded to key sequence when shell is activated.
 ** setup-autocomplete.el
 #+BEGIN_SRC emacs-lisp
 #+END_SRC
-** setup-cedet.el
+** COMMENT setup-cedet.el
 #+BEGIN_SRC emacs-lisp
 ;; Load CEDET
 (el-get-bundle cedet)
