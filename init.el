@@ -1,10 +1,4 @@
 
-;; Added by Package.el.  This must come before configurations of
-;; installed packages.  Don't delete this line.  If you don't want it,
-;; just comment it out by adding a semicolon to the start of the line.
-;; You may delete these explanatory comments.
-;; (package-initialize)
-
 (setq local-pre-init-file "~/.emacs.d/local-pre-init.el")
 (if (file-exists-p local-pre-init-file)
 (load local-pre-init-file)
@@ -101,7 +95,7 @@
 
 (global-unset-key (kbd "C-q"))
 
-(el-get-bundle org)
+;;(el-get-bundle org)
 
 (setq org-directory "~/org")
 (setq org-agenda-files (concat org-directory "/agenda"))
@@ -118,7 +112,18 @@
  'org-babel-load-languages
  '(
    (makefile . t)
-   (shell . t)
+   (sh . t)
+   (js . t)
+   (plantuml . t)
+   (emacs-lisp . t)
+   (ditaa . t)
+   ))
+
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '(
+   (makefile . t)
+   (sh . t)
    (js . t)
    (plantuml . t)
    (emacs-lisp . t)
@@ -175,6 +180,10 @@
                            (org-agenda-files . (:tag . "PROJECT"))
                            (org-agenda-files . (:tag . "TARGET"))
                            ))
+
+(setq org-mobile-directory "~/Dropbox/MobileOrg")
+
+(setq org-mobile-use-encryption nil)
 
 ;;; turn on syntax highlighting
 (global-font-lock-mode 1)
@@ -418,7 +427,7 @@
 
 (el-get-bundle yasnippet)
 (el-get-bundle auto-complete)
-(el-get-bundle auto-complete-yasnippet)
+
 
 (require 'yasnippet)
 (require 'auto-complete)
@@ -482,11 +491,16 @@
                            (mode . term-mode)
                            ))))))
 
+(defadvice quit-window (before quit-window-always-kill)
+  "When running `quit-window', always kill the buffer."
+  (ad-set-arg 0 t))
+(ad-activate 'quit-window)
+
 (setq default-fill-column 120)
 
 (el-get-install 'idea-darkula-theme)
 (push (substitute-in-file-name "~/.emacs.d/el-get/idea-darkula-theme/") custom-theme-load-path)
-(load-theme 'idea-darkula t)
+(add-hook 'after-init-hook (lambda () (load-theme 'idea-darkula t)))
 
 (add-hook 'text-mode-hook 'variable-pitch-mode)
 

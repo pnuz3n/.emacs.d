@@ -221,7 +221,7 @@ So it is unset here to allow it to be re-used later.
 Install org mode through [[Elget]].
 
 #+BEGIN_SRC emacs-lisp
-(el-get-bundle org)
+;;(el-get-bundle org)
 #+END_SRC
 
 Set up agenda functionality. Files are located under org-directory
@@ -252,13 +252,28 @@ reason to change them yet.
   (global-set-key "\C-cb" 'org-iswitchb)
 #+END_SRC
 
+
+#+BEGIN_SRC emacs-lisp
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '(
+   (makefile . t)
+   (sh . t)
+   (js . t)
+   (plantuml . t)
+   (emacs-lisp . t)
+   (ditaa . t)
+   ))
+#+END_SRC
+
+
 Active babel languages.
 #+BEGIN_SRC emacs-lisp
 (org-babel-do-load-languages
  'org-babel-load-languages
  '(
    (makefile . t)
-   (shell . t)
+   (sh . t)
    (js . t)
    (plantuml . t)
    (emacs-lisp . t)
@@ -536,11 +551,6 @@ This function can be binded to key sequence when shell is activated.
 ** setup-autocomplete.el
 #+BEGIN_SRC emacs-lisp
 #+END_SRC
-** COMMENT setup-cedet.el
-#+BEGIN_SRC emacs-lisp
-;; Load CEDET
-(el-get-bundle cedet)
-#+END_SRC
 ** setup-csv.el
 #+BEGIN_SRC emacs-lisp
 ;; CSV Mode
@@ -666,7 +676,7 @@ This function can be binded to key sequence when shell is activated.
 #+BEGIN_SRC emacs-lisp
 (el-get-bundle yasnippet)
 (el-get-bundle auto-complete)
-(el-get-bundle auto-complete-yasnippet)
+
 
 (require 'yasnippet)
 (require 'auto-complete)
@@ -756,13 +766,15 @@ recucled to change the buffer.
 #+end_src
 ** Theme
 
-Plain white theme gets old after a while. Emacs has support themes and there is [[https://emacsthemes.com/][gallery]] of them.
-Colors of IntelliJ Idea Darcula theme pleases the eye.
+Plain white theme gets old after a while. Emacs has support themes and there is [[https://emacsthemes.com/][gallery]] of them.  Colors of IntelliJ
+Idea Darcula theme pleases the eye. Emacs updates theme list only after init has been run. Hook is used to load theme
+then.  Without it first loading would fail.
 
 #+BEGIN_SRC emacs-lisp
   (el-get-install 'idea-darkula-theme)
   (push (substitute-in-file-name "~/.emacs.d/el-get/idea-darkula-theme/") custom-theme-load-path)
-  (load-theme 'idea-darkula t)
+  (add-hook 'after-init-hook (lambda () (load-theme 'idea-darkula t)))
+
 #+END_SRC
 
 ** Fonts
