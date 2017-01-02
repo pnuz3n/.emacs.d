@@ -232,10 +232,10 @@
 (global-set-key (kbd "C-c f") 'iwb)
 
 ;; Moving from window to window using arrows
-(global-set-key (kbd "C-c <left>")  'windmove-left)
-(global-set-key (kbd "C-c <right>") 'windmove-right)
-(global-set-key (kbd "C-c <up>")    'windmove-up)
-(global-set-key (kbd "C-c <down>")  'windmove-down)
+(global-set-key (kbd "<left>")  'windmove-left)
+(global-set-key (kbd "<right>") 'windmove-right)
+(global-set-key (kbd "<up>")    'windmove-up)
+(global-set-key (kbd "<down>")  'windmove-down)
 
 (global-set-key (kbd "M-n") 'next-line-insert-newline)
 (global-set-key (kbd "M-p") 'previous-line-insert-newline)
