@@ -221,13 +221,13 @@
 ;; (global-set-key  (kbd "C-`")    'shell-command)
 ;; (global-set-key  (kbd "M-`")    'shell-command-on-region)
 
-;; These need some more tought sou they dont`t override org-mode keys
-;; (global-set-key (kbd "C-c <return>") 'set-rectangular-region-anchor)
-;; (global-set-key (kbd "C-c c") 'mc/edit-lines)
-;; (global-set-key (kbd "C-c a") 'mc/mark-all-like-this)
-;; (global-set-key (kbd "C-c .") 'mc/mark-next-like-this)
-;; (global-set-key (kbd "C-c ,") 'mc/mark-previous-like-this)
-;; (global-set-key (kbd "C-c m") 'mc/mark-more-like-this-extended)
+
+(global-set-key (kbd "C-c m <return>") 'set-rectangular-region-anchor)
+(global-set-key (kbd "C-c m c") 'mc/edit-lines)
+(global-set-key (kbd "C-c m a") 'mc/mark-all-like-this)
+(global-set-key (kbd "C-c m .") 'mc/mark-next-like-this)
+(global-set-key (kbd "C-c m ,") 'mc/mark-previous-like-this)
+(global-set-key (kbd "C-c m m") 'mc/mark-more-like-this-extended)
 
 (global-set-key (kbd "C-c f") 'iwb)
 
