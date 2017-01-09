@@ -1,4 +1,3 @@
-
 (setq local-pre-init-file "~/.emacs.d/local-pre-init.el")
 (if (file-exists-p local-pre-init-file)
 (load local-pre-init-file)
@@ -95,7 +94,7 @@
 
 (global-unset-key (kbd "C-q"))
 
-;;(el-get-bundle org)
+(el-get-bundle org-mode)
 
 (setq org-directory "~/org")
 (setq org-agenda-files (concat org-directory "/agenda"))
@@ -115,7 +114,7 @@
    (sh . t)
    (js . t)
    (plantuml . t)
-   (emacs-lisp . t)
+   (emacs-lisp :tangle init.el . t)
    (ditaa . t)
    ))
 
@@ -126,7 +125,7 @@
    (sh . t)
    (js . t)
    (plantuml . t)
-   (emacs-lisp . t)
+   (emacs-lisp :tangle init.el . t)
    (ditaa . t)
    ))
 
@@ -145,19 +144,19 @@
 
 (setq org-capture-templates
         '(
-          ("t" "Task" entry (file+headline org-default-notes-file "Tasks")
+          ("t" "Task" entry (file+headline "" "Tasks")
            "* IN %?\n  CREATED: %U\n  %i\n"
            :empty-lines 1)
 
-          ("n" "Note" entry (file+headline org-default-notes-file "Notes")
+          ("n" "Note" entry (file+headline "" "Notes")
            "* %? :NOTE:\n  CREATED: %U\n"
            :empty-lines 1)
 
-          ("m" "Meeting" entry (file+headline org-default-notes-file "Meetings")
+          ("m" "Meeting" entry (file+headline "" "Meetings")
            "* MEETING %u %? :MEETING:\n CREATED: %U\n"
            :clock-in t :clock-resume t  :empty-lines 1)
 
-          ("c" "Phone call" entry (file+headline org-default-notes-file "Calls")
+          ("c" "Phone call" entry (file+headline "" "Calls")
            "* PHONE  %U %? :PHONE:\n CREATED: %U"
            :clock-in t :clock-resume t  :empty-lines 1)
 
@@ -180,10 +179,6 @@
                            (org-agenda-files . (:tag . "PROJECT"))
                            (org-agenda-files . (:tag . "TARGET"))
                            ))
-
-(setq org-mobile-directory "~/Dropbox/MobileOrg")
-
-(setq org-mobile-use-encryption nil)
 
 ;;; turn on syntax highlighting
 (global-font-lock-mode 1)
@@ -278,14 +273,14 @@
   (interactive)
   (let* ((proc (get-buffer-process (current-buffer)))
          (pmark (process-mark proc))
-         (started-at-pmark (= (point) (marker-position pmark)))         
+	 (started-at-pmark (= (point) (marker-position pmark)))         
          (root (vc-root-dir))
          (cmd (concat "cd " root)))
     (save-excursion
       (goto-char pmark)
       (unless comint-process-echoes     
          (insert cmd) (insert "\n"))
-      (sit-for 0)                       ; force redisplay      
+      (sit-for 0)			; force redisplay      
       (cd root)
       (comint-send-string proc cmd)
       (comint-send-string proc "\n")
@@ -314,7 +309,7 @@
                  (define-key comint-mode-map (kbd "<C-return>") 'comint-accumulate)
                 ))
 
-               
+
 ;; 
 ;; enable a more powerful jump back function from ace jump mode
 ;;
@@ -490,11 +485,6 @@
                            (mode . shell-mode)
                            (mode . term-mode)
                            ))))))
-
-(defadvice quit-window (before quit-window-always-kill)
-  "When running `quit-window', always kill the buffer."
-  (ad-set-arg 0 t))
-(ad-activate 'quit-window)
 
 (setq default-fill-column 120)
 
