@@ -253,19 +253,6 @@ reason to change them yet.
 #+END_SRC
 
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '(
-   (makefile . t)
-   (sh . t)
-   (js . t)
-   (plantuml . t)
-   (emacs-lisp :tangle init.el . t)
-   (ditaa . t)
-   ))
-#+END_SRC
-
 
 Active babel languages.
 #+BEGIN_SRC emacs-lisp :tangle init.el
@@ -273,7 +260,7 @@ Active babel languages.
  'org-babel-load-languages
  '(
    (makefile . t)
-   (sh . t)
+   (shell . t)
    (js . t)
    (plantuml . t)
    (emacs-lisp :tangle init.el . t)

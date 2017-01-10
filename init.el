@@ -111,18 +111,7 @@
  'org-babel-load-languages
  '(
    (makefile . t)
-   (sh . t)
-   (js . t)
-   (plantuml . t)
-   (emacs-lisp :tangle init.el . t)
-   (ditaa . t)
-   ))
-
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '(
-   (makefile . t)
-   (sh . t)
+   (shell . t)
    (js . t)
    (plantuml . t)
    (emacs-lisp :tangle init.el . t)
