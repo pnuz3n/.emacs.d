@@ -405,8 +405,6 @@
 ;(setq sql-mysql-login-params (append sql-mysql-login-params '(port)))
 ;(setq sql-port 3306)
 
-(el-get-bundle tramp)
-
 (el-get-bundle yaml-mode)
 
 (el-get-bundle yasnippet)

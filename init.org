@@ -650,10 +650,6 @@ This function can be binded to key sequence when shell is activated.
 ;(setq sql-mysql-login-params (append sql-mysql-login-params '(port)))
 ;(setq sql-port 3306)
 #+END_SRC
-** setup-tramp.el
-#+BEGIN_SRC emacs-lisp 
-(el-get-bundle tramp)
-#+END_SRC
 ** setup-yaml.el
 #+BEGIN_SRC emacs-lisp 
 (el-get-bundle yaml-mode)
