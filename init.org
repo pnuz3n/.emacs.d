@@ -3,7 +3,7 @@
 
 * Emacs Initialization
 :PROPERTIES:
-:tangle: init.el
+:header-args: :tangle init.el
 :END:
 
 This document describes how Emacs is initialized.
@@ -12,7 +12,7 @@ This document describes how Emacs is initialized.
 Run machine dependant initialization file before running the common
 setup. This script could be used to set up proxies.
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
   (setq local-pre-init-file "~/.emacs.d/local-pre-init.el")
   (if (file-exists-p local-pre-init-file)
   (load local-pre-init-file)
@@ -36,7 +36,7 @@ repositories will fail.
 Emacs shows startup screen. It gets anoying after a while, so they
 need to be turned off.
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
   (setq inhibit-startup-message t)
   (setq inhibit-splash-screen t)
 #+END_SRC
@@ -45,7 +45,7 @@ After getting used to the keyboard interface the menus and such just
 takes valuable screen space. So mouse interface is turned off.
 This is done early in the initialization to prevent momentary display.
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 (if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
 (if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
 (if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
@@ -59,7 +59,7 @@ files can not be opened or saved.
 
 Following code will extract exec-path from ~PATH~ variable.
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 (let ((elements (split-string (getenv "PATH") ":")))
   (dolist (e elements)
     (add-to-list 'exec-path e)))
@@ -68,14 +68,14 @@ Following code will extract exec-path from ~PATH~ variable.
 In some cases ~bin~ directory in home directory is missing in the ~exec-path~. Same thing goes to the
 ~/usr/local/bin~. These are often used in my machines.
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 (add-to-list 'exec-path "~/bin")
 (add-to-list 'exec-path "/usr/local/bin")
 #+END_SRC
 
 ** Lisp files
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 (add-to-list 'load-path "~/.emacs.d/lisp/")
 #+END_SRC
 
@@ -86,7 +86,7 @@ different for applications. The gpg-agent can be configured to be
 launched during login ([[http://www.weinschenker.name/2013-10-08/use-gpgtools-for-ssh-logins-on-mac-os-x/][how-to]]), but emacs does not receive the related
 environment variables. Following code fixes this issue.
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
   ;; read gpg-agent environment
 
   (defun read-env-line (line)
@@ -109,7 +109,7 @@ environment variables. Following code fixes this issue.
 #+END_SRC
 ** No tabs
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 (setq-default indent-tabs-mode nil)
 #+END_SRC
 
@@ -118,7 +118,7 @@ environment variables. Following code fixes this issue.
 Following disables [[https://www.emacswiki.org/emacs/TransientMarkMode][transient mark mode]]. This means that text is not selected by default like in "normal" editors.
 This allows more convient text editing while it requires some practice.
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 (transient-mark-mode 0)
 #+END_SRC
 
@@ -127,13 +127,13 @@ This allows more convient text editing while it requires some practice.
 After over year of practice I am begin to think that can start to lear some [[https://www.emacswiki.org/emacs/Narrowing][narrowing]]. It is disabled by default and
 needs to be enabled.
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 (put 'narrow-to-region 'disabled nil)
 #+END_SRC
 
 ** Backups
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
 (setq
   delete-old-versions t
@@ -147,7 +147,7 @@ needs to be enabled.
 ** Browser
 
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
   (when (eq system-type 'darwin)
      (setq browse-url-browser-function 'browse-url-default-macosx-browser))
 #+END_SRC
@@ -156,7 +156,7 @@ needs to be enabled.
 
 See http://orgmode.org/worg/org-faq.html#Appointments/Diary
 
-#+begin_src emacs-lisp :tangle init.el
+#+begin_src emacs-lisp 
 
 (setq diary-file "~/org/diary")
 
@@ -171,14 +171,14 @@ See http://orgmode.org/worg/org-faq.html#Appointments/Diary
 #+end_src
 ** Emacsclient server
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 (setq server-socket-dir "~/.emacs.d/server")
 (server-start)
 #+END_SRC
 
 ** Elget
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
 
 (unless (require 'el-get nil 'noerror)
@@ -201,7 +201,7 @@ See http://orgmode.org/worg/org-faq.html#Appointments/Diary
 
 ** No passwords in shell
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 ;; No passwords show in shell
 (add-hook 'comint-output-filter-functions
           'comint-watch-for-password-prompt)
@@ -212,7 +212,7 @@ See http://orgmode.org/worg/org-faq.html#Appointments/Diary
 not use so often and the key is perfectly located for prefix key.
 So it is unset here to allow it to be re-used later.
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
   (global-unset-key (kbd "C-q"))
 #+END_SRC
 
@@ -220,14 +220,14 @@ So it is unset here to allow it to be re-used later.
 
 Install org mode through [[Elget]].
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 (el-get-bundle org-mode)
 #+END_SRC
 
 Set up agenda functionality. Files are located under org-directory
 under home.
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 (setq org-directory "~/org")
 (setq org-agenda-files (concat org-directory "/agenda"))
 (setq org-default-notes-file (concat org-directory "/refile.org.gpg"))
@@ -238,14 +238,14 @@ Set up archive file that is encrypted. By default entries would be archive
 to files postfixed by ~_archive~. This file is not encrypted and that could
 be a problem.
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 (setq org-archive-location (concat org-directory "/archive.org.gpg::* From %s"))
 #+END_SRC
 
 
 Setup default keys (see [[http://orgmode.org/org.html#Activation][Org mode activation]]). There has not been any
 reason to change them yet.
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
   (global-set-key "\C-cl" 'org-store-link)
   (global-set-key "\C-ca" 'org-agenda)
   (global-set-key "\C-cc" 'org-capture)
@@ -255,7 +255,7 @@ reason to change them yet.
 
 
 Active babel languages.
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 (org-babel-do-load-languages
  'org-babel-load-languages
  '(
@@ -263,14 +263,14 @@ Active babel languages.
    (shell . t)
    (js . t)
    (plantuml . t)
-   (emacs-lisp :tangle init.el . t)
+   (emacs-lisp  . t)
    (ditaa . t)
    ))
 #+END_SRC
 
 Following will add GTD type of state for the tasks and
 provide logging.
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 (setq org-log-into-drawer t)
 (setq org-todo-keywords
 '(
@@ -289,19 +289,19 @@ Log looks something like this under the task header line.
 #+END_EXAMPLE
 
 This adds simple line that tells when the task has been closed.
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 (setq org-log-done 'time)
 #+END_SRC
 
 Improve how the stuck projects are found.
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 (setq org-tags-exclude-from-inheritance '("PROJECT" "TARGET"))
 (setq org-stuck-projects
            '("+PROJECT/-MAYBE-DONE" ("TODO")))
 #+END_SRC
 
 Capture templates
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
   (setq org-capture-templates
         '(
           ("t" "Task" entry (file+headline "" "Tasks")
@@ -337,12 +337,12 @@ Capture templates
 Following enables org-protocol handling. This means that url-like ~org-protocol://capture:/p/<url>/<title>/selection>~
 are handled by the org mode capture.
 
-#+begin_src emacs-lisp :tangle init.el 
+#+begin_src emacs-lisp  
 (require 'org-protocol)
 #+end_src
 
 Refilling
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
   (setq org-refile-targets '(
                              (org-agenda-files . (:tag . "PROJECT"))
                              (org-agenda-files . (:tag . "TARGET"))
@@ -351,11 +351,11 @@ Refilling
 
 ** COMMENT Mobile org
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 (setq org-mobile-directory "~/Dropbox/MobileOrg")
 #+END_SRC
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 (setq org-mobile-use-encryption nil)
 #+END_SRC
 
@@ -370,7 +370,7 @@ Accidentally pressin command key in MacOS is annoying so they are configured to 
 ** Misc
 
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 ;;; turn on syntax highlighting
 (global-font-lock-mode 1)
 
@@ -451,7 +451,7 @@ Accidentally pressin command key in MacOS is annoying so they are configured to 
 
 I often need shell. But default ~M-x shell~ will throw back to the already created shell. Many times this is not what I want.
 
-#+begin_src emacs-lisp :tangle init.el
+#+begin_src emacs-lisp 
 (defun new-shell ()
   (interactive)
 
@@ -472,7 +472,7 @@ I often need shell. But default ~M-x shell~ will throw back to the already creat
 
 Sometimes it is convenient to jump to the root directory of the repository.
 
-#+begin_src emacs-lisp :tangle init.el
+#+begin_src emacs-lisp 
 (defun pw/shell-cd-to-vc-root ()
 "Jumps to the root directory of version controled directory structure."
   (interactive)
@@ -501,7 +501,7 @@ Sometimes it is convenient to jump to the root directory of the repository.
 #+end_src
 
 This function can be binded to key sequence when shell is activated.
-#+begin_src emacs-lisp :tangle init.el
+#+begin_src emacs-lisp 
   (add-hook 'comint-mode-hook (lambda ()
                               (define-key comint-mode-map (kbd "C-q c r") 'pw/shell-cd-to-vc-root)
                               ))
@@ -512,7 +512,7 @@ This function can be binded to key sequence when shell is activated.
 
 #+end_src
 ** Ace Jump
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
   (el-get-bundle ace-jump-mode)
 
   (add-hook 'comint-mode-hook
@@ -536,28 +536,28 @@ This function can be binded to key sequence when shell is activated.
   (define-key global-map (kbd "C-.") 'ace-jump-mode)
 #+END_SRC
 ** setup-autocomplete.el
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 #+END_SRC
 ** setup-csv.el
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 ;; CSV Mode
 (el-get-bundle csv-mode)
 (require 'csv-mode)
 #+END_SRC
 ** setup-docker-mode.el
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 (el-get-bundle dockerfile-mode)
 ;;; Dockerfile mode
 (require 'dockerfile-mode)
 (add-to-list 'auto-mode-alist '("Dockerfile\\'" . dockerfile-mode))
 #+END_SRC
 ** setup-edit-server.el
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 (el-get-bundle edit-server)
 (edit-server-start)
 #+END_SRC
 ** setup-erlang.el
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 (defun erl-exists () "Tests wether go is installed or not" 
   (= (call-process "which" nil nil nil "erl") 0)
 )
@@ -570,13 +570,13 @@ This function can be binded to key sequence when shell is activated.
 (if (erl-exists) (erl-setup))
 #+END_SRC
 ** setup-expand-region.el
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 (el-get-bundle expand-region)
 (require 'expand-region)
 (global-set-key (kbd "C-+") 'er/expand-region)
 #+END_SRC
 ** setup-go.el
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 (defun system-has-go () "Tests wether go is installed or not" 
        (condition-case nil
            (progn
@@ -625,7 +625,7 @@ This function can be binded to key sequence when shell is activated.
 (if (system-has-go) (setup-go))
 #+END_SRC
 ** setup-idea.el
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 ;; Idea related shortcuts
 
 (defun idea-open-file (s) "Opens file in idea"
@@ -636,31 +636,31 @@ This function can be binded to key sequence when shell is activated.
 
 #+END_SRC
 ** setup-jira.el
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 (el-get-bundle org-jira)
 (setq org-jira-working-dir "~/org/jira")
 #+END_SRC
 ** setup-multicursore.el
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 (el-get-bundle multiple-cursors)
 #+END_SRC
 ** setup-mysql.el
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 ;; Allows changing port used to connect MySQL-database
 ;(setq sql-mysql-login-params (append sql-mysql-login-params '(port)))
 ;(setq sql-port 3306)
 #+END_SRC
 ** setup-tramp.el
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 (el-get-bundle tramp)
 #+END_SRC
 ** setup-yaml.el
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 (el-get-bundle yaml-mode)
 
 #+END_SRC
 ** setup-yasnippet-and-ac.el
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 (el-get-bundle yasnippet)
 (el-get-bundle auto-complete)
 
@@ -713,13 +713,13 @@ One common task is to switch between two buffers.
 Suspend frame is not very usefull command so, it is
 recucled to change the buffer.
 
-#+begin_src emacs-lisp :tangle init.el
+#+begin_src emacs-lisp 
 (global-set-key (kbd "C-z")  'mode-line-other-buffer)
 #+end_src
 
 ** IBuffers
 
-#+begin_src emacs-lisp :tangle init.el
+#+begin_src emacs-lisp 
    (global-set-key (kbd "C-x C-b") 'ibuffer)
    (autoload 'ibuffer "ibuffer" "List buffers." t)
 
@@ -741,14 +741,14 @@ recucled to change the buffer.
 #+end_src
 ** COMMENT Kill buffer instead of burying it
 
-#+begin_src emacs-lisp :tangle init.el
+#+begin_src emacs-lisp 
 (defadvice quit-window (before quit-window-always-kill)
   "When running `quit-window', always kill the buffer."
   (ad-set-arg 0 t))
 (ad-activate 'quit-window)
 #+end_src
 ** Default column width 120 characters
-#+begin_src emacs-lisp :tangle init.el
+#+begin_src emacs-lisp 
 (setq default-fill-column 120)
 #+end_src
 ** Theme
@@ -757,7 +757,7 @@ Plain white theme gets old after a while. Emacs has support themes and there is 
 Idea Darcula theme pleases the eye. Emacs updates theme list only after init has been run. Hook is used to load theme
 then.  Without it first loading would fail.
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
   (el-get-install 'idea-darkula-theme)
   (push (substitute-in-file-name "~/.emacs.d/el-get/idea-darkula-theme/") custom-theme-load-path)
   (add-hook 'after-init-hook (lambda () (load-theme 'idea-darkula t)))
@@ -770,7 +770,7 @@ Editing a lot of text using fixed width font is not optimum situation. After a w
 I found a way to use variable length fonts (see [[https://yoo2080.wordpress.com/2013/05/30/monospace-font-in-tables-and-source-code-blocks-in-org-mode-proportional-font-in-other-parts/][the blog of Jisan Yoo]]).
 
 First we hook variable-pitch-mode
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
   (add-hook 'text-mode-hook 'variable-pitch-mode)
 #+END_SRC
 
@@ -778,7 +778,7 @@ The problem is that I don't want code and tables to be variable width inside
 Org mode document. This can be archived by altering some faces
 used by the Org mode.
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
   (defun my-adjoin-to-list-or-symbol (element list-or-symbol)
     (let ((list (if (not (listp list-or-symbol))
                     (list list-or-symbol)
@@ -798,13 +798,13 @@ used by the Org mode.
 #+END_SRC
 
 Of course we can choose what kind of faces ~variable-pitch~ and ~fixed-pitch~ are.
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 (set-face-attribute 'variable-pitch nil :height 1.3 :family "Calibri")
 (set-face-attribute 'fixed-pitch nil :height 0.8 :family "Consolas")
 #+END_SRC
 
 While we are at it we could make Org-mode look a little better in general.
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
 (require 'org-bullets)
 (add-hook 'org-mode-hook 'org-indent-mode)
 (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
@@ -832,13 +832,13 @@ While we are at it we could make Org-mode look a little better in general.
 
 [[https://developers.google.com/protocol-buffers/docs/overview][Google Protocol Buffers]] is way to serialize data. It uses "proto" files to describe serialization format.
 
-#+begin_src emacs-lisp :tangle init.el
+#+begin_src emacs-lisp 
 (require 'protobuf-mode)
 (add-to-list 'auto-mode-alist '("\\.proto\\'" . protobuf-mode))
 #+end_src
 
 ** Open current buffer in idea
-#+begin_src emacs-lisp :tangle init.el
+#+begin_src emacs-lisp 
   (defun open-buffer-curent-idea ()
     ""
     (interactive)
@@ -855,7 +855,7 @@ While we are at it we could make Org-mode look a little better in general.
 
 Sometime it is nice to look what is behind the frame. Following code toggles frame to be almost completely transparent
 and back to solid again. 
-#+begin_src emacs-lisp :tangle init.el
+#+begin_src emacs-lisp 
   (defun pw/toggle-transparency ()
     "Toggles frame transparency."
     (interactive)
@@ -871,7 +871,7 @@ and back to solid again.
 PlantUML works using JAR. Next is function that will load the jar if it is missing. Function returns the path where the
 jar was loaded.
 
-#+begin_src emacs-lisp :tangle init.el
+#+begin_src emacs-lisp 
   (defun pw/download-plantuml-jar-if-needed () ""
          (let ((plantuml-jar "~/.emacs.d/plantuml.jar"))
            (if (not (file-exists-p plantuml-jar))
@@ -882,7 +882,7 @@ jar was loaded.
 #+end_src
 
 Now we can set the PlantUML jar for org-mode.
-#+begin_src emacs-lisp :tangle init.el
+#+begin_src emacs-lisp 
   (setq org-plantuml-jar-path  (pw/download-plantuml-jar-if-needed))
 
   ;; Don`t confirm plant uml runs for conviency.
@@ -902,13 +902,13 @@ There is mode for Plant UML, but no el-get recipe for it. So we create one.
 #+end_src
 
 Now the recipe can be installed. It also needs to know where the jar is.
-#+begin_src emacs-lisp :tangle init.el
+#+begin_src emacs-lisp 
   (el-get-install 'puml-mode)
   (setq org-plantuml-jar-path (pw/download-plantuml-jar-if-needed))
 #+end_src
 
 As there is no plantuml-mode we need to set up puml-mode for plantuml.
-#+begin_src emacs-lisp :tangle init.el
+#+begin_src emacs-lisp 
   (add-to-list 'org-src-lang-modes '("plantuml" . puml))
 #+end_src
 
@@ -916,7 +916,7 @@ As there is no plantuml-mode we need to set up puml-mode for plantuml.
 
 Finally after all the other initializations
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp 
   (setq local-init-file "~/.emacs.d/local-init.el")
   (if (file-exists-p local-init-file)
   (load local-init-file)

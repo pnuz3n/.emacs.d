@@ -114,7 +114,7 @@
    (shell . t)
    (js . t)
    (plantuml . t)
-   (emacs-lisp :tangle init.el . t)
+   (emacs-lisp  . t)
    (ditaa . t)
    ))
 
