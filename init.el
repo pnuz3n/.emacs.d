@@ -41,6 +41,8 @@
 
 (setq-default indent-tabs-mode nil)
 
+(setq-default tab-width 2)
+
 (transient-mark-mode 0)
 
 (put 'narrow-to-region 'disabled nil)

@@ -107,10 +107,17 @@ environment variables. Following code fixes this issue.
           )
     )
 #+END_SRC
-** No tabs
+** Tabs
+
+Do not indent with tabs by default.
 
 #+BEGIN_SRC emacs-lisp 
 (setq-default indent-tabs-mode nil)
+#+END_SRC
+
+But if you do use tab its width is two.
+#+BEGIN_SRC emacs-lisp 
+(setq-default tab-width 2)
 #+END_SRC
 
 ** No transient mark by default
