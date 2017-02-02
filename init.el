@@ -171,6 +171,8 @@
                            (org-agenda-files . (:tag . "TARGET"))
                            ))
 
+(global-set-key (kbd "C-S-s-o") 'org-capture)
+
 ;;; turn on syntax highlighting
 (global-font-lock-mode 1)
 

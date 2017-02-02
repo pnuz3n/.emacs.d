@@ -356,6 +356,16 @@ Refilling
                              ))
 #+END_SRC
 
+I have created shell script [[file:sh/orgcapture.sh]] which opens Emacs in capture mode. I have also created service to
+MacOS that uses the shell script when keyboard shortcut is used (see [[https://computers.tutsplus.com/tutorials/how-to-launch-any-app-with-a-keyboard-shortcut--mac-31463][instructions]]). Unfortunately Emacs catches all keys
+and the same shortcut does not work within Emacs. Following binding enables the same shortcut in
+Emacs.
+
+#+BEGIN_SRC emacs-lisp 
+  (global-set-key (kbd "C-S-s-o") 'org-capture)
+#+END_SRC
+ 
+
 ** COMMENT Mobile org
 
 #+BEGIN_SRC emacs-lisp 
