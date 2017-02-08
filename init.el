@@ -560,10 +560,8 @@
   (setq org-confirm-babel-evaluate 'my-org-confirm-babel-evaluate)
   )
 
-(el-get-install 'puml-mode)
+(el-get-install 'plantuml-mode)
 (setq org-plantuml-jar-path (pw/download-plantuml-jar-if-needed))
-
-(add-to-list 'org-src-lang-modes '("plantuml" . puml))
 
 (setq local-init-file "~/.emacs.d/local-init.el")
 (if (file-exists-p local-init-file)

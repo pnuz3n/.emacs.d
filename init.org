@@ -907,23 +907,20 @@ Now we can set the PlantUML jar for org-mode.
 #+end_src
 
 There is mode for Plant UML, but no el-get recipe for it. So we create one.
-#+begin_src emacs-lisp :mkdir yes :tangle el-get-user/recipes/puml-mode.rcp
-(:name puml-mode
+#+begin_src emacs-lisp :mkdir yes :tangle el-get-user/recipes/plantuml-mode.rcp
+(:name plantuml-mode
        :description "PlantUML Mode"
        :type git
-       :url "https://github.com/skuro/puml-mode")
+       :url "https://github.com/skuro/plantuml-mode")
 #+end_src
 
 Now the recipe can be installed. It also needs to know where the jar is.
 #+begin_src emacs-lisp 
-  (el-get-install 'puml-mode)
+  (el-get-install 'plantuml-mode)
   (setq org-plantuml-jar-path (pw/download-plantuml-jar-if-needed))
 #+end_src
 
 As there is no plantuml-mode we need to set up puml-mode for plantuml.
-#+begin_src emacs-lisp 
-  (add-to-list 'org-src-lang-modes '("plantuml" . puml))
-#+end_src
 
 ** Run local init
 
