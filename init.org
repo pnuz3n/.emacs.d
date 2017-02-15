@@ -460,7 +460,7 @@ Accidentally pressin command key in MacOS is annoying so they are configured to 
 
 (global-set-key (kbd "C-q o")  'find-file-at-point)
 
-
+(global-set-key (kbd "C-q C-q")  'quoted-insert)
 #+END_SRC
 
 ** Shell stuff 

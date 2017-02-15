@@ -245,6 +245,8 @@
 
 (global-set-key (kbd "C-q o")  'find-file-at-point)
 
+(global-set-key (kbd "C-q C-q")  'quoted-insert)
+
 (defun new-shell ()
   (interactive)
 
