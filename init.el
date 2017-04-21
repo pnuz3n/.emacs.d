@@ -365,9 +365,6 @@
              'string-to-number
              (split-string (buffer-substring s e) "\\.")))))
 
-
-
-
 (defun setup-go () "Install go environment with el-get"
        (el-get-bundle go-mode)
        (el-get-bundle dash)
@@ -381,15 +378,14 @@
            (require 'go-flycheck))
            ))
 
-       
-
        ;; go get github.com/nsf/gocode
        (el-get-bundle go-autocomplete)
        (require 'go-autocomplete)
 
        (add-hook 'go-mode-hook 
                  (lambda ()
-                         (add-hook 'before-save-hook 'gofmt-before-save))
+                   (define-key go-mode-map (kbd "C-q j") 'godef-jump)
+                   (add-hook 'before-save-hook 'gofmt-before-save))
                  )
 
 (if (system-has-go) (setup-go))

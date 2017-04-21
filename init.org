@@ -592,7 +592,9 @@ This function can be binded to key sequence when shell is activated.
 (require 'expand-region)
 (global-set-key (kbd "C-+") 'er/expand-region)
 #+END_SRC
-** setup-go.el
+** Setup Go environment
+
+
 #+BEGIN_SRC emacs-lisp 
 (defun system-has-go () "Tests wether go is installed or not" 
        (condition-case nil
@@ -612,9 +614,6 @@ This function can be binded to key sequence when shell is activated.
              'string-to-number
              (split-string (buffer-substring s e) "\\.")))))
 
-
-
-
 (defun setup-go () "Install go environment with el-get"
        (el-get-bundle go-mode)
        (el-get-bundle dash)
@@ -628,15 +627,14 @@ This function can be binded to key sequence when shell is activated.
            (require 'go-flycheck))
            ))
 
-       
-
        ;; go get github.com/nsf/gocode
        (el-get-bundle go-autocomplete)
        (require 'go-autocomplete)
 
        (add-hook 'go-mode-hook 
                  (lambda ()
-                         (add-hook 'before-save-hook 'gofmt-before-save))
+                   (define-key go-mode-map (kbd "C-q j") 'godef-jump)
+                   (add-hook 'before-save-hook 'gofmt-before-save))
                  )
 
 (if (system-has-go) (setup-go))
