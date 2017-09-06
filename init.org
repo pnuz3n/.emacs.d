@@ -206,13 +206,7 @@ See http://orgmode.org/worg/org-faq.html#Appointments/Diary
 #+END_SRC
 
 
-** No passwords in shell
 
-#+BEGIN_SRC emacs-lisp 
-;; No passwords show in shell
-(add-hook 'comint-output-filter-functions
-          'comint-watch-for-password-prompt)
-#+END_SRC
 ** New prefix key Control-q
 
 ~Control-q~ is bound to ~quoted-insert~ by default. That command is
@@ -528,6 +522,13 @@ This function can be binded to key sequence when shell is activated.
                               ))
 
 #+end_src
+*** No passwords in shell
+
+#+BEGIN_SRC emacs-lisp 
+;; No passwords show in shell
+(add-hook 'comint-output-filter-functions
+          'comint-watch-for-password-prompt)
+#+END_SRC
 ** Ace Jump
 #+BEGIN_SRC emacs-lisp 
   (el-get-bundle ace-jump-mode)

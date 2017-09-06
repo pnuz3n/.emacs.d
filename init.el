@@ -90,10 +90,6 @@
 (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get-user/recipes")
 (el-get 'sync)
 
-;; No passwords show in shell
-(add-hook 'comint-output-filter-functions
-          'comint-watch-for-password-prompt)
-
 (global-unset-key (kbd "C-q"))
 
 (el-get-bundle org-mode)
@@ -295,6 +291,10 @@
 (add-hook 'dired-mode-hook (lambda ()
                             (define-key dired-mode-map (kbd "C-q c r") 'pw/dired-cd-to-vc-root)
                             ))
+
+;; No passwords show in shell
+(add-hook 'comint-output-filter-functions
+          'comint-watch-for-password-prompt)
 
 (el-get-bundle ace-jump-mode)
 
