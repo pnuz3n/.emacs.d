@@ -75,13 +75,16 @@ In some cases ~bin~ directory in home directory is missing in the ~exec-path~. S
 
 ** Lisp files
 
+Additional lisp code is located in own directory. These can be loaded
+later using ~require~ function for example.
+
 #+BEGIN_SRC emacs-lisp 
 (add-to-list 'load-path "~/.emacs.d/lisp/")
 #+END_SRC
 
 ** Using GPG-Agent in MacOS
 
-MacOS environment is "funny" thing there is different for shell and
+MacOS is a "funny" thing. There is a different environment for shell and
 different for applications. The gpg-agent can be configured to be
 launched during login ([[http://www.weinschenker.name/2013-10-08/use-gpgtools-for-ssh-logins-on-mac-os-x/][how-to]]), but emacs does not receive the related
 environment variables. Following code fixes this issue.
@@ -107,81 +110,6 @@ environment variables. Following code fixes this issue.
           )
     )
 #+END_SRC
-** Tabs
-
-Do not indent with tabs by default.
-
-#+BEGIN_SRC emacs-lisp 
-(setq-default indent-tabs-mode nil)
-#+END_SRC
-
-But if you do use tab its width is two.
-#+BEGIN_SRC emacs-lisp 
-(setq-default tab-width 2)
-#+END_SRC
-
-** No transient mark by default
-
-Following disables [[https://www.emacswiki.org/emacs/TransientMarkMode][transient mark mode]]. This means that text is not selected by default like in "normal" editors.
-This allows more convient text editing while it requires some practice.
-
-#+BEGIN_SRC emacs-lisp 
-(transient-mark-mode 0)
-#+END_SRC
-
-** Allow narrowing buffer
-
-After over year of practice I am begin to think that can start to lear some [[https://www.emacswiki.org/emacs/Narrowing][narrowing]]. It is disabled by default and
-needs to be enabled.
-
-#+BEGIN_SRC emacs-lisp 
-(put 'narrow-to-region 'disabled nil)
-#+END_SRC
-
-** Backups
-
-#+BEGIN_SRC emacs-lisp 
-(setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
-(setq
-  delete-old-versions t
-  kept-new-versions 6
-  kept-old-versions 2
-  version-control t
-  backup-by-copying t
-)
-#+END_SRC
-
-** Browser
-
-
-#+BEGIN_SRC emacs-lisp 
-  (when (eq system-type 'darwin)
-     (setq browse-url-browser-function 'browse-url-default-macosx-browser))
-#+END_SRC
-
-** Calendar
-
-See http://orgmode.org/worg/org-faq.html#Appointments/Diary
-
-#+begin_src emacs-lisp 
-
-(setq diary-file "~/org/diary")
-
-;; (calendar-set-date-style 'european)
-
-(setq calendar-week-start-day 1
-      calendar-view-diary-initially-flag t
-      calendar-mark-diary-entries-flag t)
-
-(add-hook 'diary-display-hook 'diary-fancy-display)
-
-#+end_src
-** Emacsclient server
-
-#+BEGIN_SRC emacs-lisp 
-(setq server-socket-dir "~/.emacs.d/server")
-(server-start)
-#+END_SRC
 
 ** Elget
 
@@ -204,10 +132,153 @@ See http://orgmode.org/worg/org-faq.html#Appointments/Diary
 (add-to-list 'el-get-recipe-path "~/.emacs.d/el-get-user/recipes")
 (el-get 'sync)
 #+END_SRC
+** Theme
+
+Plain white theme gets old after a while. Emacs has support themes and there is [[https://emacsthemes.com/][gallery]] of them.  Colors of IntelliJ
+Idea Darcula theme pleases the eye. Emacs updates theme list only after init has been run. Hook is used to load theme
+then.  Without it first loading would fail.
+
+#+BEGIN_SRC emacs-lisp 
+  (el-get-install 'idea-darkula-theme)
+  (push (substitute-in-file-name "~/.emacs.d/el-get/idea-darkula-theme/") custom-theme-load-path)
+  (add-hook 'after-init-hook (lambda () (load-theme 'idea-darkula t)))
+
+#+END_SRC
+
+** Fonts
+
+Editing a lot of text using fixed width font is not optimum situation. After a while of googling 
+I found a way to use variable length fonts (see [[https://yoo2080.wordpress.com/2013/05/30/monospace-font-in-tables-and-source-code-blocks-in-org-mode-proportional-font-in-other-parts/][the blog of Jisan Yoo]]).
+
+First we hook variable-pitch-mode
+#+BEGIN_SRC emacs-lisp 
+  (add-hook 'text-mode-hook 'variable-pitch-mode)
+#+END_SRC
+
+The problem is that I don't want code and tables to be variable width inside
+Org mode document. This can be archived by altering some faces
+used by the Org mode.
+
+#+BEGIN_SRC emacs-lisp 
+  (defun my-adjoin-to-list-or-symbol (element list-or-symbol)
+    (let ((list (if (not (listp list-or-symbol))
+                    (list list-or-symbol)
+                  list-or-symbol)))
+      (require 'cl-lib)
+      (cl-adjoin element list)))
+
+    (mapc
+      (lambda (face)
+        (set-face-attribute
+         face nil
+         :inherit
+         (my-adjoin-to-list-or-symbol
+          'fixed-pitch
+          (face-attribute face :inherit))))
+      (list 'org-code 'org-block 'org-table 'org-meta-line))
+#+END_SRC
+
+Of course we can choose what kind of faces ~variable-pitch~ and ~fixed-pitch~ are.
+#+BEGIN_SRC emacs-lisp 
+(set-face-attribute 'variable-pitch nil :height 1.3 :family "Calibri")
+(set-face-attribute 'fixed-pitch nil :height 0.8 :family "Consolas")
+#+END_SRC
+
+While we are at it we could make Org-mode look a little better in general.
+#+BEGIN_SRC emacs-lisp 
+(require 'org-bullets)
+(add-hook 'org-mode-hook 'org-indent-mode)
+(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+(setq org-hide-leading-stars t)
+(setq line-spacing 0.25)
+(set-face-attribute 'org-tag nil :weight 'normal :height 0.8)
+(set-face-attribute 'org-todo nil :weight 'normal :height 150)
+(set-face-attribute 'org-priority nil :weight 'normal :height 100)
+(set-face-attribute 'org-todo nil :weight 'normal :height 100)
+(set-face-attribute 'org-done nil :weight 'normal :height 100)
+(set-face-attribute 'org-special-keyword nil :height 90)
+(set-face-attribute 'org-level-1 nil :height 1.3)
+(set-face-attribute 'org-level-2 nil :height 1.2)
+(set-face-attribute 'org-level-3 nil :height 1.1)
+#+END_SRC
+** Tabs
+
+Do not indent with tabs by default.
+
+#+BEGIN_SRC emacs-lisp 
+(setq-default indent-tabs-mode nil)
+#+END_SRC
+
+But if you do use tab its width is two.
+#+BEGIN_SRC emacs-lisp 
+(setq-default tab-width 2)
+#+END_SRC
+
+** No transient mark by default
+
+Following disables [[https://www.emacswiki.org/emacs/TransientMarkMode][transient mark mode]]. This means that text is not selected by
+default like in "normal" editors.  This allows more convient text editing while
+it requires some practice.
+
+#+BEGIN_SRC emacs-lisp 
+(transient-mark-mode 0)
+#+END_SRC
+
+** Allow narrowing buffer
+
+After over year of practice I am begin to think that can start to lear some
+[[https://www.emacswiki.org/emacs/Narrowing][narrowing]]. It is disabled by default and needs to be enabled.
+
+#+BEGIN_SRC emacs-lisp 
+(put 'narrow-to-region 'disabled nil)
+#+END_SRC
+
+** Backups
+
+#+BEGIN_SRC emacs-lisp 
+(setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
+(setq
+  delete-old-versions t
+  kept-new-versions 6
+  kept-old-versions 2
+  version-control t
+  backup-by-copying t
+)
+#+END_SRC
+
+** Browser
+
+#+BEGIN_SRC emacs-lisp 
+  (when (eq system-type 'darwin)
+     (setq browse-url-browser-function 'browse-url-default-macosx-browser))
+#+END_SRC
+
+** Calendar
+
+See http://orgmode.org/worg/org-faq.html#Appointments/Diary
+
+#+begin_src emacs-lisp 
+
+(setq diary-file "~/org/diary")
+
+(calendar-set-date-style 'european)
+
+(setq calendar-week-start-day 1
+      calendar-view-diary-initially-flag t
+      calendar-mark-diary-entries-flag t)
+
+(add-hook 'diary-display-hook 'diary-fancy-display)
+
+#+end_src
+** Emacsclient server
+
+#+BEGIN_SRC emacs-lisp 
+(setq server-socket-dir "~/.emacs.d/server")
+(server-start)
+#+END_SRC
 
 
-
-** New prefix key Control-q
+** New prefix key: Control-q
 
 ~Control-q~ is bound to ~quoted-insert~ by default. That command is
 not use so often and the key is perfectly located for prefix key.
@@ -359,25 +430,6 @@ Emacs.
   (global-set-key (kbd "C-S-s-o") 'org-capture)
 #+END_SRC
  
-
-** COMMENT Mobile org
-
-#+BEGIN_SRC emacs-lisp 
-(setq org-mobile-directory "~/Dropbox/MobileOrg")
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp 
-(setq org-mobile-use-encryption nil)
-#+END_SRC
-
-** MacOS command keys as meta
-
-Accidentally pressin command key in MacOS is annoying so they are configured to be as meta-keys. 
-#+BEGIN_SRC
-(setq ns-command-modifier 'meta)
-(setq ns-right-command-modifier 'meta)
-#+END_SRC
-
 ** Misc
 
 
@@ -419,13 +471,6 @@ Accidentally pressin command key in MacOS is annoying so they are configured to 
 ;; (global-set-key  (kbd "M-`")    'shell-command-on-region)
 
 
-(global-set-key (kbd "C-c m <return>") 'set-rectangular-region-anchor)
-(global-set-key (kbd "C-c m c") 'mc/edit-lines)
-(global-set-key (kbd "C-c m a") 'mc/mark-all-like-this)
-(global-set-key (kbd "C-c m .") 'mc/mark-next-like-this)
-(global-set-key (kbd "C-c m ,") 'mc/mark-previous-like-this)
-(global-set-key (kbd "C-c m m") 'mc/mark-more-like-this-extended)
-
 (global-set-key (kbd "C-c f") 'iwb)
 
 ;; Moving from window to window using arrows
@@ -460,7 +505,8 @@ Accidentally pressin command key in MacOS is annoying so they are configured to 
 ** Shell stuff 
 *** Convient way to create new shell
 
-I often need shell. But default ~M-x shell~ will throw back to the already created shell. Many times this is not what I want.
+I often need shell. But default ~M-x shell~ will throw back to the already
+created shell. Many times this is not what I want.
 
 #+begin_src emacs-lisp 
 (defun new-shell ()
@@ -479,6 +525,7 @@ I often need shell. But default ~M-x shell~ will throw back to the already creat
 
 (global-set-key (kbd "C-q s")  'new-shell)
 #+end_src
+
 *** Jumping to the root directory of repository
 
 Sometimes it is convenient to jump to the root directory of the repository.
@@ -553,45 +600,38 @@ This function can be binded to key sequence when shell is activated.
   (define-key global-map (kbd "C-q q") 'ace-jump-mode-pop-mark)
   (define-key global-map (kbd "C-.") 'ace-jump-mode)
 #+END_SRC
-** setup-autocomplete.el
-#+BEGIN_SRC emacs-lisp 
-#+END_SRC
-** setup-csv.el
+** File editing modes
+*** CSV-mode
 #+BEGIN_SRC emacs-lisp 
 ;; CSV Mode
 (el-get-bundle csv-mode)
 (require 'csv-mode)
 #+END_SRC
-** setup-docker-mode.el
+*** Docker-mode
 #+BEGIN_SRC emacs-lisp 
 (el-get-bundle dockerfile-mode)
 ;;; Dockerfile mode
 (require 'dockerfile-mode)
 (add-to-list 'auto-mode-alist '("Dockerfile\\'" . dockerfile-mode))
 #+END_SRC
-** setup-edit-server.el
+*** Yaml-mode
+#+BEGIN_SRC emacs-lisp 
+(el-get-bundle yaml-mode)
+#+END_SRC
+** Edit server
+
+Edit server allows editing content from web browser. See for example [[https://chrome.google.com/webstore/detail/edit-with-emacs/ljobjlafonikaiipfkggjbhkghgicgoh][edit-with-emacs]] Chrome extension.
+
 #+BEGIN_SRC emacs-lisp 
 (el-get-bundle edit-server)
 (edit-server-start)
 #+END_SRC
-** setup-erlang.el
-#+BEGIN_SRC emacs-lisp 
-(defun erl-exists () "Tests wether go is installed or not" 
-  (= (call-process "which" nil nil nil "erl") 0)
-)
 
-
-(defun erl-setup () "Install erlang environment with el-get"
-       (el-get-bundle erlang-mode)
-)
-
-(if (erl-exists) (erl-setup))
-#+END_SRC
-** setup-expand-region.el
+** Expand region
 #+BEGIN_SRC emacs-lisp 
 (el-get-bundle expand-region)
 (require 'expand-region)
-(global-set-key (kbd "C-+") 'er/expand-region)
+(global-set-key (kbd "C-q C-e") 'er/expand-region)
 #+END_SRC
 ** Setup Go environment
 
@@ -640,38 +680,28 @@ This function can be binded to key sequence when shell is activated.
 
 (if (system-has-go) (setup-go))
 #+END_SRC
-** setup-idea.el
+** IntelliJ Idea
 #+BEGIN_SRC emacs-lisp 
-;; Idea related shortcuts
 
 (defun idea-open-file (s) "Opens file in idea"
        (interactive
         (list (idea-open-file (buffer-substring (region-beginning) (region-end)))))
        (start-process "" nil "idea" s)
        )
-
 #+END_SRC
-** setup-jira.el
-#+BEGIN_SRC emacs-lisp 
-(el-get-bundle org-jira)
-(setq org-jira-working-dir "~/org/jira")
-#+END_SRC
-** setup-multicursore.el
+** Multicursors
 #+BEGIN_SRC emacs-lisp 
 (el-get-bundle multiple-cursors)
-#+END_SRC
-** setup-mysql.el
-#+BEGIN_SRC emacs-lisp 
-;; Allows changing port used to connect MySQL-database
-;(setq sql-mysql-login-params (append sql-mysql-login-params '(port)))
-;(setq sql-port 3306)
-#+END_SRC
-** setup-yaml.el
-#+BEGIN_SRC emacs-lisp 
-(el-get-bundle yaml-mode)
 
+(global-set-key (kbd "C-c m <return>") 'set-rectangular-region-anchor)
+(global-set-key (kbd "C-c m c") 'mc/edit-lines)
+(global-set-key (kbd "C-c m a") 'mc/mark-all-like-this)
+(global-set-key (kbd "C-c m .") 'mc/mark-next-like-this)
+(global-set-key (kbd "C-c m ,") 'mc/mark-previous-like-this)
+(global-set-key (kbd "C-c m m") 'mc/mark-more-like-this-extended)
 #+END_SRC
-** setup-yasnippet-and-ac.el
+
+** Yasniplet and autocomplete
 #+BEGIN_SRC emacs-lisp 
 (el-get-bundle yasnippet)
 (el-get-bundle auto-complete)
@@ -723,7 +753,7 @@ This function can be binded to key sequence when shell is activated.
 
 One common task is to switch between two buffers.
 Suspend frame is not very usefull command so, it is
-recucled to change the buffer.
+recycled to change the buffer.
 
 #+begin_src emacs-lisp 
 (global-set-key (kbd "C-z")  'mode-line-other-buffer)
@@ -759,79 +789,10 @@ recucled to change the buffer.
   (ad-set-arg 0 t))
 (ad-activate 'quit-window)
 #+end_src
-** Default column width 120 characters
+** Default column width 80 characters
 #+begin_src emacs-lisp 
-(setq default-fill-column 120)
+(setq default-fill-column 80)
 #+end_src
-** Theme
-
-Plain white theme gets old after a while. Emacs has support themes and there is [[https://emacsthemes.com/][gallery]] of them.  Colors of IntelliJ
-Idea Darcula theme pleases the eye. Emacs updates theme list only after init has been run. Hook is used to load theme
-then.  Without it first loading would fail.
-
-#+BEGIN_SRC emacs-lisp 
-  (el-get-install 'idea-darkula-theme)
-  (push (substitute-in-file-name "~/.emacs.d/el-get/idea-darkula-theme/") custom-theme-load-path)
-  (add-hook 'after-init-hook (lambda () (load-theme 'idea-darkula t)))
-
-#+END_SRC
-
-** Fonts
-
-Editing a lot of text using fixed width font is not optimum situation. After a while of googling 
-I found a way to use variable length fonts (see [[https://yoo2080.wordpress.com/2013/05/30/monospace-font-in-tables-and-source-code-blocks-in-org-mode-proportional-font-in-other-parts/][the blog of Jisan Yoo]]).
-
-First we hook variable-pitch-mode
-#+BEGIN_SRC emacs-lisp 
-  (add-hook 'text-mode-hook 'variable-pitch-mode)
-#+END_SRC
-
-The problem is that I don't want code and tables to be variable width inside
-Org mode document. This can be archived by altering some faces
-used by the Org mode.
-
-#+BEGIN_SRC emacs-lisp 
-  (defun my-adjoin-to-list-or-symbol (element list-or-symbol)
-    (let ((list (if (not (listp list-or-symbol))
-                    (list list-or-symbol)
-                  list-or-symbol)))
-      (require 'cl-lib)
-      (cl-adjoin element list)))
-
-    (mapc
-      (lambda (face)
-        (set-face-attribute
-         face nil
-         :inherit
-         (my-adjoin-to-list-or-symbol
-          'fixed-pitch
-          (face-attribute face :inherit))))
-      (list 'org-code 'org-block 'org-table 'org-meta-line))
-#+END_SRC
-
-Of course we can choose what kind of faces ~variable-pitch~ and ~fixed-pitch~ are.
-#+BEGIN_SRC emacs-lisp 
-(set-face-attribute 'variable-pitch nil :height 1.3 :family "Calibri")
-(set-face-attribute 'fixed-pitch nil :height 0.8 :family "Consolas")
-#+END_SRC
-
-While we are at it we could make Org-mode look a little better in general.
-#+BEGIN_SRC emacs-lisp 
-(require 'org-bullets)
-(add-hook 'org-mode-hook 'org-indent-mode)
-(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
-(setq org-hide-leading-stars t)
-(setq line-spacing 0.25)
-(set-face-attribute 'org-tag nil :weight 'normal :height 0.8)
-(set-face-attribute 'org-todo nil :weight 'normal :height 150)
-(set-face-attribute 'org-priority nil :weight 'normal :height 100)
-(set-face-attribute 'org-todo nil :weight 'normal :height 100)
-(set-face-attribute 'org-done nil :weight 'normal :height 100)
-(set-face-attribute 'org-special-keyword nil :height 90)
-(set-face-attribute 'org-level-1 nil :height 1.3)
-(set-face-attribute 'org-level-2 nil :height 1.2)
-(set-face-attribute 'org-level-3 nil :height 1.1)
-#+END_SRC
 
 ** Don't confirm kills
 
@@ -878,7 +839,7 @@ and back to solid again.
   (global-set-key (kbd "C-x C-t")  'pw/toggle-transparency)
 #+end_src
 
-** PlantUML mode
+** PlantUML support
 
 PlantUML works using JAR. Next is function that will load the jar if it is missing. Function returns the path where the
 jar was loaded.
@@ -923,7 +884,7 @@ As there is no plantuml-mode we need to set up puml-mode for plantuml.
 
 ** Run local init
 
-Finally after all the other initializations
+Finally after all the other initializations run local initialisation file.
 
 #+BEGIN_SRC emacs-lisp 
   (setq local-init-file "~/.emacs.d/local-init.el")

@@ -39,6 +39,65 @@
         )
   )
 
+(add-to-list 'load-path "~/.emacs.d/el-get/el-get")
+
+(unless (require 'el-get nil 'noerror)
+  (with-current-buffer
+      (url-retrieve-synchronously
+       "https://raw.githubusercontent.com/dimitri/el-get/master/el-get-install.el")
+    (goto-char (point-max))
+    (eval-print-last-sexp)))
+
+(require 'el-get-elpa)
+;; Build the El-Get copy of the package.el packages if we have not
+;; built it before.  Will have to look into updating later ...
+(unless (file-directory-p el-get-recipe-path-elpa)
+  (el-get-elpa-build-local-recipes))
+
+(add-to-list 'el-get-recipe-path "~/.emacs.d/el-get-user/recipes")
+(el-get 'sync)
+
+(el-get-install 'idea-darkula-theme)
+(push (substitute-in-file-name "~/.emacs.d/el-get/idea-darkula-theme/") custom-theme-load-path)
+(add-hook 'after-init-hook (lambda () (load-theme 'idea-darkula t)))
+
+(add-hook 'text-mode-hook 'variable-pitch-mode)
+
+(defun my-adjoin-to-list-or-symbol (element list-or-symbol)
+  (let ((list (if (not (listp list-or-symbol))
+                  (list list-or-symbol)
+                list-or-symbol)))
+    (require 'cl-lib)
+    (cl-adjoin element list)))
+
+  (mapc
+    (lambda (face)
+      (set-face-attribute
+       face nil
+       :inherit
+       (my-adjoin-to-list-or-symbol
+        'fixed-pitch
+        (face-attribute face :inherit))))
+    (list 'org-code 'org-block 'org-table 'org-meta-line))
+
+(set-face-attribute 'variable-pitch nil :height 1.3 :family "Calibri")
+(set-face-attribute 'fixed-pitch nil :height 0.8 :family "Consolas")
+
+(require 'org-bullets)
+(add-hook 'org-mode-hook 'org-indent-mode)
+(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+(setq org-hide-leading-stars t)
+(setq line-spacing 0.25)
+(set-face-attribute 'org-tag nil :weight 'normal :height 0.8)
+(set-face-attribute 'org-todo nil :weight 'normal :height 150)
+(set-face-attribute 'org-priority nil :weight 'normal :height 100)
+(set-face-attribute 'org-todo nil :weight 'normal :height 100)
+(set-face-attribute 'org-done nil :weight 'normal :height 100)
+(set-face-attribute 'org-special-keyword nil :height 90)
+(set-face-attribute 'org-level-1 nil :height 1.3)
+(set-face-attribute 'org-level-2 nil :height 1.2)
+(set-face-attribute 'org-level-3 nil :height 1.1)
+
 (setq-default indent-tabs-mode nil)
 
 (setq-default tab-width 2)
@@ -61,7 +120,7 @@
 
 (setq diary-file "~/org/diary")
 
-;; (calendar-set-date-style 'european)
+(calendar-set-date-style 'european)
 
 (setq calendar-week-start-day 1
       calendar-view-diary-initially-flag t
@@ -71,24 +130,6 @@
 
 (setq server-socket-dir "~/.emacs.d/server")
 (server-start)
-
-(add-to-list 'load-path "~/.emacs.d/el-get/el-get")
-
-(unless (require 'el-get nil 'noerror)
-  (with-current-buffer
-      (url-retrieve-synchronously
-       "https://raw.githubusercontent.com/dimitri/el-get/master/el-get-install.el")
-    (goto-char (point-max))
-    (eval-print-last-sexp)))
-
-(require 'el-get-elpa)
-;; Build the El-Get copy of the package.el packages if we have not
-;; built it before.  Will have to look into updating later ...
-(unless (file-directory-p el-get-recipe-path-elpa)
-  (el-get-elpa-build-local-recipes))
-
-(add-to-list 'el-get-recipe-path "~/.emacs.d/el-get-user/recipes")
-(el-get 'sync)
 
 (global-unset-key (kbd "C-q"))
 
@@ -206,13 +247,6 @@
 ;; (global-set-key  (kbd "M-`")    'shell-command-on-region)
 
 
-(global-set-key (kbd "C-c m <return>") 'set-rectangular-region-anchor)
-(global-set-key (kbd "C-c m c") 'mc/edit-lines)
-(global-set-key (kbd "C-c m a") 'mc/mark-all-like-this)
-(global-set-key (kbd "C-c m .") 'mc/mark-next-like-this)
-(global-set-key (kbd "C-c m ,") 'mc/mark-previous-like-this)
-(global-set-key (kbd "C-c m m") 'mc/mark-more-like-this-extended)
-
 (global-set-key (kbd "C-c f") 'iwb)
 
 ;; Moving from window to window using arrows
@@ -318,8 +352,6 @@
 (define-key global-map (kbd "C-q q") 'ace-jump-mode-pop-mark)
 (define-key global-map (kbd "C-.") 'ace-jump-mode)
 
-
-
 ;; CSV Mode
 (el-get-bundle csv-mode)
 (require 'csv-mode)
@@ -329,23 +361,14 @@
 (require 'dockerfile-mode)
 (add-to-list 'auto-mode-alist '("Dockerfile\\'" . dockerfile-mode))
 
+(el-get-bundle yaml-mode)
+
 (el-get-bundle edit-server)
 (edit-server-start)
 
-(defun erl-exists () "Tests wether go is installed or not" 
-  (= (call-process "which" nil nil nil "erl") 0)
-)
-
-
-(defun erl-setup () "Install erlang environment with el-get"
-       (el-get-bundle erlang-mode)
-)
-
-(if (erl-exists) (erl-setup))
-
 (el-get-bundle expand-region)
 (require 'expand-region)
-(global-set-key (kbd "C-+") 'er/expand-region)
+(global-set-key (kbd "C-q C-e") 'er/expand-region)
 
 (defun system-has-go () "Tests wether go is installed or not" 
        (condition-case nil
@@ -390,24 +413,20 @@
 
 (if (system-has-go) (setup-go))
 
-;; Idea related shortcuts
-
 (defun idea-open-file (s) "Opens file in idea"
        (interactive
         (list (idea-open-file (buffer-substring (region-beginning) (region-end)))))
        (start-process "" nil "idea" s)
        )
 
-(el-get-bundle org-jira)
-(setq org-jira-working-dir "~/org/jira")
-
 (el-get-bundle multiple-cursors)
 
-;; Allows changing port used to connect MySQL-database
-;(setq sql-mysql-login-params (append sql-mysql-login-params '(port)))
-;(setq sql-port 3306)
-
-(el-get-bundle yaml-mode)
+(global-set-key (kbd "C-c m <return>") 'set-rectangular-region-anchor)
+(global-set-key (kbd "C-c m c") 'mc/edit-lines)
+(global-set-key (kbd "C-c m a") 'mc/mark-all-like-this)
+(global-set-key (kbd "C-c m .") 'mc/mark-next-like-this)
+(global-set-key (kbd "C-c m ,") 'mc/mark-previous-like-this)
+(global-set-key (kbd "C-c m m") 'mc/mark-more-like-this-extended)
 
 (el-get-bundle yasnippet)
 (el-get-bundle auto-complete)
@@ -475,48 +494,7 @@
                            (mode . term-mode)
                            ))))))
 
-(setq default-fill-column 120)
-
-(el-get-install 'idea-darkula-theme)
-(push (substitute-in-file-name "~/.emacs.d/el-get/idea-darkula-theme/") custom-theme-load-path)
-(add-hook 'after-init-hook (lambda () (load-theme 'idea-darkula t)))
-
-(add-hook 'text-mode-hook 'variable-pitch-mode)
-
-(defun my-adjoin-to-list-or-symbol (element list-or-symbol)
-  (let ((list (if (not (listp list-or-symbol))
-                  (list list-or-symbol)
-                list-or-symbol)))
-    (require 'cl-lib)
-    (cl-adjoin element list)))
-
-  (mapc
-    (lambda (face)
-      (set-face-attribute
-       face nil
-       :inherit
-       (my-adjoin-to-list-or-symbol
-        'fixed-pitch
-        (face-attribute face :inherit))))
-    (list 'org-code 'org-block 'org-table 'org-meta-line))
-
-(set-face-attribute 'variable-pitch nil :height 1.3 :family "Calibri")
-(set-face-attribute 'fixed-pitch nil :height 0.8 :family "Consolas")
-
-(require 'org-bullets)
-(add-hook 'org-mode-hook 'org-indent-mode)
-(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
-(setq org-hide-leading-stars t)
-(setq line-spacing 0.25)
-(set-face-attribute 'org-tag nil :weight 'normal :height 0.8)
-(set-face-attribute 'org-todo nil :weight 'normal :height 150)
-(set-face-attribute 'org-priority nil :weight 'normal :height 100)
-(set-face-attribute 'org-todo nil :weight 'normal :height 100)
-(set-face-attribute 'org-done nil :weight 'normal :height 100)
-(set-face-attribute 'org-special-keyword nil :height 90)
-(set-face-attribute 'org-level-1 nil :height 1.3)
-(set-face-attribute 'org-level-2 nil :height 1.2)
-(set-face-attribute 'org-level-3 nil :height 1.1)
+(setq default-fill-column 80)
 
 (require 'protobuf-mode)
 (add-to-list 'auto-mode-alist '("\\.proto\\'" . protobuf-mode))
