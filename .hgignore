@@ -2,3 +2,14 @@ el-get
 elpa
 backups
 ac-comphist.dat
+bookmarks
+plantuml.jar
+tramp
+local-init.el
+local-pre-init.el
+.mc-lists.el
+network-security.data
+srecode-map.el
+.org-id-locations
+request/curl-cookie-jar
+url/cookies
