@@ -275,7 +275,7 @@
 
 (global-set-key (kbd "C-q o")  'find-file-at-point)
 
-(global-set-key (kbd "C-q C-q")  'quoted-insert)
+(global-set-key (kbd "C-q i")  'quoted-insert)
 
 (defun new-shell ()
   (interactive)
@@ -408,6 +408,7 @@
        (add-hook 'go-mode-hook 
                  (lambda ()
                    (define-key go-mode-map (kbd "C-q j") 'godef-jump)
+                   (define-key go-mode-map (kbd "C-q q") 'pop-global-mark)
                    (add-hook 'before-save-hook 'gofmt-before-save))
                  )
 

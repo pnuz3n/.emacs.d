@@ -276,8 +276,6 @@ See http://orgmode.org/worg/org-faq.html#Appointments/Diary
 (setq server-socket-dir "~/.emacs.d/server")
 (server-start)
 #+END_SRC
-
-
 ** New prefix key: Control-q
 
 ~Control-q~ is bound to ~quoted-insert~ by default. That command is
@@ -499,7 +497,7 @@ Emacs.
 
 (global-set-key (kbd "C-q o")  'find-file-at-point)
 
-(global-set-key (kbd "C-q C-q")  'quoted-insert)
+(global-set-key (kbd "C-q i")  'quoted-insert)
 #+END_SRC
 
 ** Shell stuff 
@@ -675,6 +673,7 @@ Edit server allows editing content from web browser. See for example [[https://c
        (add-hook 'go-mode-hook 
                  (lambda ()
                    (define-key go-mode-map (kbd "C-q j") 'godef-jump)
+                   (define-key go-mode-map (kbd "C-q q") 'pop-global-mark)
                    (add-hook 'before-save-hook 'gofmt-before-save))
                  )
 
