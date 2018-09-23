@@ -158,55 +158,103 @@
    ))
 
 (setq org-log-into-drawer t)
-(setq org-todo-keywords
-'(
-(sequence "IN(i!)" "SOMEDAY(s!)" "WAIT(w@/!)" "TODO(t!)" "NEXT(n!)" "|" "DONE(d!)" "CANCELLED(c@)")
-(sequence "|" "PHONE" "MEETING")
-))
-
-(setq org-log-done 'time)
-
-(setq org-tags-exclude-from-inheritance '("PROJECT" "TARGET"))
-(setq org-stuck-projects
-           '("+PROJECT/-MAYBE-DONE" ("TODO")))
+(setq org-todo-keywords '((sequence  "TODO(t!)" "WAIT(w@/!)" "|" "DONE(d!)" "CANCELLED(c@)")))
 
 (setq org-capture-templates
-        '(
-          ("t" "Task" entry (file+headline "" "Tasks")
-           "* IN %?\n  CREATED: %U\n  %i\n"
-           :empty-lines 1)
+      '(
+        ("t" "Task" entry (file "")
+          "* TODO %?\n:LOGBOOK:\n- Created %U\n:END:\n%i\n"
+         :empty-lines 1)
 
-          ("n" "Note" entry (file+headline "" "Notes")
-           "* %? :NOTE:\n  CREATED: %U\n"
-           :empty-lines 1)
+        ("n" "Note" entry (file "")
+         "* %? :muistiinpano:\n:LOGBOOK:\n- Created %U\n:END:\n%i\n"
+         :empty-lines 1)
 
-          ("m" "Meeting" entry (file+headline "" "Meetings")
-           "* MEETING %u %? :MEETING:\n CREATED: %U\n"
-           :clock-in t :clock-resume t  :empty-lines 1)
+        ("m" "Meeting" entry (file "")
+         "* %u %? :tapaminen:\n:LOGBOOK:\n- Created %U\n:END:\n"
+         :clock-in t :clock-resume t  :empty-lines 1)
 
-          ("c" "Phone call" entry (file+headline "" "Calls")
-           "* PHONE  %U %? :PHONE:\n CREATED: %U"
-           :clock-in t :clock-resume t  :empty-lines 1)
+        ("c" "Phone call" entry (file "")
+         "* %U %? :puhelu:\n:LOGBOOK:\n- Created %U\n:END:\n"
+         :clock-in t :clock-resume t  :empty-lines 1)
 
-          ("j" "Journal" entry (file+datetree "~/org/diary.org.gpg")
-           "* %U\n\n%?")
+        ("j" "Journal" entry (file+datetree "~/org/diary.org.gpg")
+         "* %U\n\n%?")
 
-          ("p" "Org-protocol, Selection" entry (file+headline org-default-notes-file "Tasks")
-           "* IN Finnish note from %c :NOTE:captured:\n CREATED: %U\n\n From %c:\n\n#+BEGIN_QUOTE\n%i\n#+END_QUOTE\n\n"
-           :immediate-finish t)
-
-          ("L" "Org-protocol, Link" entry (file+headline org-default-notes-file "Tasks")
-           "* IN Review [[%:link][%:description]] :captured: \n CREATED: %U\n\n"
-:immediate-finish t)
-
-          ))
+        ("e" "Event" entry (file "")
+         "* %? :tapahtuma:\n <%(org-read-date)> \n"
+         )
 
 (require 'org-protocol)
 
-(setq org-refile-targets '(
-                           (org-agenda-files . (:tag . "PROJECT"))
-                           (org-agenda-files . (:tag . "TARGET"))
-                           ))
+(setq org-agenda-custom-commands
+              '(("ok" "Koti" tags-todo "@koti"
+           ((org-agenda-overriding-header "Koti")
+           (org-agenda-skip-function 'my-org-agenda-skip-deadline-if-not-today)))
+              ("oo" "Omat" tags-todo "oma"
+           ((org-agenda-overriding-header "Koti")
+            (org-agenda-skip-function #'my-org-agenda-skip-all-siblings-but-first)))
+                ("ot" "Työ" tags-todo "työ"
+                   ((org-agenda-overriding-header "Työ")
+                    (org-agenda-skip-function #'my-org-agenda-skip-all-siblings-but-first)))))
+
+
+    (defun my-org-agenda-skip-all-siblings-but-first ()
+      "Skip all but the first non-done entry."
+      (let (should-skip-entry)
+        (unless (org-current-is-todo)
+          (setq should-skip-entry t))
+        (save-excursion
+          (while (and (not should-skip-entry) (org-goto-sibling t))
+          (when (org-current-is-todo)
+              (setq should-skip-entry t))))
+        (when should-skip-entry
+          (or (outline-next-heading)
+              (goto-char (point-max))))))
+
+(defun org-current-is-todo ()
+      (string= "TODO" (org-get-todo-state)))
+
+(defun my-org-scheduled-for-today ()
+       (ignore-errors
+    (let ((subtree-end (save-excursion (org-end-of-subtree t)))
+          (scheduled-day
+            (time-to-days
+              (org-time-string-to-time
+                (org-entry-get nil "SCHEDULED"))))
+          (now (time-to-days (current-time))))
+       (and scheduled-day
+            (not (= scheduled-day now))))))
+
+(defun my-org-agenda-skip-if-not-scheduled-today ()
+"If this function returns nil, the current match should not be skipped.
+Otherwise, the function must return a position from where the search
+should be continued."
+(ignore-errors
+    (let ((subtree-end (save-excursion (org-end-of-subtree t)))
+          (scheduled-day
+            (time-to-days
+              (org-time-string-to-time
+                (org-entry-get nil "SCHEDULED"))))
+          (now (time-to-days (current-time))))
+       (and scheduled-day
+            (not (= scheduled-day now))
+            subtree-end))))
+
+    (setq org-refile-targets '(("gtd.org"  :maxlevel . 2)
+                                 ("polar-gtd.org.gpg" :maxlevel . 2)
+                                  ("someday.org" :maxlevel . 2)                             
+                                  ("polar-someday.org.gpg" :maxlevel . 2)))
+
+  (setq org-tags-exclude-from-inheritance '("prj"))
+  (setq org-stuck-projects '("+prj/-MAYBE-DONE-CANCELLED"
+                             ("TODO" "WAIT") ()))
+
+  (defun my-org-with-entry ()
+    (interactive)
+    (save-excursion
+      (org-entry-put nil "with" (read-string "With: " (org-entry-get nil "with")))))
+  (global-set-key "\C-cw" 'my-org-with-entry)
 
 (global-set-key (kbd "C-S-s-o") 'org-capture)
 
