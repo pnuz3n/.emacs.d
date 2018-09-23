@@ -1,3 +1,10 @@
+
+;; Added by Package.el.  This must come before configurations of
+;; installed packages.  Don't delete this line.  If you don't want it,
+;; just comment it out by adding a semicolon to the start of the line.
+;; You may delete these explanatory comments.
+(package-initialize)
+
 (setq local-pre-init-file "~/.emacs.d/local-pre-init.el")
 (if (file-exists-p local-pre-init-file)
 (load local-pre-init-file)
@@ -61,43 +68,6 @@
 (push (substitute-in-file-name "~/.emacs.d/el-get/idea-darkula-theme/") custom-theme-load-path)
 (add-hook 'after-init-hook (lambda () (load-theme 'idea-darkula t)))
 
-(add-hook 'text-mode-hook 'variable-pitch-mode)
-
-(defun my-adjoin-to-list-or-symbol (element list-or-symbol)
-  (let ((list (if (not (listp list-or-symbol))
-                  (list list-or-symbol)
-                list-or-symbol)))
-    (require 'cl-lib)
-    (cl-adjoin element list)))
-
-  (mapc
-    (lambda (face)
-      (set-face-attribute
-       face nil
-       :inherit
-       (my-adjoin-to-list-or-symbol
-        'fixed-pitch
-        (face-attribute face :inherit))))
-    (list 'org-code 'org-block 'org-table 'org-meta-line))
-
-(set-face-attribute 'variable-pitch nil :height 1.3 :family "Calibri")
-(set-face-attribute 'fixed-pitch nil :height 0.8 :family "Consolas")
-
-(require 'org-bullets)
-(add-hook 'org-mode-hook 'org-indent-mode)
-(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
-(setq org-hide-leading-stars t)
-(setq line-spacing 0.25)
-(set-face-attribute 'org-tag nil :weight 'normal :height 0.8)
-(set-face-attribute 'org-todo nil :weight 'normal :height 150)
-(set-face-attribute 'org-priority nil :weight 'normal :height 100)
-(set-face-attribute 'org-todo nil :weight 'normal :height 100)
-(set-face-attribute 'org-done nil :weight 'normal :height 100)
-(set-face-attribute 'org-special-keyword nil :height 90)
-(set-face-attribute 'org-level-1 nil :height 1.3)
-(set-face-attribute 'org-level-2 nil :height 1.2)
-(set-face-attribute 'org-level-3 nil :height 1.1)
-
 (setq-default indent-tabs-mode nil)
 
 (setq-default tab-width 2)
@@ -117,21 +87,6 @@
 
 (when (eq system-type 'darwin)
    (setq browse-url-browser-function 'browse-url-default-macosx-browser))
-
-(setq diary-file "~/org/diary")
-
-(calendar-set-date-style 'european)
-
-(setq calendar-week-start-day 1
-      calendar-view-diary-initially-flag t
-      calendar-mark-diary-entries-flag t)
-
-(add-hook 'diary-display-hook 'diary-fancy-display)
-
-(setq server-socket-dir "~/.emacs.d/server")
-(server-start)
-
-(global-unset-key (kbd "C-q"))
 
 (el-get-bundle org-mode)
 
@@ -183,7 +138,7 @@
 
         ("e" "Event" entry (file "")
          "* %? :tapahtuma:\n <%(org-read-date)> \n"
-         )
+         )))
 
 (require 'org-protocol)
 
@@ -257,6 +212,58 @@ should be continued."
   (global-set-key "\C-cw" 'my-org-with-entry)
 
 (global-set-key (kbd "C-S-s-o") 'org-capture)
+
+(setq diary-file "~/org/diary")
+
+(calendar-set-date-style 'european)
+
+(setq calendar-week-start-day 1
+      calendar-view-diary-initially-flag t
+      calendar-mark-diary-entries-flag t)
+
+(add-hook 'diary-display-hook 'diary-fancy-display)
+
+(setq server-socket-dir "~/.emacs.d/server")
+(server-start)
+
+(global-unset-key (kbd "C-q"))
+
+(add-hook 'text-mode-hook 'variable-pitch-mode)
+
+(defun my-adjoin-to-list-or-symbol (element list-or-symbol)
+  (let ((list (if (not (listp list-or-symbol))
+                  (list list-or-symbol)
+                list-or-symbol)))
+    (require 'cl-lib)
+    (cl-adjoin element list)))
+
+  (mapc
+    (lambda (face)
+      (set-face-attribute
+       face nil
+       :inherit
+       (my-adjoin-to-list-or-symbol
+        'fixed-pitch
+        (face-attribute face :inherit))))
+    (list 'org-code 'org-block 'org-table 'org-meta-line))
+
+(set-face-attribute 'variable-pitch nil :height 1.3 :family "Calibri")
+(set-face-attribute 'fixed-pitch nil :height 0.8 :family "Consolas")
+
+(require 'org-bullets)
+(add-hook 'org-mode-hook 'org-indent-mode)
+(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+(setq org-hide-leading-stars t)
+(setq line-spacing 0.25)
+(set-face-attribute 'org-tag nil :weight 'normal :height 0.8)
+(set-face-attribute 'org-todo nil :weight 'normal :height 150)
+(set-face-attribute 'org-priority nil :weight 'normal :height 100)
+(set-face-attribute 'org-todo nil :weight 'normal :height 100)
+(set-face-attribute 'org-done nil :weight 'normal :height 100)
+(set-face-attribute 'org-special-keyword nil :height 90)
+(set-face-attribute 'org-level-1 nil :height 1.3)
+(set-face-attribute 'org-level-2 nil :height 1.2)
+(set-face-attribute 'org-level-3 nil :height 1.1)
 
 ;;; turn on syntax highlighting
 (global-font-lock-mode 1)
@@ -484,7 +491,7 @@ should be continued."
 (require 'yasnippet)
 (require 'auto-complete)
 (require 'auto-complete-config)
-(require 'auto-complete-yasnippet)
+;;(require 'auto-complete-yasnippet)
 
 (ac-config-default)
 ;(global-set-key (kbd "C-<tab>")  'yas-expand)

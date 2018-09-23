@@ -145,62 +145,6 @@ then.  Without it first loading would fail.
 
 #+END_SRC
 
-** Fonts
-
-Editing a lot of text using fixed width font is not optimum situation. After a while of googling 
-I found a way to use variable length fonts (see [[https://yoo2080.wordpress.com/2013/05/30/monospace-font-in-tables-and-source-code-blocks-in-org-mode-proportional-font-in-other-parts/][the blog of Jisan Yoo]]).
-
-First we hook variable-pitch-mode
-#+BEGIN_SRC emacs-lisp 
-  (add-hook 'text-mode-hook 'variable-pitch-mode)
-#+END_SRC
-
-The problem is that I don't want code and tables to be variable width inside
-Org mode document. This can be archived by altering some faces
-used by the Org mode.
-
-#+BEGIN_SRC emacs-lisp 
-  (defun my-adjoin-to-list-or-symbol (element list-or-symbol)
-    (let ((list (if (not (listp list-or-symbol))
-                    (list list-or-symbol)
-                  list-or-symbol)))
-      (require 'cl-lib)
-      (cl-adjoin element list)))
-
-    (mapc
-      (lambda (face)
-        (set-face-attribute
-         face nil
-         :inherit
-         (my-adjoin-to-list-or-symbol
-          'fixed-pitch
-          (face-attribute face :inherit))))
-      (list 'org-code 'org-block 'org-table 'org-meta-line))
-#+END_SRC
-
-Of course we can choose what kind of faces ~variable-pitch~ and ~fixed-pitch~ are.
-#+BEGIN_SRC emacs-lisp 
-(set-face-attribute 'variable-pitch nil :height 1.3 :family "Calibri")
-(set-face-attribute 'fixed-pitch nil :height 0.8 :family "Consolas")
-#+END_SRC
-
-While we are at it we could make Org-mode look a little better in general.
-#+BEGIN_SRC emacs-lisp 
-(require 'org-bullets)
-(add-hook 'org-mode-hook 'org-indent-mode)
-(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
-(setq org-hide-leading-stars t)
-(setq line-spacing 0.25)
-(set-face-attribute 'org-tag nil :weight 'normal :height 0.8)
-(set-face-attribute 'org-todo nil :weight 'normal :height 150)
-(set-face-attribute 'org-priority nil :weight 'normal :height 100)
-(set-face-attribute 'org-todo nil :weight 'normal :height 100)
-(set-face-attribute 'org-done nil :weight 'normal :height 100)
-(set-face-attribute 'org-special-keyword nil :height 90)
-(set-face-attribute 'org-level-1 nil :height 1.3)
-(set-face-attribute 'org-level-2 nil :height 1.2)
-(set-face-attribute 'org-level-3 nil :height 1.1)
-#+END_SRC
 ** Tabs
 
 Do not indent with tabs by default.
@@ -251,39 +195,6 @@ After over year of practice I am begin to think that can start to lear some
 #+BEGIN_SRC emacs-lisp 
   (when (eq system-type 'darwin)
      (setq browse-url-browser-function 'browse-url-default-macosx-browser))
-#+END_SRC
-
-** Calendar
-
-See http://orgmode.org/worg/org-faq.html#Appointments/Diary
-
-#+begin_src emacs-lisp 
-
-(setq diary-file "~/org/diary")
-
-(calendar-set-date-style 'european)
-
-(setq calendar-week-start-day 1
-      calendar-view-diary-initially-flag t
-      calendar-mark-diary-entries-flag t)
-
-(add-hook 'diary-display-hook 'diary-fancy-display)
-
-#+end_src
-** Emacsclient server
-
-#+BEGIN_SRC emacs-lisp 
-(setq server-socket-dir "~/.emacs.d/server")
-(server-start)
-#+END_SRC
-** New prefix key: Control-q
-
-~Control-q~ is bound to ~quoted-insert~ by default. That command is
-not use so often and the key is perfectly located for prefix key.
-So it is unset here to allow it to be re-used later.
-
-#+BEGIN_SRC emacs-lisp 
-  (global-unset-key (kbd "C-q"))
 #+END_SRC
 
 ** Org-mode
@@ -386,7 +297,7 @@ Log looks something like this under the task header line.
 
           ("e" "Event" entry (file "")
            "* %? :tapahtuma:\n <%(org-read-date)> \n"
-           )
+           )))
 
 #+END_SRC
 
@@ -479,6 +390,95 @@ Emacs.
   (global-set-key (kbd "C-S-s-o") 'org-capture)
 #+END_SRC
  
+** Calendar
+
+See http://orgmode.org/worg/org-faq.html#Appointments/Diary
+
+#+begin_src emacs-lisp 
+
+(setq diary-file "~/org/diary")
+
+(calendar-set-date-style 'european)
+
+(setq calendar-week-start-day 1
+      calendar-view-diary-initially-flag t
+      calendar-mark-diary-entries-flag t)
+
+(add-hook 'diary-display-hook 'diary-fancy-display)
+
+#+end_src
+** Emacsclient server
+
+#+BEGIN_SRC emacs-lisp 
+(setq server-socket-dir "~/.emacs.d/server")
+(server-start)
+#+END_SRC
+** New prefix key: Control-q
+
+~Control-q~ is bound to ~quoted-insert~ by default. That command is
+not use so often and the key is perfectly located for prefix key.
+So it is unset here to allow it to be re-used later.
+
+#+BEGIN_SRC emacs-lisp 
+  (global-unset-key (kbd "C-q"))
+#+END_SRC
+
+** Fonts
+
+Editing a lot of text using fixed width font is not optimum situation. After a while of googling 
+I found a way to use variable length fonts (see [[https://yoo2080.wordpress.com/2013/05/30/monospace-font-in-tables-and-source-code-blocks-in-org-mode-proportional-font-in-other-parts/][the blog of Jisan Yoo]]).
+
+First we hook variable-pitch-mode
+#+BEGIN_SRC emacs-lisp 
+  (add-hook 'text-mode-hook 'variable-pitch-mode)
+#+END_SRC
+
+The problem is that I don't want code and tables to be variable width inside
+Org mode document. This can be archived by altering some faces
+used by the Org mode.
+
+#+BEGIN_SRC emacs-lisp 
+  (defun my-adjoin-to-list-or-symbol (element list-or-symbol)
+    (let ((list (if (not (listp list-or-symbol))
+                    (list list-or-symbol)
+                  list-or-symbol)))
+      (require 'cl-lib)
+      (cl-adjoin element list)))
+
+    (mapc
+      (lambda (face)
+        (set-face-attribute
+         face nil
+         :inherit
+         (my-adjoin-to-list-or-symbol
+          'fixed-pitch
+          (face-attribute face :inherit))))
+      (list 'org-code 'org-block 'org-table 'org-meta-line))
+#+END_SRC
+
+Of course we can choose what kind of faces ~variable-pitch~ and ~fixed-pitch~ are.
+#+BEGIN_SRC emacs-lisp 
+(set-face-attribute 'variable-pitch nil :height 1.3 :family "Calibri")
+(set-face-attribute 'fixed-pitch nil :height 0.8 :family "Consolas")
+#+END_SRC
+
+While we are at it we could make Org-mode look a little better in general.
+#+BEGIN_SRC emacs-lisp 
+(require 'org-bullets)
+(add-hook 'org-mode-hook 'org-indent-mode)
+(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+(setq org-hide-leading-stars t)
+(setq line-spacing 0.25)
+(set-face-attribute 'org-tag nil :weight 'normal :height 0.8)
+(set-face-attribute 'org-todo nil :weight 'normal :height 150)
+(set-face-attribute 'org-priority nil :weight 'normal :height 100)
+(set-face-attribute 'org-todo nil :weight 'normal :height 100)
+(set-face-attribute 'org-done nil :weight 'normal :height 100)
+(set-face-attribute 'org-special-keyword nil :height 90)
+(set-face-attribute 'org-level-1 nil :height 1.3)
+(set-face-attribute 'org-level-2 nil :height 1.2)
+(set-face-attribute 'org-level-3 nil :height 1.1)
+#+END_SRC
 ** Misc
 
 
@@ -760,7 +760,7 @@ Edit server allows editing content from web browser. See for example [[https://c
 (require 'yasnippet)
 (require 'auto-complete)
 (require 'auto-complete-config)
-(require 'auto-complete-yasnippet)
+;;(require 'auto-complete-yasnippet)
 
 (ac-config-default)
 ;(global-set-key (kbd "C-<tab>")  'yas-expand)
