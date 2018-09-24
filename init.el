@@ -144,14 +144,58 @@
 
 (setq org-agenda-custom-commands
               '(("ok" "Koti" tags-todo "@koti"
-           ((org-agenda-overriding-header "Koti")
-           (org-agenda-skip-function 'my-org-agenda-skip-deadline-if-not-today)))
-              ("oo" "Omat" tags-todo "oma"
-           ((org-agenda-overriding-header "Koti")
-            (org-agenda-skip-function #'my-org-agenda-skip-all-siblings-but-first)))
+                 ((org-agenda-overriding-header "Koti")
+                  (org-agenda-skip-function 'my-org-agenda-skip-deadline-if-not-today)))
+                ("oo" "Omat" tags-todo "oma"
+                 ((org-agenda-overriding-header "Koti")
+                  (org-agenda-skip-function #'my-org-agenda-skip-all-siblings-but-first)))
+                ("oi" "Internet" tags-todo "@internet"
+                 (
+                  (org-agenda-overriding-header "Internet")
+                  (org-agenda-with-colors nil)
+                  (org-agenda-remove-tags t)
+                  (org-agenda-prefix-format "  %?-12t% s")                  
+                  ) ("~/org/@internet.org"))
+                ("G" "GTD Block Agenda"
+                 (
+                   (agenda "" ((org-agenda-span 1)                      ; daily agenda
+                      (org-deadline-warning-days 7)            ; 7 day advanced warning for deadlines
+                      (org-agenda-todo-keyword-format "")
+                      (org-agenda-scheduled-leaders '("" ""))
+                      (org-agenda-prefix-format "%t%s")))
+                  (tags-todo "@internet" ((org-agenda-overriding-header "Internet")))
+                  (tags-todo "@koti" ((org-agenda-overriding-header "Kotona")))
+                  (tags-todo "puhelu-työ" ((org-agenda-overriding-header "Puhelut")))                  
+                  (tags-todo "errands"))
+                 (
+                  (org-agenda-remove-tags t)
+                  (org-agenda-todo-keyword-format "")                  
+                  (org-agenda-prefix-format "  %?-12t% s")
+                  (org-agenda-compact-blocks t)
+                   )
+                 ("~/org/next-actions.txt")) ;;
+                ("N" "GTD Block Agenda"
+                 (
+                   (agenda "" ((org-agenda-span 1)                      ; daily agenda
+                      (org-deadline-warning-days 7)            ; 7 day advanced warning for deadlines
+                      (org-agenda-todo-keyword-format "")
+                      (org-agenda-scheduled-leaders '("" ""))
+                      (org-agenda-prefix-format "%t%s")))
+                   (tags-todo "jira" ((org-agenda-overriding-header "Jira")))
+                   (tags-todo "@internet" ((org-agenda-overriding-header "Internet")))                   
+                   (tags-todo "puhelu" ((org-agenda-overriding-header "Puhelut")))                  
+                   (tags-todo "errands"))
+                 (
+                  (org-agenda-remove-tags t)
+                  (org-agenda-todo-keyword-format "")                  
+                  (org-agenda-prefix-format "  %?-12t% s")
+                  (org-agenda-compact-blocks t)
+                   )
+                 ("~/org/next-actions.txt")) ;; 
+
                 ("ot" "Työ" tags-todo "työ"
-                   ((org-agenda-overriding-header "Työ")
-                    (org-agenda-skip-function #'my-org-agenda-skip-all-siblings-but-first)))))
+                 ((org-agenda-overriding-header "Työ")
+                  (org-agenda-skip-function #'my-org-agenda-skip-all-siblings-but-first)))))
 
 
     (defun my-org-agenda-skip-all-siblings-but-first ()
@@ -196,12 +240,13 @@ should be continued."
             (not (= scheduled-day now))
             subtree-end))))
 
-    (setq org-refile-targets '(("gtd.org"  :maxlevel . 2)
-                                 ("polar-gtd.org.gpg" :maxlevel . 2)
-                                  ("someday.org" :maxlevel . 2)                             
-                                  ("polar-someday.org.gpg" :maxlevel . 2)))
+(setq org-refile-targets '(("gtd.org.gpg"  :maxlevel . 1)
+                           (org-agenda-files :tag . "prj")
+                           ("polar-gtd.org.gpg" :maxlevel . 1)
+                           ("someday.org.gpg" :maxlevel . 2)                             
+                           ("polar-someday.org.gpg" :maxlevel . 2)))
 
-  (setq org-tags-exclude-from-inheritance '("prj"))
+(setq org-tags-exclude-from-inheritance '("prj" "puhelu" "muistiinpano" "tapaaminen"))
   (setq org-stuck-projects '("+prj/-MAYBE-DONE-CANCELLED"
                              ("TODO" "WAIT") ()))
 
