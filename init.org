@@ -85,30 +85,11 @@ later using ~require~ function for example.
 ** Using GPG-Agent in MacOS
 
 MacOS is a "funny" thing. There is a different environment for shell and
-different for applications. The gpg-agent can be configured to be
-launched during login ([[http://www.weinschenker.name/2013-10-08/use-gpgtools-for-ssh-logins-on-mac-os-x/][how-to]]), but emacs does not receive the related
-environment variables. Following code fixes this issue.
+different for applications. This will set the SSH agent socket for Emacs.
 
 #+BEGIN_SRC emacs-lisp 
-  ;; read gpg-agent environment
-
-  (defun read-env-line (line)
-    "read a env line and post to environment"
-    (let ((key-value-pair (split-string line "=" t)))
-      (setenv (car key-value-pair) (car (last key-value-pair))))
-    )
-  (defvar gpg-agent-info-file)
-  (setq gpg-agent-info-file (concat (getenv "HOME") "/.gpg-agent-info"))
-
-  (when (and
-         (eq system-type 'darwin)
-         (file-exists-p gpg-agent-info-file))
-        (with-temp-buffer
-          (progn
-            (insert-file-contents gpg-agent-info-file)
-            (mapc 'read-env-line (split-string (buffer-string) "\n" t)))
-          )
-    )
+  (when (eq system-type 'darwin)
+  (setenv "SSH_AUTH_SOCK" (concat (getenv "HOME") "/.gnupg/S.gpg-agent.ssh")))
 #+END_SRC
 
 ** Elget
