@@ -126,59 +126,47 @@
 (require 'org-protocol)
 
 (setq org-agenda-custom-commands
-              '(("ok" "Koti" tags-todo "@koti"
-                 ((org-agenda-overriding-header "Koti")
-                  (org-agenda-skip-function 'my-org-agenda-skip-deadline-if-not-today)))
-                ("oo" "Omat" tags-todo "oma"
-                 ((org-agenda-overriding-header "Koti")
-                  (org-agenda-skip-function #'my-org-agenda-skip-all-siblings-but-first)))
-                ("oi" "Internet" tags-todo "@internet"
+              '(
+                ("A" "All tasks (for export)" todo ""
+                (
+                (org-agenda-overriding-header "Export")
+                (org-agenda-with-colors nil)
+                ) ("~/org/exported-lists/all.org"))
+                ("Gw" "Agenda työ"
                  (
-                  (org-agenda-overriding-header "Internet")
-                  (org-agenda-with-colors nil)
-                  (org-agenda-remove-tags t)
-                  (org-agenda-prefix-format "  %?-12t% s")                  
-                  ) ("~/org/@internet.org"))
-                ("G" "GTD Block Agenda"
-                 (
-                   (agenda "" ((org-agenda-span 1)                      ; daily agenda
+                   (agenda "" ((org-agenda-span 1)             ; daily agenda
                       (org-deadline-warning-days 7)            ; 7 day advanced warning for deadlines
                       (org-agenda-todo-keyword-format "")
                       (org-agenda-scheduled-leaders '("" ""))
                       (org-agenda-prefix-format "%t%s")))
-                  (tags-todo "@internet" ((org-agenda-overriding-header "Internet")))
-                  (tags-todo "@koti" ((org-agenda-overriding-header "Kotona")))
-                  (tags-todo "puhelu-työ" ((org-agenda-overriding-header "Puhelut")))                  
-                  (tags-todo "errands"))
+                  (tags-todo "+työ-@web" ((org-agenda-overriding-header "Työt") (org-agenda-skip-function #'my-org-agenda-skip-all-siblings-but-first)))
+                  (tags-todo "+työ+@web" ((org-agenda-overriding-header "Selain") (org-agenda-skip-function #'my-org-agenda-skip-all-siblings-but-first)))
+                  (tags-todo "+työ+puhelu" ((org-agenda-overriding-header "Puhelut") (org-agenda-skip-function #'my-org-agenda-skip-all-siblings-but-first)))
+                  )
                  (
-                  (org-agenda-remove-tags t)
-                  (org-agenda-todo-keyword-format "")                  
-                  (org-agenda-prefix-format "  %?-12t% s")
-                  (org-agenda-compact-blocks t)
-                   )
-                 ("~/org/next-actions.txt")) ;;
-                ("N" "GTD Block Agenda"
+                 (org-agenda-remove-tags t)
+                 (org-agenda-todo-keyword-format "")                  
+                 (org-agenda-prefix-format "  %?-12t% s")
+                 (org-agenda-compact-blocks t)
+                 ))
+                ("Gh" "Agenda koti"
                  (
-                   (agenda "" ((org-agenda-span 1)                      ; daily agenda
+                   (agenda "" ((org-agenda-span 1)             ; daily agenda
                       (org-deadline-warning-days 7)            ; 7 day advanced warning for deadlines
                       (org-agenda-todo-keyword-format "")
                       (org-agenda-scheduled-leaders '("" ""))
                       (org-agenda-prefix-format "%t%s")))
-                   (tags-todo "jira" ((org-agenda-overriding-header "Jira")))
-                   (tags-todo "@internet" ((org-agenda-overriding-header "Internet")))                   
-                   (tags-todo "puhelu" ((org-agenda-overriding-header "Puhelut")))                  
-                   (tags-todo "errands"))
+                  (tags-todo "-työ-@web" ((org-agenda-overriding-header "Työt") (org-agenda-skip-function #'my-org-agenda-skip-all-siblings-but-first)))
+                  (tags-todo "-työ+@web" ((org-agenda-overriding-header "Selain") (org-agenda-skip-function #'my-org-agenda-skip-all-siblings-but-first)))
+                  (tags-todo "-työ+puhelu" ((org-agenda-overriding-header "Puhelut") (org-agenda-skip-function #'my-org-agenda-skip-all-siblings-but-first)))
+                  )
                  (
-                  (org-agenda-remove-tags t)
-                  (org-agenda-todo-keyword-format "")                  
-                  (org-agenda-prefix-format "  %?-12t% s")
-                  (org-agenda-compact-blocks t)
-                   )
-                 ("~/org/next-actions.txt")) ;; 
-
-                ("ot" "Työ" tags-todo "työ"
-                 ((org-agenda-overriding-header "Työ")
-                  (org-agenda-skip-function #'my-org-agenda-skip-all-siblings-but-first)))))
+                 (org-agenda-remove-tags t)
+                 (org-agenda-todo-keyword-format "")                  
+                 (org-agenda-prefix-format "  %?-12t% s")
+                 (org-agenda-compact-blocks t)
+                 ))
+                ))
 
 
     (defun my-org-agenda-skip-all-siblings-but-first ()

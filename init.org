@@ -251,8 +251,7 @@ Log looks something like this under the task header line.
 - State "WAIT"       from "TODO"       [2016-02-22 Mon 16:03]
 :END:
 #+END_EXAMPLE
-
-*** Capture templates
+apture templates
 
 #+BEGIN_SRC emacs-lisp 
   (setq org-capture-templates
@@ -292,119 +291,107 @@ are handled by the org mode capture.
 
 Unfinished improvements for GTD.
 #+BEGIN_SRC emacs-lisp
-    (setq org-agenda-custom-commands
-                '(("ok" "Koti" tags-todo "@koti"
-                   ((org-agenda-overriding-header "Koti")
-                    (org-agenda-skip-function 'my-org-agenda-skip-deadline-if-not-today)))
-                  ("oo" "Omat" tags-todo "oma"
-                   ((org-agenda-overriding-header "Koti")
-                    (org-agenda-skip-function #'my-org-agenda-skip-all-siblings-but-first)))
-                  ("oi" "Internet" tags-todo "@internet"
-                   (
-                    (org-agenda-overriding-header "Internet")
+      (setq org-agenda-custom-commands
+                  '(
+                    ("A" "All tasks (for export)" todo ""
+                    (
+                    (org-agenda-overriding-header "Export")
                     (org-agenda-with-colors nil)
-                    (org-agenda-remove-tags t)
-                    (org-agenda-prefix-format "  %?-12t% s")                  
-                    ) ("~/org/@internet.org"))
-                  ("G" "GTD Block Agenda"
-                   (
-                     (agenda "" ((org-agenda-span 1)                      ; daily agenda
-                        (org-deadline-warning-days 7)            ; 7 day advanced warning for deadlines
-                        (org-agenda-todo-keyword-format "")
-                        (org-agenda-scheduled-leaders '("" ""))
-                        (org-agenda-prefix-format "%t%s")))
-                    (tags-todo "@internet" ((org-agenda-overriding-header "Internet")))
-                    (tags-todo "@koti" ((org-agenda-overriding-header "Kotona")))
-                    (tags-todo "puhelu-työ" ((org-agenda-overriding-header "Puhelut")))                  
-                    (tags-todo "errands"))
-                   (
-                    (org-agenda-remove-tags t)
-                    (org-agenda-todo-keyword-format "")                  
-                    (org-agenda-prefix-format "  %?-12t% s")
-                    (org-agenda-compact-blocks t)
-                     )
-                   ("~/org/next-actions.txt")) ;;
-                  ("N" "GTD Block Agenda"
-                   (
-                     (agenda "" ((org-agenda-span 1)                      ; daily agenda
-                        (org-deadline-warning-days 7)            ; 7 day advanced warning for deadlines
-                        (org-agenda-todo-keyword-format "")
-                        (org-agenda-scheduled-leaders '("" ""))
-                        (org-agenda-prefix-format "%t%s")))
-                     (tags-todo "jira" ((org-agenda-overriding-header "Jira")))
-                     (tags-todo "@internet" ((org-agenda-overriding-header "Internet")))                   
-                     (tags-todo "puhelu" ((org-agenda-overriding-header "Puhelut")))                  
-                     (tags-todo "errands"))
-                   (
-                    (org-agenda-remove-tags t)
-                    (org-agenda-todo-keyword-format "")                  
-                    (org-agenda-prefix-format "  %?-12t% s")
-                    (org-agenda-compact-blocks t)
-                     )
-                   ("~/org/next-actions.txt")) ;; 
-                
-                  ("ot" "Työ" tags-todo "työ"
-                   ((org-agenda-overriding-header "Työ")
-                    (org-agenda-skip-function #'my-org-agenda-skip-all-siblings-but-first)))))
+                    ) ("~/org/exported-lists/all.org"))
+                    ("Gw" "Agenda työ"
+                     (
+                       (agenda "" ((org-agenda-span 1)             ; daily agenda
+                          (org-deadline-warning-days 7)            ; 7 day advanced warning for deadlines
+                          (org-agenda-todo-keyword-format "")
+                          (org-agenda-scheduled-leaders '("" ""))
+                          (org-agenda-prefix-format "%t%s")))
+                      (tags-todo "+työ-@web" ((org-agenda-overriding-header "Työt") (org-agenda-skip-function #'my-org-agenda-skip-all-siblings-but-first)))
+                      (tags-todo "+työ+@web" ((org-agenda-overriding-header "Selain") (org-agenda-skip-function #'my-org-agenda-skip-all-siblings-but-first)))
+                      (tags-todo "+työ+puhelu" ((org-agenda-overriding-header "Puhelut") (org-agenda-skip-function #'my-org-agenda-skip-all-siblings-but-first)))
+                      )
+                     (
+                     (org-agenda-remove-tags t)
+                     (org-agenda-todo-keyword-format "")                  
+                     (org-agenda-prefix-format "  %?-12t% s")
+                     (org-agenda-compact-blocks t)
+                     ))
+                    ("Gh" "Agenda koti"
+                     (
+                       (agenda "" ((org-agenda-span 1)             ; daily agenda
+                          (org-deadline-warning-days 7)            ; 7 day advanced warning for deadlines
+                          (org-agenda-todo-keyword-format "")
+                          (org-agenda-scheduled-leaders '("" ""))
+                          (org-agenda-prefix-format "%t%s")))
+                      (tags-todo "-työ-@web" ((org-agenda-overriding-header "Työt") (org-agenda-skip-function #'my-org-agenda-skip-all-siblings-but-first)))
+                      (tags-todo "-työ+@web" ((org-agenda-overriding-header "Selain") (org-agenda-skip-function #'my-org-agenda-skip-all-siblings-but-first)))
+                      (tags-todo "-työ+puhelu" ((org-agenda-overriding-header "Puhelut") (org-agenda-skip-function #'my-org-agenda-skip-all-siblings-but-first)))
+                      )
+                     (
+                     (org-agenda-remove-tags t)
+                     (org-agenda-todo-keyword-format "")                  
+                     (org-agenda-prefix-format "  %?-12t% s")
+                     (org-agenda-compact-blocks t)
+                     ))
+                    ))
 
 
-      (defun my-org-agenda-skip-all-siblings-but-first ()
-        "Skip all but the first non-done entry."
-        (let (should-skip-entry)
-          (unless (org-current-is-todo)
-            (setq should-skip-entry t))
-          (save-excursion
-            (while (and (not should-skip-entry) (org-goto-sibling t))
-            (when (org-current-is-todo)
-                (setq should-skip-entry t))))
-          (when should-skip-entry
-            (or (outline-next-heading)
-                (goto-char (point-max))))))
+        (defun my-org-agenda-skip-all-siblings-but-first ()
+          "Skip all but the first non-done entry."
+          (let (should-skip-entry)
+            (unless (org-current-is-todo)
+              (setq should-skip-entry t))
+            (save-excursion
+              (while (and (not should-skip-entry) (org-goto-sibling t))
+              (when (org-current-is-todo)
+                  (setq should-skip-entry t))))
+            (when should-skip-entry
+              (or (outline-next-heading)
+                  (goto-char (point-max))))))
 
-  (defun org-current-is-todo ()
-        (string= "TODO" (org-get-todo-state)))
+    (defun org-current-is-todo ()
+          (string= "TODO" (org-get-todo-state)))
 
-  (defun my-org-scheduled-for-today ()
-         (ignore-errors
-      (let ((subtree-end (save-excursion (org-end-of-subtree t)))
-            (scheduled-day
-              (time-to-days
-                (org-time-string-to-time
-                  (org-entry-get nil "SCHEDULED"))))
-            (now (time-to-days (current-time))))
-         (and scheduled-day
-              (not (= scheduled-day now))))))
+    (defun my-org-scheduled-for-today ()
+           (ignore-errors
+        (let ((subtree-end (save-excursion (org-end-of-subtree t)))
+              (scheduled-day
+                (time-to-days
+                  (org-time-string-to-time
+                    (org-entry-get nil "SCHEDULED"))))
+              (now (time-to-days (current-time))))
+           (and scheduled-day
+                (not (= scheduled-day now))))))
 
-  (defun my-org-agenda-skip-if-not-scheduled-today ()
-  "If this function returns nil, the current match should not be skipped.
-  Otherwise, the function must return a position from where the search
-  should be continued."
-  (ignore-errors
-      (let ((subtree-end (save-excursion (org-end-of-subtree t)))
-            (scheduled-day
-              (time-to-days
-                (org-time-string-to-time
-                  (org-entry-get nil "SCHEDULED"))))
-            (now (time-to-days (current-time))))
-         (and scheduled-day
-              (not (= scheduled-day now))
-              subtree-end))))
+    (defun my-org-agenda-skip-if-not-scheduled-today ()
+    "If this function returns nil, the current match should not be skipped.
+    Otherwise, the function must return a position from where the search
+    should be continued."
+    (ignore-errors
+        (let ((subtree-end (save-excursion (org-end-of-subtree t)))
+              (scheduled-day
+                (time-to-days
+                  (org-time-string-to-time
+                    (org-entry-get nil "SCHEDULED"))))
+              (now (time-to-days (current-time))))
+           (and scheduled-day
+                (not (= scheduled-day now))
+                subtree-end))))
 
-  (setq org-refile-targets '(("gtd.org.gpg"  :maxlevel . 1)
-                             (org-agenda-files :tag . "prj")
-                             ("polar-gtd.org.gpg" :maxlevel . 1)
-                             ("someday.org.gpg" :maxlevel . 2)                             
-                             ("polar-someday.org.gpg" :maxlevel . 2)))
+    (setq org-refile-targets '(("gtd.org.gpg"  :maxlevel . 1)
+                               (org-agenda-files :tag . "prj")
+                               ("polar-gtd.org.gpg" :maxlevel . 1)
+                               ("someday.org.gpg" :maxlevel . 2)                             
+                               ("polar-someday.org.gpg" :maxlevel . 2)))
 
-  (setq org-tags-exclude-from-inheritance '("prj" "puhelu" "muistiinpano" "tapaaminen"))
-    (setq org-stuck-projects '("+prj/-MAYBE-DONE-CANCELLED"
-                               ("TODO" "WAIT") ()))
+    (setq org-tags-exclude-from-inheritance '("prj" "puhelu" "muistiinpano" "tapaaminen"))
+      (setq org-stuck-projects '("+prj/-MAYBE-DONE-CANCELLED"
+                                 ("TODO" "WAIT") ()))
 
-    (defun my-org-with-entry ()
-      (interactive)
-      (save-excursion
-        (org-entry-put nil "with" (read-string "With: " (org-entry-get nil "with")))))
-    (global-set-key "\C-cw" 'my-org-with-entry)
+      (defun my-org-with-entry ()
+        (interactive)
+        (save-excursion
+          (org-entry-put nil "with" (read-string "With: " (org-entry-get nil "with")))))
+      (global-set-key "\C-cw" 'my-org-with-entry)
 #+END_SRC
 
 I have created shell script [[file:sh/orgcapture.sh]] which opens Emacs in capture mode. I have also created service to
@@ -415,7 +402,8 @@ Emacs.
 #+BEGIN_SRC emacs-lisp 
   (global-set-key (kbd "C-S-s-o") 'org-capture)
 #+END_SRC
- 
+
+
 ** Calendar
 
 See http://orgmode.org/worg/org-faq.html#Appointments/Diary
