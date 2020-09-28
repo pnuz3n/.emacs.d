@@ -1,10 +1,3 @@
-
-;; Added by Package.el.  This must come before configurations of
-;; installed packages.  Don't delete this line.  If you don't want it,
-;; just comment it out by adding a semicolon to the start of the line.
-;; You may delete these explanatory comments.
-(package-initialize)
-
 (setq local-pre-init-file "~/.emacs.d/local-pre-init.el")
 (if (file-exists-p local-pre-init-file)
 (load local-pre-init-file)
@@ -422,10 +415,6 @@ should be continued."
   '(ace-jump-mode-enable-mark-sync))
 (define-key global-map (kbd "C-q q") 'ace-jump-mode-pop-mark)
 (define-key global-map (kbd "C-.") 'ace-jump-mode)
-
-;; CSV Mode
-(el-get-bundle csv-mode)
-(require 'csv-mode)
 
 (el-get-bundle dockerfile-mode)
 ;;; Dockerfile mode

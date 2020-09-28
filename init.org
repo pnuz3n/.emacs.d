@@ -664,7 +664,7 @@ This function can be binded to key sequence when shell is activated.
   (define-key global-map (kbd "C-.") 'ace-jump-mode)
 #+END_SRC
 ** File editing modes
-*** CSV-mode
+*** COMMENT CSV-mode
 #+BEGIN_SRC emacs-lisp 
 ;; CSV Mode
 (el-get-bundle csv-mode)
