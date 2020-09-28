@@ -551,6 +551,38 @@ should be continued."
                            (mode . term-mode)
                            ))))))
 
+(el-get-bundle 'wcheck-mode)
+(global-set-key (kbd "C-x w") 'wcheck-mode)
+(add-hook 'wcheck-mode-hook
+          (lambda ()
+            (define-key wcheck-mode-map (kbd "C-q l") 'wcheck-change-language)
+            (define-key wcheck-mode-map (kbd "C-q c") 'wcheck-actions)
+            (define-key wcheck-mode-map (kbd "C-q n") 'wcheck-jump-forward)
+            (define-key wcheck-mode-map (kbd "C-q p") 'wcheck-jump-backward)
+            ))
+
+(setq wcheck-language-data
+      '(
+        ("British English"
+         (program . "/usr/bin/enchant")
+         (args "-l" "-d" "british")
+         (action-program . "/usr/bin/ispell")
+         (action-args "-a" "-d" "british")
+         (action-parser . wcheck-parser-ispell-suggestions))
+
+        ("Finnish"
+         (program . "/usr/bin/enchant")
+         (args "-l" "-d" "fi")
+         (action-program . "/usr/bin/enchant")
+         (action-args "-a" "-d" "fi")
+         (action-parser . wcheck-parser-ispell-suggestions))
+
+        ))
+
+(wcheck-change-language "British English" 'GLOBAL)
+
+(el-get-bundle 'magit)
+
 (setq default-fill-column 80)
 
 (require 'protobuf-mode)

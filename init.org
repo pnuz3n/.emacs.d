@@ -842,6 +842,50 @@ recycled to change the buffer.
                               ))))))
 
 #+end_src
+
+** WCheck mode
+
+Set up wcheck mode for spell checking
+
+#+BEGIN_SRC emacs-lisp
+  (el-get-bundle 'wcheck-mode)
+  (global-set-key (kbd "C-x w") 'wcheck-mode)
+  (add-hook 'wcheck-mode-hook
+            (lambda ()
+              (define-key wcheck-mode-map (kbd "C-q l") 'wcheck-change-language)
+              (define-key wcheck-mode-map (kbd "C-q c") 'wcheck-actions)
+              (define-key wcheck-mode-map (kbd "C-q n") 'wcheck-jump-forward)
+              (define-key wcheck-mode-map (kbd "C-q p") 'wcheck-jump-backward)
+              ))
+
+  (setq wcheck-language-data
+        '(
+          ("British English"
+           (program . "/usr/bin/enchant")
+           (args "-l" "-d" "british")
+           (action-program . "/usr/bin/ispell")
+           (action-args "-a" "-d" "british")
+           (action-parser . wcheck-parser-ispell-suggestions))
+
+          ("Finnish"
+           (program . "/usr/bin/enchant")
+           (args "-l" "-d" "fi")
+           (action-program . "/usr/bin/enchant")
+           (action-args "-a" "-d" "fi")
+           (action-parser . wcheck-parser-ispell-suggestions))
+
+          ))
+
+  (wcheck-change-language "British English" 'GLOBAL)
+
+#+END_SRC
+
+** Magit for using git
+
+#+BEGIN_SRC emacs-lisp
+  (el-get-bundle 'magit)
+#+END_SRC
+
 ** COMMENT Kill buffer instead of burying it
 
 #+begin_src emacs-lisp 
