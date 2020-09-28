@@ -809,9 +809,6 @@ Edit server allows editing content from web browser. See for example [[https://c
 (yas-global-mode 1)
 (global-auto-complete-mode 1)
 
- (defadvice ac-fallback-command (around no-yasnippet-fallback activate)
-      (let ((yas-fallback-behavior nil))
-        ad-do-it))
 #+END_SRC
 ** Buffer switching
 

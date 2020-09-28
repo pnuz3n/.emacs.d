@@ -531,10 +531,6 @@ should be continued."
 (yas-global-mode 1)
 (global-auto-complete-mode 1)
 
- (defadvice ac-fallback-command (around no-yasnippet-fallback activate)
-      (let ((yas-fallback-behavior nil))
-        ad-do-it))
-
 (global-set-key (kbd "C-z")  'mode-line-other-buffer)
 
 (global-set-key (kbd "C-x C-b") 'ibuffer)
