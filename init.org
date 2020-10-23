@@ -744,15 +744,7 @@ Edit server allows editing content from web browser. See for example [[https://c
 
 (if (system-has-go) (setup-go))
 #+END_SRC
-** IntelliJ Idea
-#+BEGIN_SRC emacs-lisp 
 
-(defun idea-open-file (s) "Opens file in idea"
-       (interactive
-        (list (idea-open-file (buffer-substring (region-beginning) (region-end)))))
-       (start-process "" nil "idea" s)
-       )
-#+END_SRC
 ** Multicursors
 #+BEGIN_SRC emacs-lisp 
 (el-get-bundle multiple-cursors)

@@ -474,12 +474,6 @@ should be continued."
 
 (if (system-has-go) (setup-go))
 
-(defun idea-open-file (s) "Opens file in idea"
-       (interactive
-        (list (idea-open-file (buffer-substring (region-beginning) (region-end)))))
-       (start-process "" nil "idea" s)
-       )
-
 (el-get-bundle multiple-cursors)
 
 (global-set-key (kbd "C-c m <return>") 'set-rectangular-region-anchor)
