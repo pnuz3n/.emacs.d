@@ -25,13 +25,12 @@
 (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
 
 (unless (require 'el-get nil 'noerror)
-  (with-current-buffer
-      (url-retrieve-synchronously
-       "https://raw.githubusercontent.com/dimitri/el-get/master/el-get-install.el")
-    (goto-char (point-max))
-    (eval-print-last-sexp)))
+(url-retrieve
+ "https://raw.githubusercontent.com/dimitri/el-get/master/el-get-install.el"
+ (lambda (s)
+   (goto-char (point-max))
+   (eval-print-last-sexp))))
 
-(require 'el-get-elpa)
 ;; Build the El-Get copy of the package.el packages if we have not
 ;; built it before.  Will have to look into updating later ...
 (unless (file-directory-p el-get-recipe-path-elpa)
@@ -422,9 +421,6 @@ should be continued."
 (add-to-list 'auto-mode-alist '("Dockerfile\\'" . dockerfile-mode))
 
 (el-get-bundle yaml-mode)
-
-(el-get-bundle edit-server)
-(edit-server-start)
 
 (el-get-bundle expand-region)
 (require 'expand-region)
