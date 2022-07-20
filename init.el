@@ -254,7 +254,7 @@ should be continued."
     (list 'org-code 'org-block 'org-table 'org-meta-line))
 
 (set-face-attribute 'variable-pitch nil :height 1.3 :family "Calibri")
-(set-face-attribute 'fixed-pitch nil :height 0.8 :family "Consolas")
+(set-face-attribute 'fixed-pitch nil :height 0.8 :family "DejaVu Sans Mono")
 
 (require 'org-bullets)
 (add-hook 'org-mode-hook 'org-indent-mode)
