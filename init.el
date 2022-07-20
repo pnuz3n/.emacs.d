@@ -63,8 +63,6 @@
 (when (eq system-type 'darwin)
    (setq browse-url-browser-function 'browse-url-default-macosx-browser))
 
-(el-get-bundle org-mode)
-
 (setq org-directory "~/org")
 (setq org-agenda-files (concat org-directory "/agenda"))
 (setq org-default-notes-file (concat org-directory "/refile.org.gpg"))

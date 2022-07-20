@@ -182,13 +182,6 @@ After over year of practice I am begin to think that can start to lear some
 
 https://emacs.cafe/emacs/orgmode/gtd/2017/06/30/orgmode-gtd.html
 
-
-Install org mode through [[Elget]].
-
-#+BEGIN_SRC emacs-lisp 
-(el-get-bundle org-mode)
-#+END_SRC
-
 Set up agenda functionality. Files are located under org-directory
 under home.
 
