@@ -983,3 +983,9 @@ Finally after all the other initializations run local initialisation file.
   (load local-init-file)
   )
 #+END_SRC
+
+** Markdown mode
+
+#+BEGIN_SRC emacs-lisp 
+(el-get-install 'markdown-mode)
+#+END_SRC

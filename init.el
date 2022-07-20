@@ -620,3 +620,5 @@ should be continued."
 (if (file-exists-p local-init-file)
 (load local-init-file)
 )
+
+(el-get-install 'markdown-mode)
