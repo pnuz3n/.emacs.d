@@ -3,12 +3,79 @@
 (load local-pre-init-file)
 )
 
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name
+        "straight/repos/straight.el/bootstrap.el"
+        (or (bound-and-true-p straight-base-dir)
+            user-emacs-directory)))
+      (bootstrap-version 7))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+
+(use-package all-the-icons
+:straight t)
+
 (setq inhibit-startup-message t)
 (setq inhibit-splash-screen t)
 
 (if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
 (if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
 (if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
+
+(add-hook 'text-mode-hook 'variable-pitch-mode)
+
+(use-package doom-themes
+  :straight t
+  :ensure t
+  :config
+  ;; Global settings (defaults)
+  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+        doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  (load-theme 'doom-acario-dark t)
+
+  ;; Enable flashing mode-line on errors
+  (doom-themes-visual-bell-config)
+  ;; Enable custom neotree theme (nerd-icons must be installed!)
+  (doom-themes-neotree-config)
+  ;; or for treemacs users
+  (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
+  (doom-themes-treemacs-config)
+  ;; Corrects (and improves) org-mode's native fontification.
+  (doom-themes-org-config))
+
+(use-package doom-modeline
+:ensure t
+:straight t
+:init (doom-modeline-mode 1))
+
+(use-package vertico-posframe
+  :straight t
+  :after vertico
+  :init
+  (vertico-posframe-mode 1)
+  (setq vertico-posframe-poshandler 'posframe-poshandler-frame-top-center)
+  )
+
+(use-package treemacs
+  :straight t
+  :bind
+  ("C-x t t" . treemacs)
+  :config
+  (setq treemacs-width 30)
+  (setq treemacs-no-png-images t
+      treemacs--icon-size-check nil))
+
+(use-package docker
+  :straight t
+  :ensure t
+  :bind ("C-c d" . docker))
 
 (let ((elements (split-string (getenv "PATH") ":")))
   (dolist (e elements)
@@ -21,27 +88,6 @@
 
 (when (eq system-type 'darwin)
 (setenv "SSH_AUTH_SOCK" (concat (getenv "HOME") "/.gnupg/S.gpg-agent.ssh")))
-
-(add-to-list 'load-path "~/.emacs.d/el-get/el-get")
-
-(unless (require 'el-get nil 'noerror)
-(url-retrieve
- "https://raw.githubusercontent.com/dimitri/el-get/master/el-get-install.el"
- (lambda (s)
-   (goto-char (point-max))
-   (eval-print-last-sexp))))
-
-;; Build the El-Get copy of the package.el packages if we have not
-;; built it before.  Will have to look into updating later ...
-(unless (file-directory-p el-get-recipe-path-elpa)
-  (el-get-elpa-build-local-recipes))
-
-(add-to-list 'el-get-recipe-path "~/.emacs.d/el-get-user/recipes")
-(el-get 'sync)
-
-(el-get-install 'idea-darkula-theme)
-(push (substitute-in-file-name "~/.emacs.d/el-get/idea-darkula-theme/") custom-theme-load-path)
-(add-hook 'after-init-hook (lambda () (load-theme 'idea-darkula t)))
 
 (setq-default indent-tabs-mode nil)
 
@@ -234,42 +280,30 @@ should be continued."
 
 (global-unset-key (kbd "C-q"))
 
-(add-hook 'text-mode-hook 'variable-pitch-mode)
+(use-package vertico
+:straight t
+:ensure t
+:init
+(vertico-mode))
 
-(defun my-adjoin-to-list-or-symbol (element list-or-symbol)
-  (let ((list (if (not (listp list-or-symbol))
-                  (list list-or-symbol)
-                list-or-symbol)))
-    (require 'cl-lib)
-    (cl-adjoin element list)))
+(use-package marginalia
+:straight t
+:ensure t
+:init
+(marginalia-mode))
 
-  (mapc
-    (lambda (face)
-      (set-face-attribute
-       face nil
-       :inherit
-       (my-adjoin-to-list-or-symbol
-        'fixed-pitch
-        (face-attribute face :inherit))))
-    (list 'org-code 'org-block 'org-table 'org-meta-line))
+(use-package consult
+:straight t
+:ensure t
+:bind
+(("C-s" . consult-line)
+ ("C-x b" . consult-buffer)
+ ("M-y" . consult-yank-pop)))
 
-(set-face-attribute 'variable-pitch nil :height 1.3 :family "Calibri")
-(set-face-attribute 'fixed-pitch nil :height 0.8 :family "DejaVu Sans Mono")
-
-(require 'org-bullets)
-(add-hook 'org-mode-hook 'org-indent-mode)
-(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
-(setq org-hide-leading-stars t)
-(setq line-spacing 0.25)
-(set-face-attribute 'org-tag nil :weight 'normal :height 0.8)
-(set-face-attribute 'org-todo nil :weight 'normal :height 150)
-(set-face-attribute 'org-priority nil :weight 'normal :height 100)
-(set-face-attribute 'org-todo nil :weight 'normal :height 100)
-(set-face-attribute 'org-done nil :weight 'normal :height 100)
-(set-face-attribute 'org-special-keyword nil :height 90)
-(set-face-attribute 'org-level-1 nil :height 1.3)
-(set-face-attribute 'org-level-2 nil :height 1.2)
-(set-face-attribute 'org-level-3 nil :height 1.1)
+(use-package orderless
+:straight t
+:init
+(setq completion-styles '(orderless)))
 
 ;;; turn on syntax highlighting
 (global-font-lock-mode 1)
@@ -338,21 +372,27 @@ should be continued."
 
 (global-set-key (kbd "C-q i")  'quoted-insert)
 
-(defun new-shell ()
-  (interactive)
+(defun ps/open-new-shell ()
+    (interactive)
 
-  (let (
-        (currentbuf (get-buffer-window (current-buffer)))
-        (newbuf     (generate-new-buffer-name "*shell*"))
-       )
-   (generate-new-buffer newbuf)
-   (set-window-dedicated-p currentbuf nil)
-   (set-window-buffer currentbuf newbuf)
-   (shell newbuf)
+    (let (
+          (currentbuf (get-buffer-window (current-buffer)))
+          (newbuf     (generate-new-buffer-name "*shell*"))
+         )
+     (generate-new-buffer newbuf)
+     (set-window-dedicated-p currentbuf nil)
+     (set-window-buffer currentbuf newbuf)
+     (shell newbuf)
+    )
   )
-)
+(defun ps/open-new-local-shell ()
+  "Open a new shell buffer in home directory."
+  (interactive)
+  (let ((default-directory "~/"))
+        (ps/open-new-shell)))
 
-(global-set-key (kbd "C-q s")  'new-shell)
+(global-set-key (kbd "C-q s")  'ps/open-new-shell)
+(global-set-key (kbd "C-q C-s")  'ps/open-new-local-shell)
 
 (defun pw/shell-cd-to-vc-root ()
 "Jumps to the root directory of version controled directory structure."
@@ -391,133 +431,18 @@ should be continued."
 (add-hook 'comint-output-filter-functions
           'comint-watch-for-password-prompt)
 
-(el-get-bundle ace-jump-mode)
+(use-package openai
+:straight (openai :type git :host github :repo "emacs-openai/openai")
+:ensure t)
+(use-package chatgpt
+  :straight (chatgpt :type git :host github :repo "emacs-openai/chatgpt")    
+  :ensure t)
 
-(add-hook 'comint-mode-hook
-               (lambda ()
-                 (define-key comint-mode-map (kbd "C-.") 'ace-jump-mode)
-                 (define-key comint-mode-map (kbd "<C-return>") 'comint-accumulate)
-                ))
-
-
-;; 
-;; enable a more powerful jump back function from ace jump mode
-;;
-(autoload
-  'ace-jump-mode-pop-mark
-  "ace-jump-mode"
-  "Ace jump back:-)"
-  t)
-(eval-after-load "ace-jump-mode"
-  '(ace-jump-mode-enable-mark-sync))
-(define-key global-map (kbd "C-q q") 'ace-jump-mode-pop-mark)
-(define-key global-map (kbd "C-.") 'ace-jump-mode)
-
-(el-get-bundle dockerfile-mode)
-;;; Dockerfile mode
-(require 'dockerfile-mode)
-(add-to-list 'auto-mode-alist '("Dockerfile\\'" . dockerfile-mode))
-
-(el-get-bundle yaml-mode)
-
-(el-get-bundle expand-region)
-(require 'expand-region)
-(global-set-key (kbd "C-q C-e") 'er/expand-region)
-
-(defun system-has-go () "Tests wether go is installed or not" 
-       (condition-case nil
-           (progn
-             (start-process "" nil "go")
-             t
-             )
-         (error nil))
-       )
-(defun makeinfo-version () "Make info version"
-       (with-temp-buffer
-          (call-process "makeinfo" nil t nil "--version")
-          (goto-char (point-min))
-          (re-search-forward "[0-9]\\{1,2\\}\\(\\.[0-9]\\{1,2\\}\\)\\{1,2\\}")
-          (let ((s (match-beginning 0)) (e (point)))
-            (mapcar
-             'string-to-number
-             (split-string (buffer-substring s e) "\\.")))))
-
-(defun setup-go () "Install go environment with el-get"
-       (el-get-bundle go-mode)
-       (el-get-bundle dash)
-       
-       ;; Require makeinfo which major version is 5 or more
-       (if (< 4 (car (makeinfo-version)))
-           (progn
-           (el-get-bundle flycheck)   
-           ;; go get github.com/dougm/goflymake
-           (add-to-list 'load-path "~/src/github.com/dougm/goflymake")
-           (require 'go-flycheck))
-           ))
-
-       ;; go get github.com/nsf/gocode
-       (el-get-bundle go-autocomplete)
-       (require 'go-autocomplete)
-
-       (add-hook 'go-mode-hook 
-                 (lambda ()
-                   (define-key go-mode-map (kbd "C-q j") 'godef-jump)
-                   (define-key go-mode-map (kbd "C-q q") 'pop-global-mark)
-                   (add-hook 'before-save-hook 'gofmt-before-save))
-                 )
-
-(if (system-has-go) (setup-go))
-
-(el-get-bundle multiple-cursors)
-
-(global-set-key (kbd "C-c m <return>") 'set-rectangular-region-anchor)
-(global-set-key (kbd "C-c m c") 'mc/edit-lines)
-(global-set-key (kbd "C-c m a") 'mc/mark-all-like-this)
-(global-set-key (kbd "C-c m .") 'mc/mark-next-like-this)
-(global-set-key (kbd "C-c m ,") 'mc/mark-previous-like-this)
-(global-set-key (kbd "C-c m m") 'mc/mark-more-like-this-extended)
-
-(el-get-bundle yasnippet)
-(el-get-bundle auto-complete)
-
-
-(require 'yasnippet)
-(require 'auto-complete)
-(require 'auto-complete-config)
-;;(require 'auto-complete-yasnippet)
-
-(ac-config-default)
-;(global-set-key (kbd "C-<tab>")  'yas-expand)
-
-(setq ac-source-yasnippet nil)
-
-;;; auto complete mod
-;;; should be loaded after yasnippet so that they can work together
-
-(add-to-list 'ac-dictionary-directories "~/.emacs.d/ac-dict")
-
-;;; set the trigger key so that it can work together with yasnippet on tab key,
-;;; if the word exists in yasnippet, pressing tab will cause yasnippet to
-;;; activate, otherwise, auto-complete will
-(ac-set-trigger-key "<tab>")
-
-
-
-;; (setq-default ac-sources
-;;       '(
-;;         ;; ac-source-semantic
-;;         ac-source-yasnippet
-;;         ac-source-abbrev
-;;         ac-source-words-in-buffer
-;;         ac-source-words-in-all-buffer
-;;         ;; ac-source-imenu
-;;         ac-source-files-in-current-dir
-;;         ac-source-filename
-;;         )
-;;       )
-
-(yas-global-mode 1)
-(global-auto-complete-mode 1)
+(use-package avy
+ :straight t
+ :bind (
+        ("C-." . avy-goto-char)
+        ("C-q q". avy-pop-mark)))
 
 (global-set-key (kbd "C-z")  'mode-line-other-buffer)
 
@@ -539,39 +464,16 @@ should be continued."
                            (mode . term-mode)
                            ))))))
 
-(el-get-bundle 'wcheck-mode)
-(global-set-key (kbd "C-x w") 'wcheck-mode)
-(add-hook 'wcheck-mode-hook
-          (lambda ()
-            (define-key wcheck-mode-map (kbd "C-q l") 'wcheck-change-language)
-            (define-key wcheck-mode-map (kbd "C-q c") 'wcheck-actions)
-            (define-key wcheck-mode-map (kbd "C-q n") 'wcheck-jump-forward)
-            (define-key wcheck-mode-map (kbd "C-q p") 'wcheck-jump-backward)
-            ))
+(use-package magit
+  :straight t
+  :bind ("C-x g" . magit-status))
 
-(setq wcheck-language-data
-      '(
-        ("British English"
-         (program . "/usr/bin/enchant")
-         (args "-l" "-d" "british")
-         (action-program . "/usr/bin/ispell")
-         (action-args "-a" "-d" "british")
-         (action-parser . wcheck-parser-ispell-suggestions))
-
-        ("Finnish"
-         (program . "/usr/bin/enchant")
-         (args "-l" "-d" "fi")
-         (action-program . "/usr/bin/enchant")
-         (action-args "-a" "-d" "fi")
-         (action-parser . wcheck-parser-ispell-suggestions))
-
-        ))
-
-(wcheck-change-language "British English" 'GLOBAL)
-
-(el-get-bundle 'magit)
+(use-package treemacs-magit  :straight t :after (treemacs magit))
 
 (setq default-fill-column 80)
+
+(global-set-key (kbd "C-x k")
+              (lambda () (interactive) (kill-this-buffer)))
 
 (require 'protobuf-mode)
 (add-to-list 'auto-mode-alist '("\\.proto\\'" . protobuf-mode))
@@ -587,14 +489,14 @@ should be continued."
 
 (global-set-key (kbd "C-q C-o")  'open-buffer-curent-idea)
 
-(defun pw/toggle-transparency ()
+(defun ps/toggle-transparency ()
   "Toggles frame transparency."
   (interactive)
   (if (equal '(100 100) (frame-parameter (selected-frame) 'alpha))
       (set-frame-parameter (selected-frame) 'alpha '(10 10))
     (set-frame-parameter (selected-frame) 'alpha '(100 100))))
 
-(global-set-key (kbd "C-x C-t")  'pw/toggle-transparency)
+(global-set-key (kbd "C-q t")  'ps/toggle-transparency)
 
 (defun pw/download-plantuml-jar-if-needed () ""
        (let ((plantuml-jar "~/.emacs.d/plantuml.jar"))
@@ -604,21 +506,31 @@ should be continued."
                ))
          (expand-file-name plantuml-jar)))
 
-(setq org-plantuml-jar-path  (pw/download-plantuml-jar-if-needed))
+(use-package deflate
+  :straight (deflate :type git :host github :repo "skuro/deflate"))
+
+  (use-package plantuml-mode
+    :straight (plantuml-mode :type git :host github :repo "skuro/plantuml-mode")
+    :mode ("\\.plantuml\\'" "\\.puml\\'")
+    :config
+    (setq plantuml-default-exec-mode 'jar
+          org-plantuml-jar-path (pw/download-plantuml-jar-if-needed)
+          plantuml-jar-path (pw/download-plantuml-jar-if-needed)))
 
 ;; Don`t confirm plant uml runs for conviency.
-(lexical-let ((default-confirm org-confirm-babel-evaluate))
+(let ((default-confirm org-confirm-babel-evaluate))
   (defun my-org-confirm-babel-evaluate (lang body)
     (if (string= lang "plantuml") nil default-confirm))
   (setq org-confirm-babel-evaluate 'my-org-confirm-babel-evaluate)
   )
 
-(el-get-install 'plantuml-mode)
-(setq org-plantuml-jar-path (pw/download-plantuml-jar-if-needed))
+(add-hook 'org-babel-after-execute-hook 'org-display-inline-images)
+(setq org-startup-with-inline-images t)
+(setq plantuml-indent-level 2)
+(setq org-src-tab-acts-natively t)
+(setq org-edit-src-content-indentation 0)
 
 (setq local-init-file "~/.emacs.d/local-init.el")
 (if (file-exists-p local-init-file)
 (load local-init-file)
 )
-
-(el-get-install 'markdown-mode)

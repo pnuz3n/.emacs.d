@@ -31,7 +31,33 @@ repositories will fail.
 )
 #+END_EXAMPLE
 
-** Minimalistic user interface
+** Straight packet manager
+
+#+BEGIN_SRC emacs-lisp
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name
+        "straight/repos/straight.el/bootstrap.el"
+        (or (bound-and-true-p straight-base-dir)
+            user-emacs-directory)))
+      (bootstrap-version 7))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+#+END_SRC
+
+** Appearance
+*** All the icons
+#+BEGIN_SRC emacs-lisp
+  (use-package all-the-icons
+  :straight t)
+#+END_SRC
+*** Minimalistic user interface
 
 Emacs shows startup screen. It gets anoying after a while, so they
 need to be turned off.
@@ -51,6 +77,136 @@ This is done early in the initialization to prevent momentary display.
 (if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 #+END_SRC
 
+*** Fonts
+
+Editing a lot of text using fixed width font is not optimum situation. After a while of googling 
+I found a way to use variable length fonts (see [[https://yoo2080.wordpress.com/2013/05/30/monospace-font-in-tables-and-source-code-blocks-in-org-mode-proportional-font-in-other-parts/][the blog of Jisan Yoo]]).
+
+First we hook variable-pitch-mode
+#+BEGIN_SRC emacs-lisp 
+  (add-hook 'text-mode-hook 'variable-pitch-mode)
+#+END_SRC
+
+The problem is that I don't want code and tables to be variable width inside
+Org mode document. This can be archived by altering some faces
+used by the Org mode.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  (defun my-adjoin-to-list-or-symbol (element list-or-symbol)
+    (let ((list (if (not (listp list-or-symbol))
+                    (list list-or-symbol)
+                  list-or-symbol)))
+      (require 'cl-lib)
+      (cl-adjoin element list)))
+
+    (mapc
+      (lambda (face)
+        (set-face-attribute
+         face nil
+         :inherit
+         (my-adjoin-to-list-or-symbol
+          'fixed-pitch
+          (face-attribute face :inherit))))
+      (list 'org-code 'org-block 'org-table 'org-meta-line))
+#+END_SRC
+
+*** Doom Themes
+
+#+BEGIN_SRC emacs-lisp
+  (use-package doom-themes
+    :straight t
+    :ensure t
+    :config
+    ;; Global settings (defaults)
+    (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+          doom-themes-enable-italic t) ; if nil, italics is universally disabled
+    (load-theme 'doom-acario-dark t)
+
+    ;; Enable flashing mode-line on errors
+    (doom-themes-visual-bell-config)
+    ;; Enable custom neotree theme (nerd-icons must be installed!)
+    (doom-themes-neotree-config)
+    ;; or for treemacs users
+    (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
+    (doom-themes-treemacs-config)
+    ;; Corrects (and improves) org-mode's native fontification.
+    (doom-themes-org-config))  
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  (use-package doom-modeline
+  :ensure t
+  :straight t
+  :init (doom-modeline-mode 1))
+  
+ #+END_SRC
+
+ It might be necessary to install fonts (use M-x nerd-icons-install-fonts).
+
+ 
+
+  Of course we can choose what kind of faces ~variable-pitch~ and ~fixed-pitch~ are.
+ #+BEGIN_SRC emacs-lisp :tangle no
+  (set-face-attribute 'variable-pitch nil :height 1.3 :family "FiraCode Nerd Font")
+    (set-face-attribute 'variable-pitch nil :height 1.3 :family "Calibri")
+    (set-face-attribute 'fixed-pitch nil :height 0.8 :family "DejaVu Sans Mono")
+#+END_SRC
+
+While we are at it we could make Org-mode look a little better in general.
+#+BEGIN_SRC emacs-lisp :tangle no
+(require 'org-bullets)
+(add-hook 'org-mode-hook 'org-indent-mode)
+(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+(setq org-hide-leading-stars t)
+(setq line-spacing 0.25)
+(set-face-attribute 'org-tag nil :weight 'normal :height 0.8)
+(set-face-attribute 'org-todo nil :weight 'normal :height 150)
+(set-face-attribute 'org-priority nil :weight 'normal :height 100)
+(set-face-attribute 'org-todo nil :weight 'normal :height 100)
+(set-face-attribute 'org-done nil :weight 'normal :height 100)
+(set-face-attribute 'org-special-keyword nil :height 90)
+(set-face-attribute 'org-level-1 nil :height 1.3)
+(set-face-attribute 'org-level-2 nil :height 1.2)
+(set-face-attribute 'org-level-3 nil :height 1.1)
+#+END_SRC
+
+*** Minibuffer to center of the screen
+
+With wide screen it is a bit complicated to see lower left of the screen. This moves minibuffer to center.
+
+#+BEGIN_SRC emacs-lisp
+    (use-package vertico-posframe
+      :straight t
+      :after vertico
+      :init
+      (vertico-posframe-mode 1)
+      (setq vertico-posframe-poshandler 'posframe-poshandler-frame-top-center)
+      )
+  #+END_SRC
+
+** Treemacs
+
+#+BEGIN_SRC emacs-lisp
+  (use-package treemacs
+    :straight t
+    :bind
+    ("C-x t t" . treemacs)
+    :config
+    (setq treemacs-width 30)
+    (setq treemacs-no-png-images t
+        treemacs--icon-size-check nil))
+  #+END_SRC
+
+  Needs fronts from https://www.nerdfonts.com/font-downloads
+** Docker
+
+#+BEGIN_SRC emacs-lisp
+(use-package docker
+  :straight t
+  :ensure t
+  :bind ("C-c d" . docker))
+  #+END_SRC
+  
 ** Exec path
 
 At least in MacOS there is problems of ~exec-path~ being insufficient.
@@ -90,39 +246,6 @@ different for applications. This will set the SSH agent socket for Emacs.
 #+BEGIN_SRC emacs-lisp 
   (when (eq system-type 'darwin)
   (setenv "SSH_AUTH_SOCK" (concat (getenv "HOME") "/.gnupg/S.gpg-agent.ssh")))
-#+END_SRC
-
-** Elget
-
-#+BEGIN_SRC emacs-lisp 
-(add-to-list 'load-path "~/.emacs.d/el-get/el-get")
-
-(unless (require 'el-get nil 'noerror)
-(url-retrieve
- "https://raw.githubusercontent.com/dimitri/el-get/master/el-get-install.el"
- (lambda (s)
-   (goto-char (point-max))
-   (eval-print-last-sexp))))
-
-;; Build the El-Get copy of the package.el packages if we have not
-;; built it before.  Will have to look into updating later ...
-(unless (file-directory-p el-get-recipe-path-elpa)
-  (el-get-elpa-build-local-recipes))
-
-(add-to-list 'el-get-recipe-path "~/.emacs.d/el-get-user/recipes")
-(el-get 'sync)
-#+END_SRC
-** Theme
-
-Plain white theme gets old after a while. Emacs has support themes and there is [[https://emacsthemes.com/][gallery]] of them.  Colors of IntelliJ
-Idea Darcula theme pleases the eye. Emacs updates theme list only after init has been run. Hook is used to load theme
-then.  Without it first loading would fail.
-
-#+BEGIN_SRC emacs-lisp 
-  (el-get-install 'idea-darkula-theme)
-  (push (substitute-in-file-name "~/.emacs.d/el-get/idea-darkula-theme/") custom-theme-load-path)
-  (add-hook 'after-init-hook (lambda () (load-theme 'idea-darkula t)))
-
 #+END_SRC
 
 ** Tabs
@@ -179,7 +302,6 @@ After over year of practice I am begin to think that can start to lear some
 
 ** Org-mode
 
-
 https://emacs.cafe/emacs/orgmode/gtd/2017/06/30/orgmode-gtd.html
 
 Set up agenda functionality. Files are located under org-directory
@@ -225,7 +347,6 @@ Active babel languages.
    (ditaa . t)
    ))
 #+END_SRC
-
 
 *** State changes and logging 
 
@@ -395,7 +516,6 @@ Emacs.
   (global-set-key (kbd "C-S-s-o") 'org-capture)
 #+END_SRC
 
-
 ** Calendar
 
 See http://orgmode.org/worg/org-faq.html#Appointments/Diary
@@ -429,132 +549,105 @@ So it is unset here to allow it to be re-used later.
   (global-unset-key (kbd "C-q"))
 #+END_SRC
 
-** Fonts
+** Vertico, Marginalia, Consult, Orderless
 
-Editing a lot of text using fixed width font is not optimum situation. After a while of googling 
-I found a way to use variable length fonts (see [[https://yoo2080.wordpress.com/2013/05/30/monospace-font-in-tables-and-source-code-blocks-in-org-mode-proportional-font-in-other-parts/][the blog of Jisan Yoo]]).
+#+BEGIN_SRC emacs-lisp
+  (use-package vertico
+  :straight t
+  :ensure t
+  :init
+  (vertico-mode))
 
-First we hook variable-pitch-mode
-#+BEGIN_SRC emacs-lisp 
-  (add-hook 'text-mode-hook 'variable-pitch-mode)
+  (use-package marginalia
+  :straight t
+  :ensure t
+  :init
+  (marginalia-mode))
+
+  (use-package consult
+  :straight t
+  :ensure t
+  :bind
+  (("C-s" . consult-line)
+   ("C-x b" . consult-buffer)
+   ("M-y" . consult-yank-pop)))
+
+  (use-package orderless
+  :straight t
+  :init
+  (setq completion-styles '(orderless)))
 #+END_SRC
 
-The problem is that I don't want code and tables to be variable width inside
-Org mode document. This can be archived by altering some faces
-used by the Org mode.
-
-#+BEGIN_SRC emacs-lisp 
-  (defun my-adjoin-to-list-or-symbol (element list-or-symbol)
-    (let ((list (if (not (listp list-or-symbol))
-                    (list list-or-symbol)
-                  list-or-symbol)))
-      (require 'cl-lib)
-      (cl-adjoin element list)))
-
-    (mapc
-      (lambda (face)
-        (set-face-attribute
-         face nil
-         :inherit
-         (my-adjoin-to-list-or-symbol
-          'fixed-pitch
-          (face-attribute face :inherit))))
-      (list 'org-code 'org-block 'org-table 'org-meta-line))
-#+END_SRC
-
-Of course we can choose what kind of faces ~variable-pitch~ and ~fixed-pitch~ are.
-#+BEGIN_SRC emacs-lisp 
-(set-face-attribute 'variable-pitch nil :height 1.3 :family "Calibri")
-(set-face-attribute 'fixed-pitch nil :height 0.8 :family "DejaVu Sans Mono")
-#+END_SRC
-
-While we are at it we could make Org-mode look a little better in general.
-#+BEGIN_SRC emacs-lisp 
-(require 'org-bullets)
-(add-hook 'org-mode-hook 'org-indent-mode)
-(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
-(setq org-hide-leading-stars t)
-(setq line-spacing 0.25)
-(set-face-attribute 'org-tag nil :weight 'normal :height 0.8)
-(set-face-attribute 'org-todo nil :weight 'normal :height 150)
-(set-face-attribute 'org-priority nil :weight 'normal :height 100)
-(set-face-attribute 'org-todo nil :weight 'normal :height 100)
-(set-face-attribute 'org-done nil :weight 'normal :height 100)
-(set-face-attribute 'org-special-keyword nil :height 90)
-(set-face-attribute 'org-level-1 nil :height 1.3)
-(set-face-attribute 'org-level-2 nil :height 1.2)
-(set-face-attribute 'org-level-3 nil :height 1.1)
-#+END_SRC
 ** Misc
 
 
 #+BEGIN_SRC emacs-lisp 
-;;; turn on syntax highlighting
-(global-font-lock-mode 1)
+  ;;; turn on syntax highlighting
+  (global-font-lock-mode 1)
 
-;; Mustache mode
-(require 'mustache-mode)
+  ;; Mustache mode
+  (require 'mustache-mode)
 
-(defun iwb ()
-  "indent whole buffer"
-  (interactive)
-  (delete-trailing-whitespace)
-  (indent-region (point-min) (point-max) nil)
-  (untabify (point-min) (point-max)))
+  (defun iwb ()
+    "indent whole buffer"
+    (interactive)
+    (delete-trailing-whitespace)
+    (indent-region (point-min) (point-max) nil)
+    (untabify (point-min) (point-max)))
 
-(defun previous-line-insert-newline ()
-  "Moves line up and creates empty line"
-  (interactive)
-  (previous-line)
-  (end-of-line)
-  (newline-and-indent)
-  )
+  (defun previous-line-insert-newline ()
+    "Moves line up and creates empty line"
+    (interactive)
+    (previous-line)
+    (end-of-line)
+    (newline-and-indent)
+    )
 
-(defun next-line-insert-newline ()
-  "Moves line up and creates empty line"
-  (interactive)
-  (end-of-line)
-  (newline-and-indent)
-  )
+  (defun next-line-insert-newline ()
+    "Moves line up and creates empty line"
+    (interactive)
+    (end-of-line)
+    (newline-and-indent)
+    )
 
-(setq line-move-visual nil)
-(put 'scroll-left 'disabled nil)
+  (setq line-move-visual nil)
+  (put 'scroll-left 'disabled nil)
 
-;; (global-set-key (kbd "C-,") 'backward-paragraph)
-;; (global-set-key (kbd "C-.") 'forward-paragraph)
-;; (global-set-key  (kbd "C-`")    'shell-command)
-;; (global-set-key  (kbd "M-`")    'shell-command-on-region)
-
-
-(global-set-key (kbd "C-c f") 'iwb)
-
-;; Moving from window to window using arrows
-(global-set-key (kbd "<left>")  'windmove-left)
-(global-set-key (kbd "<right>") 'windmove-right)
-(global-set-key (kbd "<up>")    'windmove-up)
-(global-set-key (kbd "<down>")  'windmove-down)
-
-(global-set-key (kbd "M-n") 'next-line-insert-newline)
-(global-set-key (kbd "M-p") 'previous-line-insert-newline)
+  ;; (global-set-key (kbd "C-,") 'backward-paragraph)
+  ;; (global-set-key (kbd "C-.") 'forward-paragraph)
+  ;; (global-set-key  (kbd "C-`")    'shell-command)
+  ;; (global-set-key  (kbd "M-`")    'shell-command-on-region)
 
 
+  (global-set-key (kbd "C-c f") 'iwb)
 
-(global-unset-key (kbd "C-<SPC>"))
-(global-set-key (kbd "C-<SPC>") 'set-mark-command)
+  ;; Moving from window to window using arrows
+  (global-set-key (kbd "<left>")  'windmove-left)
+  (global-set-key (kbd "<right>") 'windmove-right)
+  (global-set-key (kbd "<up>")    'windmove-up)
+  (global-set-key (kbd "<down>")  'windmove-down)
+
+  (global-set-key (kbd "M-n") 'next-line-insert-newline)
+  (global-set-key (kbd "M-p") 'previous-line-insert-newline)
 
 
 
-(global-set-key (kbd "s-<left>")  'windmove-left)
-(global-set-key (kbd "s-<right>") 'windmove-right)
-(global-set-key (kbd "s-<up>")    'windmove-up)
-(global-set-key (kbd "s-<down>")  'windmove-down)
+  (global-unset-key (kbd "C-<SPC>"))
+  (global-set-key (kbd "C-<SPC>") 'set-mark-command)
 
-(put 'upcase-region 'disabled nil)
-(put 'scroll-left 'disabled nil)
 
-(global-set-key (kbd "C-q o")  'find-file-at-point)
 
-(global-set-key (kbd "C-q i")  'quoted-insert)
+  (global-set-key (kbd "s-<left>")  'windmove-left)
+  (global-set-key (kbd "s-<right>") 'windmove-right)
+  (global-set-key (kbd "s-<up>")    'windmove-up)
+  (global-set-key (kbd "s-<down>")  'windmove-down)
+
+  (put 'upcase-region 'disabled nil)
+  (put 'scroll-left 'disabled nil)
+
+  (global-set-key (kbd "C-q o")  'find-file-at-point)
+
+  (global-set-key (kbd "C-q i")  'quoted-insert)
 #+END_SRC
 
 ** Shell stuff 
@@ -564,21 +657,27 @@ I often need shell. But default ~M-x shell~ will throw back to the already
 created shell. Many times this is not what I want.
 
 #+begin_src emacs-lisp 
-(defun new-shell ()
-  (interactive)
+    (defun ps/open-new-shell ()
+      (interactive)
 
-  (let (
-        (currentbuf (get-buffer-window (current-buffer)))
-        (newbuf     (generate-new-buffer-name "*shell*"))
-       )
-   (generate-new-buffer newbuf)
-   (set-window-dedicated-p currentbuf nil)
-   (set-window-buffer currentbuf newbuf)
-   (shell newbuf)
-  )
-)
+      (let (
+            (currentbuf (get-buffer-window (current-buffer)))
+            (newbuf     (generate-new-buffer-name "*shell*"))
+           )
+       (generate-new-buffer newbuf)
+       (set-window-dedicated-p currentbuf nil)
+       (set-window-buffer currentbuf newbuf)
+       (shell newbuf)
+      )
+    )
+  (defun ps/open-new-local-shell ()
+    "Open a new shell buffer in home directory."
+    (interactive)
+    (let ((default-directory "~/"))
+          (ps/open-new-shell)))
 
-(global-set-key (kbd "C-q s")  'new-shell)
+  (global-set-key (kbd "C-q s")  'ps/open-new-shell)
+  (global-set-key (kbd "C-q C-s")  'ps/open-new-local-shell)
 #+end_src
 
 *** Jumping to the root directory of repository
@@ -631,17 +730,27 @@ This function can be binded to key sequence when shell is activated.
 (add-hook 'comint-output-filter-functions
           'comint-watch-for-password-prompt)
 #+END_SRC
-** Ace Jump
-#+BEGIN_SRC emacs-lisp 
-  (el-get-bundle ace-jump-mode)
+**
+#+BEGIN_SRC emacs-lisp
+    (use-package openai
+    :straight (openai :type git :host github :repo "emacs-openai/openai")
+    :ensure t)
+    (use-package chatgpt
+      :straight (chatgpt :type git :host github :repo "emacs-openai/chatgpt")    
+      :ensure t)
+#+END_SRC
 
-  (add-hook 'comint-mode-hook
-                 (lambda ()
-                   (define-key comint-mode-map (kbd "C-.") 'ace-jump-mode)
-                   (define-key comint-mode-map (kbd "<C-return>") 'comint-accumulate)
-                  ))
+** Avy - for jumping around
 
-                 
+#+BEGIN_SRC emacs-lisp
+      (use-package avy
+       :straight t
+       :bind (
+              ("C-." . avy-goto-char)
+              ("C-q q". avy-pop-mark)))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle no
   ;; 
   ;; enable a more powerful jump back function from ace jump mode
   ;;
@@ -655,14 +764,14 @@ This function can be binded to key sequence when shell is activated.
   (define-key global-map (kbd "C-q q") 'ace-jump-mode-pop-mark)
   (define-key global-map (kbd "C-.") 'ace-jump-mode)
 #+END_SRC
-** File editing modes
+** COMMENT File editing modes
 *** COMMENT CSV-mode
 #+BEGIN_SRC emacs-lisp 
 ;; CSV Mode
 (el-get-bundle csv-mode)
 (require 'csv-mode)
 #+END_SRC
-*** Docker-mode
+*** COMMENT Docker-mode
 #+BEGIN_SRC emacs-lisp 
 (el-get-bundle dockerfile-mode)
 ;;; Dockerfile mode
@@ -673,7 +782,7 @@ This function can be binded to key sequence when shell is activated.
 #+BEGIN_SRC emacs-lisp 
 (el-get-bundle yaml-mode)
 #+END_SRC
-** Edit server
+** COMMENT Edit server
 
 Edit server allows editing content from web browser. See for example [[https://chrome.google.com/webstore/detail/edit-with-emacs/ljobjlafonikaiipfkggjbhkghgicgoh][edit-with-emacs]] Chrome extension.
 
@@ -684,13 +793,13 @@ This is disabled as there seems to be some kind of load problem at the moment [2
 (edit-server-start)
 #+END_SRC
 
-** Expand region
+** COMMENT Expand region
 #+BEGIN_SRC emacs-lisp 
 (el-get-bundle expand-region)
 (require 'expand-region)
 (global-set-key (kbd "C-q C-e") 'er/expand-region)
 #+END_SRC
-** Setup Go environment
+** COMMENT Setup Go environment
 
 
 #+BEGIN_SRC emacs-lisp 
@@ -739,7 +848,7 @@ This is disabled as there seems to be some kind of load problem at the moment [2
 (if (system-has-go) (setup-go))
 #+END_SRC
 
-** Multicursors
+** COMMENT Multicursors
 #+BEGIN_SRC emacs-lisp 
 (el-get-bundle multiple-cursors)
 
@@ -751,7 +860,7 @@ This is disabled as there seems to be some kind of load problem at the moment [2
 (global-set-key (kbd "C-c m m") 'mc/mark-more-like-this-extended)
 #+END_SRC
 
-** Yasniplet and autocomplete
+** COMMENT Yasniplet and autocomplete
 #+BEGIN_SRC emacs-lisp 
 (el-get-bundle yasnippet)
 (el-get-bundle auto-complete)
@@ -829,7 +938,7 @@ recycled to change the buffer.
 
 #+end_src
 
-** WCheck mode
+** COMMENT WCheck mode
 
 Set up wcheck mode for spell checking
 
@@ -869,7 +978,11 @@ Set up wcheck mode for spell checking
 ** Magit for using git
 
 #+BEGIN_SRC emacs-lisp
-  (el-get-bundle 'magit)
+  (use-package magit
+    :straight t
+    :bind ("C-x g" . magit-status))
+
+  (use-package treemacs-magit  :straight t :after (treemacs magit))
 #+END_SRC
 
 ** COMMENT Kill buffer instead of burying it
@@ -887,10 +1000,11 @@ Set up wcheck mode for spell checking
 
 ** Don't confirm kills
 
-#+begin_src
-(global-set-key (kbd "C-x k") 'kill-this-buffer)
-(setq kill-buffer-query-functions '())
-#+end_src
+#+BEGIN_SRC emacs-lisp
+
+  (global-set-key (kbd "C-x k")
+                (lambda () (interactive) (kill-this-buffer)))
+#+END_SRC
 
 ** Protocol Buffers  mode
 
@@ -920,14 +1034,14 @@ Set up wcheck mode for spell checking
 Sometime it is nice to look what is behind the frame. Following code toggles frame to be almost completely transparent
 and back to solid again. 
 #+begin_src emacs-lisp 
-  (defun pw/toggle-transparency ()
+  (defun ps/toggle-transparency ()
     "Toggles frame transparency."
     (interactive)
     (if (equal '(100 100) (frame-parameter (selected-frame) 'alpha))
         (set-frame-parameter (selected-frame) 'alpha '(10 10))
       (set-frame-parameter (selected-frame) 'alpha '(100 100))))
 
-  (global-set-key (kbd "C-x C-t")  'pw/toggle-transparency)
+  (global-set-key (kbd "C-q t")  'ps/toggle-transparency)
 #+end_src
 
 ** PlantUML support
@@ -945,33 +1059,34 @@ jar was loaded.
            (expand-file-name plantuml-jar)))
 #+end_src
 
+#+begin_src emacs-lisp
+  (use-package deflate
+    :straight (deflate :type git :host github :repo "skuro/deflate"))
+
+    (use-package plantuml-mode
+      :straight (plantuml-mode :type git :host github :repo "skuro/plantuml-mode")
+      :mode ("\\.plantuml\\'" "\\.puml\\'")
+      :config
+      (setq plantuml-default-exec-mode 'jar
+            org-plantuml-jar-path (pw/download-plantuml-jar-if-needed)
+            plantuml-jar-path (pw/download-plantuml-jar-if-needed)))
+#+end_src
+
 Now we can set the PlantUML jar for org-mode.
 #+begin_src emacs-lisp 
-  (setq org-plantuml-jar-path  (pw/download-plantuml-jar-if-needed))
+;; Don`t confirm plant uml runs for conviency.
+(let ((default-confirm org-confirm-babel-evaluate))
+  (defun my-org-confirm-babel-evaluate (lang body)
+    (if (string= lang "plantuml") nil default-confirm))
+  (setq org-confirm-babel-evaluate 'my-org-confirm-babel-evaluate)
+  )
 
-  ;; Don`t confirm plant uml runs for conviency.
-  (lexical-let ((default-confirm org-confirm-babel-evaluate))
-    (defun my-org-confirm-babel-evaluate (lang body)
-      (if (string= lang "plantuml") nil default-confirm))
-    (setq org-confirm-babel-evaluate 'my-org-confirm-babel-evaluate)
-    )
+(add-hook 'org-babel-after-execute-hook 'org-display-inline-images)
+(setq org-startup-with-inline-images t)
+(setq plantuml-indent-level 2)
+(setq org-src-tab-acts-natively t)
+(setq org-edit-src-content-indentation 0)
 #+end_src
-
-There is mode for Plant UML, but no el-get recipe for it. So we create one.
-#+begin_src emacs-lisp :mkdir yes :tangle el-get-user/recipes/plantuml-mode.rcp
-(:name plantuml-mode
-       :description "PlantUML Mode"
-       :type git
-       :url "https://github.com/skuro/plantuml-mode")
-#+end_src
-
-Now the recipe can be installed. It also needs to know where the jar is.
-#+begin_src emacs-lisp 
-  (el-get-install 'plantuml-mode)
-  (setq org-plantuml-jar-path (pw/download-plantuml-jar-if-needed))
-#+end_src
-
-As there is no plantuml-mode we need to set up puml-mode for plantuml.
 
 ** Run local init
 
@@ -984,7 +1099,7 @@ Finally after all the other initializations run local initialisation file.
   )
 #+END_SRC
 
-** Markdown mode
+** COMMENT Markdown mode
 
 #+BEGIN_SRC emacs-lisp 
 (el-get-install 'markdown-mode)
