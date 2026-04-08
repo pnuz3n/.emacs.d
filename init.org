@@ -1,4 +1,5 @@
 
+
 #+TITLE: Emacs initialization
 
 * Emacs Initialization
@@ -730,15 +731,6 @@ This function can be binded to key sequence when shell is activated.
 (add-hook 'comint-output-filter-functions
           'comint-watch-for-password-prompt)
 #+END_SRC
-**
-#+BEGIN_SRC emacs-lisp
-    (use-package openai
-    :straight (openai :type git :host github :repo "emacs-openai/openai")
-    :ensure t)
-    (use-package chatgpt
-      :straight (chatgpt :type git :host github :repo "emacs-openai/chatgpt")    
-      :ensure t)
-#+END_SRC
 
 ** Avy - for jumping around
 
@@ -1087,6 +1079,176 @@ Now we can set the PlantUML jar for org-mode.
 (setq org-src-tab-acts-natively t)
 (setq org-edit-src-content-indentation 0)
 #+end_src
+** AI tool setup
+
+*** Model names
+#+begin_src emacs-lisp
+;; Set up host in local configuration, for example:
+;; (defvar my/ollama-host-name "127.0.0.1")
+;; (defvar my/ollama-port 11434)
+;; 
+;; Derived (do not override directly)
+;; (defvar my/ollama-host
+;; (format "%s:%d" my/ollama-host-name my/ollama-port))
+
+(defvar my/ollama-chat-model "gpt-oss:20b")
+(defvar my/ollama-fast-model "llama3.1:8b")
+(defvar my/ollama-utility-model "qwen2.5-coder:14b")
+(defvar my/ollama-embedding-model "nomic-embed-text")
+#+end_src
+
+*** AI keymap
+#+begin_src emacs-lisp
+(define-prefix-command 'my/ai-map)
+(global-set-key (kbd "C-q a") #'my/ai-map)
+#+end_src
+
+*** gptel
+#+begin_src emacs-lisp
+(use-package gptel
+  :ensure t
+  :commands (gptel gptel-send gptel-rewrite)
+  :init
+  (setq my/gptel-ollama
+        (gptel-make-ollama
+         "Ollama"
+         :host my/ollama-host
+         :stream t
+        :models (mapcar #'intern
+                       (list my/ollama-chat-model
+                             my/ollama-fast-model
+                             my/ollama-utility-model))))         
+  :config
+  (setq gptel-backend my/gptel-ollama)
+  (setq gptel-model (intern my/ollama-chat-model))   
+  (setq gptel-default-mode 'org-mode)
+  (setq gptel-track-response nil)
+
+  (define-key my/ai-map (kbd "c") #'gptel)
+  (define-key my/ai-map (kbd "s") #'gptel-send)
+  (define-key my/ai-map (kbd "r") #'gptel-rewrite))
+#+end_src
+
+*** aidermacs
+#+begin_src emacs-lisp
+(use-package aidermacs
+  :ensure t
+  :commands (aidermacs-transient-menu aidermacs-run-aider)
+  :init
+  (setq aidermacs-default-chat-mode 'architect)
+  (setq aidermacs-use-voice nil) 
+  :config
+  (setq aidermacs-default-model (exec-path-from-shell-getenv "AIDER_MODEL"))
+  (setq aidermacs-weak-model (exec-path-from-shell-getenv "AIDER_WEAK_MODEL"))
+  (define-key my/ai-map (kbd "a") #'aidermacs-transient-menu))
+#+end_src
+
+*** aidermacs / git helper
+#+begin_src emacs-lisp
+(defun my/git-diff-staged-to-buffer ()
+  "Show staged git diff in a temp buffer."
+  (interactive)
+  (let ((buf (get-buffer-create "*git-staged-diff*")))
+    (with-current-buffer buf
+      (erase-buffer)
+      (call-process "git" nil buf nil "diff" "--staged")
+      (diff-mode))
+    (pop-to-buffer buf)))
+
+(define-key my/ai-map (kbd "d") #'my/git-diff-staged-to-buffer)
+#+end_src
+
+*** ellama
+#+begin_src emacs-lisp
+(use-package llm
+  :ensure t)
+
+(use-package ellama
+  :ensure t
+  :after llm
+  :config
+  (require 'llm-ollama)
+
+  (setq ellama-provider
+        (make-llm-ollama
+         :host my/ollama-host-name
+         :port my/ollama-port
+         :chat-model my/ollama-utility-model
+         :embedding-model my/ollama-embedding-model))
+
+
+  (setq ellama-language "English")
+  (setq ellama-naming-provider ellama-provider)
+  (setq ellama-summarization-provider ellama-provider)
+
+  (define-key my/ai-map (kbd "e") #'ellama)
+  (define-key my/ai-map (kbd "i") #'ellama-improve-wording)
+  (define-key my/ai-map (kbd "m") #'ellama-summarize))
+#+end_src
+
+*** gptel autocomplete
+
+#+begin_src emacs-lisp
+(setq my/gptel-autocompletion-backend
+      (gptel-make-ollama
+       "autocomplete"
+       :host my/ollama-host
+       :models '("qwen2.5-coder:14b")))
+
+(use-package gptel-autocomplete
+  :straight '(:type git :host github :repo "JDNdeveloper/gptel-autocomplete")
+  :config
+  (require 'gptel-autocomplete)
+  (setq gptel-autocomplete-before-context-lines 100
+        gptel-autocomplete-after-context-lines 20
+        gptel-autocomplete-temperature 0.1
+        gptel-autocomplete-use-context t
+        gptel-autocomplete-idle-delay 0)
+  (keymap-set gptel-autocomplete-completion-map "C-e" #'gptel-accept-completion)
+  (keymap-set gptel-autocomplete-completion-map "<tab>" #'gptel-accept-completion)
+  (keymap-set gptel-autocomplete-completion-map "M-f" #'gptel-accept-word)
+  (define-key my/ai-map (kbd "<tab>") #'gptel-autocomplete-mode)
+
+  (defun my/gptel-autocomplete-backend (orig &rest args)
+    (let ((gptel-backend my/gptel-autocompletion-backend))
+      (apply orig args)))
+  (advice-add 'gptel-complete :around #'my/gptel-autocomplete-backend))
+#+end_src
+
+*** Claude code support
+
+**** Eat terminal emulator
+
+#+begin_src elisp
+(use-package eat
+  :straight (eat :type git :host codeberg :repo "akib/emacs-eat")
+  :commands (eat eat-project eat-other-window)
+  :init
+  ;; Optional: pick a convenient key
+  (global-set-key (kbd "C-c t") #'eat))
+#+end_src
+
+#+begin_src emacs-lisp
+(use-package claude-code-ide
+  :straight (:type git :host github :repo "manzaltu/claude-code-ide.el")
+  :bind ("C-q a t" . claude-code-ide-menu) ; Set your favorite keybinding
+  :config
+  (exec-path-from-shell-copy-env "AWS_BEARER_TOKEN_BEDROCK")
+  (exec-path-from-shell-copy-env "CLAUDE_CODE_USE_BEDROCK")
+  (setq claude-code-ide-terminal-backend 'eat)
+  (claude-code-ide-emacs-tools-setup)) ; Optionally enable Emacs MCP tools
+#+end_src
+
+
+
+** Grab environment variables from shell
+
+#+BEGIN_SRC emacs-lisp
+(straight-use-package 'exec-path-from-shell)
+(require 'exec-path-from-shell)
+(exec-path-from-shell-copy-env "AWS_REGION")
+(exec-path-from-shell-copy-env "AWS_PROFILE")
+#+END_SRC
 
 ** Run local init
 
