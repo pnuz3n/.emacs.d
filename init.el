@@ -523,18 +523,45 @@ should be continued."
 (setq org-src-tab-acts-natively t)
 (setq org-edit-src-content-indentation 0)
 
-;; Set up host in local configuration, for example:
-;; (defvar my/ollama-host-name "127.0.0.1")
-;; (defvar my/ollama-port 11434)
-;; 
-;; Derived (do not override directly)
-;; (defvar my/ollama-host
-;; (format "%s:%d" my/ollama-host-name my/ollama-port))
+;; Ollama host configuration
+(unless (boundp 'my/ollama-host-name)
+  (defvar my/ollama-host-name "127.0.0.1"))
+(unless (boundp 'my/ollama-port)
+  (defvar my/ollama-port 11434))
 
-(defvar my/ollama-chat-model "gpt-oss:20b")
-(defvar my/ollama-fast-model "llama3.1:8b")
-(defvar my/ollama-utility-model "qwen2.5-coder:14b")
-(defvar my/ollama-embedding-model "nomic-embed-text")
+;; Ollama model names
+(unless (boundp 'my/ollama-chat-model)
+  (defvar my/ollama-chat-model "gpt-oss:20b"))
+(unless (boundp 'my/ollama-fast-model)
+  (defvar my/ollama-fast-model "llama3.1:8b"))
+(unless (boundp 'my/ollama-utility-model)
+  (defvar my/ollama-utility-model "qwen2.5-coder:14b"))
+(unless (boundp 'my/ollama-embedding-model)
+  (defvar my/ollama-embedding-model "nomic-embed-text"))
+
+;; Derived variable
+(defvar my/ollama-host
+  (format "%s:%d" my/ollama-host-name my/ollama-port))
+
+;; Backend selection defaults
+(unless (boundp 'my/use-bedrock-gptel)
+  (defvar my/use-bedrock-gptel t))  ; Default to Bedrock
+(unless (boundp 'my/use-ollama-autocomplete)
+  (defvar my/use-ollama-autocomplete t))
+
+;; Bedrock configuration defaults
+(unless (boundp 'my/bedrock-region)
+  (defvar my/bedrock-region "us-east-1"))
+(unless (boundp 'my/bedrock-model-region)
+  (defvar my/bedrock-model-region 'us))
+(unless (boundp 'my/bedrock-model)
+  (defvar my/bedrock-model 'claude-sonnet-4-20250514))
+
+;; Claude API configuration defaults
+(unless (boundp 'my/claude-api-key)
+  (defvar my/claude-api-key nil))  ; Should be set in local-pre-init.el
+(unless (boundp 'my/claude-model)
+  (defvar my/claude-model 'claude-sonnet-4-20250514))
 
 (define-prefix-command 'my/ai-map)
 (global-set-key (kbd "C-q a") #'my/ai-map)
@@ -543,18 +570,44 @@ should be continued."
   :ensure t
   :commands (gptel gptel-send gptel-rewrite)
   :init
+  ;; Always set up Ollama backend (might be used for autocomplete)
   (setq my/gptel-ollama
         (gptel-make-ollama
          "Ollama"
          :host my/ollama-host
          :stream t
-        :models (mapcar #'intern
-                       (list my/ollama-chat-model
-                             my/ollama-fast-model
-                             my/ollama-utility-model))))         
+         :models (mapcar #'intern
+                        (list my/ollama-chat-model
+                              my/ollama-fast-model
+                              my/ollama-utility-model))))
+
+  ;; Set up the main backend based on configuration
+  (if my/use-bedrock-gptel
+      ;; Use AWS Bedrock
+      (progn
+        (setq my/gptel-main-backend
+              (gptel-make-bedrock
+               "Claude-Bedrock"
+               :stream t
+               :region 'eu-west-1'
+               :model-region 'eu
+               :models '(claude-opus-4-6
+                 claude-sonnet-4-20250514
+                 claude-haiku-4-5-20251001)))               
+
+        (setq my/gptel-main-model my/bedrock-model))
+    ;; Use Claude API directly
+    (progn
+      (setq my/gptel-main-backend
+            (gptel-make-anthropic
+             "Claude"
+             :stream t
+             :key my/claude-api-key))  ; Can also use 'gptel-api-key for auth-source
+      (setq my/gptel-main-model my/claude-model)))
+
   :config
-  (setq gptel-backend my/gptel-ollama)
-  (setq gptel-model (intern my/ollama-chat-model))   
+  (setq gptel-backend my/gptel-main-backend)
+  (setq gptel-model my/gptel-main-model)
   (setq gptel-default-mode 'org-mode)
   (setq gptel-track-response nil)
 
@@ -567,7 +620,7 @@ should be continued."
   :commands (aidermacs-transient-menu aidermacs-run-aider)
   :init
   (setq aidermacs-default-chat-mode 'architect)
-  (setq aidermacs-use-voice nil) 
+  (setq aidermacs-use-voice nil)
   :config
   (setq aidermacs-default-model (exec-path-from-shell-getenv "AIDER_MODEL"))
   (setq aidermacs-weak-model (exec-path-from-shell-getenv "AIDER_WEAK_MODEL"))
@@ -610,11 +663,17 @@ should be continued."
   (define-key my/ai-map (kbd "i") #'ellama-improve-wording)
   (define-key my/ai-map (kbd "m") #'ellama-summarize))
 
-(setq my/gptel-autocompletion-backend
-      (gptel-make-ollama
-       "autocomplete"
-       :host my/ollama-host
-       :models '("qwen2.5-coder:14b")))
+;; Set up autocomplete backend based on configuration
+(when my/use-ollama-autocomplete
+  (setq my/gptel-autocompletion-backend
+        (gptel-make-ollama
+         "autocomplete"
+         :host my/ollama-host
+         :models (list my/ollama-utility-model))))
+
+;; If not using Ollama, use the main backend
+(unless (boundp 'my/gptel-autocompletion-backend)
+  (setq my/gptel-autocompletion-backend my/gptel-main-backend))
 
 (use-package gptel-autocomplete
   :straight '(:type git :host github :repo "JDNdeveloper/gptel-autocomplete")
@@ -644,12 +703,14 @@ should be continued."
 
 (use-package claude-code-ide
   :straight (:type git :host github :repo "manzaltu/claude-code-ide.el")
-  :bind ("C-q a t" . claude-code-ide-menu) ; Set your favorite keybinding
+  :bind ("C-q a t" . claude-code-ide-menu)
   :config
+  ;; Copy environment variables from shell
   (exec-path-from-shell-copy-env "AWS_BEARER_TOKEN_BEDROCK")
   (exec-path-from-shell-copy-env "CLAUDE_CODE_USE_BEDROCK")
+  (exec-path-from-shell-copy-env "ANTHROPIC_API_KEY")
   (setq claude-code-ide-terminal-backend 'eat)
-  (claude-code-ide-emacs-tools-setup)) ; Optionally enable Emacs MCP tools
+  (claude-code-ide-emacs-tools-setup))
 
 (straight-use-package 'exec-path-from-shell)
 (require 'exec-path-from-shell)

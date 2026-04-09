@@ -11,26 +11,40 @@ This document describes how Emacs is initialized.
 ** Run local pre-initialization
 
 Run machine dependant initialization file before running the common
-setup. This script could be used to set up proxies.
+setup. This file (=~/.emacs.d/local-pre-init.el=) should contain configuration
+that varies between machines, such as:
 
-#+BEGIN_SRC emacs-lisp 
+- Proxy settings
+- AI/LLM backend configuration (Bedrock vs Claude API, Ollama settings)
+- Machine-specific environment variables
+- Custom paths or hostnames
+
+#+BEGIN_SRC emacs-lisp
   (setq local-pre-init-file "~/.emacs.d/local-pre-init.el")
   (if (file-exists-p local-pre-init-file)
   (load local-pre-init-file)
   )
 #+END_SRC
 
-Following kind of sniplet can be used to set up proxy. It tries to
-ping the host and if it succeseed in on second it setups environment
-variables. El-get will run git and without those variables cloning
-repositories will fail.
+*** Example: Proxy Setup
 
-#+BEGIN_EXAMPLE emacs-list
+Following snippet can be used to set up proxy. It tries to ping the
+host and if it succeeds within one second, it sets up environment
+variables. Package managers will use these when cloning repositories.
+
+#+BEGIN_EXAMPLE emacs-lisp
+;; In local-pre-init.el:
 (if (= 0 (call-process "ping" nil nil nil "-W" "1" "-c" "1" "1.2.3.4"))
-  (setenv "http_proxy" "1.2.3.4:8080")
-  (setenv "https_proxy" "1.2.3.4:8080")
-)
+    (progn
+      (setenv "http_proxy" "http://1.2.3.4:8080")
+      (setenv "https_proxy" "http://1.2.3.4:8080")))
 #+END_EXAMPLE
+
+*** Example: AI Backend Configuration
+
+See the "AI tool setup" section below for detailed examples of how to
+configure different LLM backends (Bedrock, Claude API, Ollama) in
+=local-pre-init.el= for work vs personal machines.
 
 ** Straight packet manager
 
@@ -1081,20 +1095,102 @@ Now we can set the PlantUML jar for org-mode.
 #+end_src
 ** AI tool setup
 
-*** Model names
-#+begin_src emacs-lisp
-;; Set up host in local configuration, for example:
-;; (defvar my/ollama-host-name "127.0.0.1")
-;; (defvar my/ollama-port 11434)
-;; 
-;; Derived (do not override directly)
-;; (defvar my/ollama-host
-;; (format "%s:%d" my/ollama-host-name my/ollama-port))
+This section configures AI tools (gptel, ellama, aidermacs, Claude Code) for use with
+different LLM backends. The configuration is designed to be machine-independent by using
+variables that can be overridden in =local-pre-init.el=.
 
+*** Machine-Dependent Configuration
+
+The following variables control which LLM backend is used and should be set in
+=~/.emacs.d/local-pre-init.el= before this configuration loads:
+
+**** Work Machine Example (Bedrock + Ollama)
+#+BEGIN_EXAMPLE emacs-lisp
+;; In local-pre-init.el for work machine:
+;; Use AWS Bedrock for main chat, Ollama for autocomplete
+
+;; Ollama configuration (for autocomplete)
+(defvar my/ollama-host-name "127.0.0.1")
+(defvar my/ollama-port 11434)
 (defvar my/ollama-chat-model "gpt-oss:20b")
 (defvar my/ollama-fast-model "llama3.1:8b")
 (defvar my/ollama-utility-model "qwen2.5-coder:14b")
 (defvar my/ollama-embedding-model "nomic-embed-text")
+
+;; Use Bedrock for gptel
+(defvar my/use-bedrock-gptel t)
+(defvar my/bedrock-region "eu-west-1")
+(defvar my/bedrock-model-region 'eu)
+(defvar my/bedrock-model 'claude-opus-4-6)
+
+;; Use Ollama for autocomplete
+(defvar my/use-ollama-autocomplete t)
+#+END_EXAMPLE
+
+**** Personal Machine Example (Claude API + Ollama)
+#+BEGIN_EXAMPLE emacs-lisp
+;; In local-pre-init.el for personal machine:
+;; Use Claude API directly, Ollama for autocomplete
+
+;; Ollama configuration (for autocomplete and ellama)
+(defvar my/ollama-host-name "127.0.0.1")
+(defvar my/ollama-port 11434)
+(defvar my/ollama-chat-model "gpt-oss:20b")
+(defvar my/ollama-fast-model "llama3.1:8b")
+(defvar my/ollama-utility-model "qwen2.5-coder:14b")
+(defvar my/ollama-embedding-model "nomic-embed-text")
+
+;; Use Claude API for gptel
+(defvar my/use-bedrock-gptel nil)
+(defvar my/claude-api-key "your-api-key-here")  ; Or use auth-source
+(defvar my/claude-model 'claude-sonnet-4-20250514)
+
+;; Use Ollama for autocomplete
+(defvar my/use-ollama-autocomplete t)
+#+END_EXAMPLE
+
+*** Default Values (used if not set in local-pre-init.el)
+
+#+begin_src emacs-lisp
+;; Ollama host configuration
+(unless (boundp 'my/ollama-host-name)
+  (defvar my/ollama-host-name "127.0.0.1"))
+(unless (boundp 'my/ollama-port)
+  (defvar my/ollama-port 11434))
+
+;; Ollama model names
+(unless (boundp 'my/ollama-chat-model)
+  (defvar my/ollama-chat-model "gpt-oss:20b"))
+(unless (boundp 'my/ollama-fast-model)
+  (defvar my/ollama-fast-model "llama3.1:8b"))
+(unless (boundp 'my/ollama-utility-model)
+  (defvar my/ollama-utility-model "qwen2.5-coder:14b"))
+(unless (boundp 'my/ollama-embedding-model)
+  (defvar my/ollama-embedding-model "nomic-embed-text"))
+
+;; Derived variable
+(defvar my/ollama-host
+  (format "%s:%d" my/ollama-host-name my/ollama-port))
+
+;; Backend selection defaults
+(unless (boundp 'my/use-bedrock-gptel)
+  (defvar my/use-bedrock-gptel t))  ; Default to Bedrock
+(unless (boundp 'my/use-ollama-autocomplete)
+  (defvar my/use-ollama-autocomplete t))
+
+;; Bedrock configuration defaults
+(unless (boundp 'my/bedrock-region)
+  (defvar my/bedrock-region "us-east-1"))
+(unless (boundp 'my/bedrock-model-region)
+  (defvar my/bedrock-model-region 'us))
+(unless (boundp 'my/bedrock-model)
+  (defvar my/bedrock-model 'claude-sonnet-4-20250514))
+
+;; Claude API configuration defaults
+(unless (boundp 'my/claude-api-key)
+  (defvar my/claude-api-key nil))  ; Should be set in local-pre-init.el
+(unless (boundp 'my/claude-model)
+  (defvar my/claude-model 'claude-sonnet-4-20250514))
 #+end_src
 
 *** AI keymap
@@ -1104,23 +1200,52 @@ Now we can set the PlantUML jar for org-mode.
 #+end_src
 
 *** gptel
+
+Configure gptel to use either Bedrock or Claude API based on machine configuration.
+
 #+begin_src emacs-lisp
 (use-package gptel
   :ensure t
   :commands (gptel gptel-send gptel-rewrite)
   :init
+  ;; Always set up Ollama backend (might be used for autocomplete)
   (setq my/gptel-ollama
         (gptel-make-ollama
          "Ollama"
          :host my/ollama-host
          :stream t
-        :models (mapcar #'intern
-                       (list my/ollama-chat-model
-                             my/ollama-fast-model
-                             my/ollama-utility-model))))         
+         :models (mapcar #'intern
+                        (list my/ollama-chat-model
+                              my/ollama-fast-model
+                              my/ollama-utility-model))))
+
+  ;; Set up the main backend based on configuration
+  (if my/use-bedrock-gptel
+      ;; Use AWS Bedrock
+      (progn
+        (setq my/gptel-main-backend
+              (gptel-make-bedrock
+               "Claude-Bedrock"
+               :stream t
+               :region 'eu-west-1'
+               :model-region 'eu
+               :models '(claude-opus-4-6
+                 claude-sonnet-4-20250514
+                 claude-haiku-4-5-20251001)))               
+
+        (setq my/gptel-main-model my/bedrock-model))
+    ;; Use Claude API directly
+    (progn
+      (setq my/gptel-main-backend
+            (gptel-make-anthropic
+             "Claude"
+             :stream t
+             :key my/claude-api-key))  ; Can also use 'gptel-api-key for auth-source
+      (setq my/gptel-main-model my/claude-model)))
+
   :config
-  (setq gptel-backend my/gptel-ollama)
-  (setq gptel-model (intern my/ollama-chat-model))   
+  (setq gptel-backend my/gptel-main-backend)
+  (setq gptel-model my/gptel-main-model)
   (setq gptel-default-mode 'org-mode)
   (setq gptel-track-response nil)
 
@@ -1130,13 +1255,26 @@ Now we can set the PlantUML jar for org-mode.
 #+end_src
 
 *** aidermacs
+
+Aider configuration uses environment variables =AIDER_MODEL= and =AIDER_WEAK_MODEL=.
+These should be set in your shell profile or in =local-pre-init.el= using:
+
+#+BEGIN_EXAMPLE emacs-lisp
+;; In local-pre-init.el (optional, if not set in shell):
+(setenv "AIDER_MODEL" "bedrock/anthropic.claude-sonnet-4-20250514-v1:0")
+(setenv "AIDER_WEAK_MODEL" "bedrock/anthropic.claude-3-5-haiku-20241022-v1:0")
+;; or for personal machine:
+(setenv "AIDER_MODEL" "claude-sonnet-4-20250514")
+(setenv "AIDER_WEAK_MODEL" "claude-3-5-haiku-20241022")
+#+END_EXAMPLE
+
 #+begin_src emacs-lisp
 (use-package aidermacs
   :ensure t
   :commands (aidermacs-transient-menu aidermacs-run-aider)
   :init
   (setq aidermacs-default-chat-mode 'architect)
-  (setq aidermacs-use-voice nil) 
+  (setq aidermacs-use-voice nil)
   :config
   (setq aidermacs-default-model (exec-path-from-shell-getenv "AIDER_MODEL"))
   (setq aidermacs-weak-model (exec-path-from-shell-getenv "AIDER_WEAK_MODEL"))
@@ -1188,12 +1326,21 @@ Now we can set the PlantUML jar for org-mode.
 
 *** gptel autocomplete
 
+Autocomplete can use either Ollama (faster, local) or the main backend.
+Set =my/use-ollama-autocomplete= in =local-pre-init.el= to control this.
+
 #+begin_src emacs-lisp
-(setq my/gptel-autocompletion-backend
-      (gptel-make-ollama
-       "autocomplete"
-       :host my/ollama-host
-       :models '("qwen2.5-coder:14b")))
+;; Set up autocomplete backend based on configuration
+(when my/use-ollama-autocomplete
+  (setq my/gptel-autocompletion-backend
+        (gptel-make-ollama
+         "autocomplete"
+         :host my/ollama-host
+         :models (list my/ollama-utility-model))))
+
+;; If not using Ollama, use the main backend
+(unless (boundp 'my/gptel-autocompletion-backend)
+  (setq my/gptel-autocompletion-backend my/gptel-main-backend))
 
 (use-package gptel-autocomplete
   :straight '(:type git :host github :repo "JDNdeveloper/gptel-autocomplete")
@@ -1217,6 +1364,24 @@ Now we can set the PlantUML jar for org-mode.
 
 *** Claude code support
 
+Claude Code can use either Bedrock or Claude API. Set these environment variables
+in your shell profile or in =local-pre-init.el=:
+
+**** For Bedrock (work machine):
+#+BEGIN_EXAMPLE emacs-lisp
+;; In local-pre-init.el:
+(setenv "CLAUDE_CODE_USE_BEDROCK" "1")
+(setenv "AWS_BEARER_TOKEN_BEDROCK" "your-token")  ; If using bearer token auth
+;; Or rely on AWS CLI credentials
+#+END_EXAMPLE
+
+**** For Claude API (personal machine):
+#+BEGIN_EXAMPLE emacs-lisp
+;; In local-pre-init.el:
+(setenv "ANTHROPIC_API_KEY" "your-api-key")
+;; Leave CLAUDE_CODE_USE_BEDROCK unset or set to ""
+#+END_EXAMPLE
+
 **** Eat terminal emulator
 
 #+begin_src elisp
@@ -1231,12 +1396,14 @@ Now we can set the PlantUML jar for org-mode.
 #+begin_src emacs-lisp
 (use-package claude-code-ide
   :straight (:type git :host github :repo "manzaltu/claude-code-ide.el")
-  :bind ("C-q a t" . claude-code-ide-menu) ; Set your favorite keybinding
+  :bind ("C-q a t" . claude-code-ide-menu)
   :config
+  ;; Copy environment variables from shell
   (exec-path-from-shell-copy-env "AWS_BEARER_TOKEN_BEDROCK")
   (exec-path-from-shell-copy-env "CLAUDE_CODE_USE_BEDROCK")
+  (exec-path-from-shell-copy-env "ANTHROPIC_API_KEY")
   (setq claude-code-ide-terminal-backend 'eat)
-  (claude-code-ide-emacs-tools-setup)) ; Optionally enable Emacs MCP tools
+  (claude-code-ide-emacs-tools-setup))
 #+end_src
 
 
@@ -1252,9 +1419,18 @@ Now we can set the PlantUML jar for org-mode.
 
 ** Run local init
 
-Finally after all the other initializations run local initialisation file.
+Finally, after all the other initializations, run local initialization file.
+This file (=~/.emacs.d/local-init.el=) should contain:
 
-#+BEGIN_SRC emacs-lisp 
+- Machine-specific package configurations that depend on packages loaded in =init.org=
+- Custom functions or keybindings specific to this machine
+- Overrides of default settings from =init.org=
+
+*Note:* Use =local-pre-init.el= for configuration that must be set *before* packages
+are loaded (like AI backend selection, proxy settings, environment variables).
+Use =local-init.el= for configuration that must run *after* packages are loaded.
+
+#+BEGIN_SRC emacs-lisp
   (setq local-init-file "~/.emacs.d/local-init.el")
   (if (file-exists-p local-init-file)
   (load local-init-file)
