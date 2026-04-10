@@ -1382,15 +1382,15 @@ in your shell profile or in =local-pre-init.el=:
 ;; Leave CLAUDE_CODE_USE_BEDROCK unset or set to ""
 #+END_EXAMPLE
 
-**** Eat terminal emulator
+**** Vterm terminal emulator
 
 #+begin_src elisp
-(use-package eat
-  :straight (eat :type git :host codeberg :repo "akib/emacs-eat")
-  :commands (eat eat-project eat-other-window)
+(use-package vterm
+  :straight t
+  :commands (vterm vterm-other-window)
   :init
   ;; Optional: pick a convenient key
-  (global-set-key (kbd "C-c t") #'eat))
+  (global-set-key (kbd "C-c t") #'vterm))
 #+end_src
 
 #+begin_src emacs-lisp
@@ -1402,7 +1402,7 @@ in your shell profile or in =local-pre-init.el=:
   (exec-path-from-shell-copy-env "AWS_BEARER_TOKEN_BEDROCK")
   (exec-path-from-shell-copy-env "CLAUDE_CODE_USE_BEDROCK")
   (exec-path-from-shell-copy-env "ANTHROPIC_API_KEY")
-  (setq claude-code-ide-terminal-backend 'eat)
+  (setq claude-code-ide-terminal-backend 'vterm)
   (claude-code-ide-emacs-tools-setup))
 #+end_src
 

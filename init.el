@@ -694,12 +694,12 @@ should be continued."
       (apply orig args)))
   (advice-add 'gptel-complete :around #'my/gptel-autocomplete-backend))
 
-(use-package eat
-  :straight (eat :type git :host codeberg :repo "akib/emacs-eat")
-  :commands (eat eat-project eat-other-window)
+(use-package vterm
+  :straight t
+  :commands (vterm vterm-other-window)
   :init
   ;; Optional: pick a convenient key
-  (global-set-key (kbd "C-c t") #'eat))
+  (global-set-key (kbd "C-c t") #'vterm))
 
 (use-package claude-code-ide
   :straight (:type git :host github :repo "manzaltu/claude-code-ide.el")
@@ -709,7 +709,7 @@ should be continued."
   (exec-path-from-shell-copy-env "AWS_BEARER_TOKEN_BEDROCK")
   (exec-path-from-shell-copy-env "CLAUDE_CODE_USE_BEDROCK")
   (exec-path-from-shell-copy-env "ANTHROPIC_API_KEY")
-  (setq claude-code-ide-terminal-backend 'eat)
+  (setq claude-code-ide-terminal-backend 'vterm)
   (claude-code-ide-emacs-tools-setup))
 
 (straight-use-package 'exec-path-from-shell)
