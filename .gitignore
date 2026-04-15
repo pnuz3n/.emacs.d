@@ -37,6 +37,8 @@ local-pre-init.el
 # LSP / Java
 eclipse.jdt.ls/
 lsp-java/
+lsp-java-workspace/
+lsp-booster/
 .cache/
 
 # External tools

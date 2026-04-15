@@ -20,6 +20,9 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
+(straight-use-package 'use-package)
+(setq straight-use-package-by-default t)
+
 (use-package all-the-icons
 :straight t)
 
@@ -34,7 +37,7 @@
 
 (use-package doom-themes
   :straight t
-  :ensure t
+  :straight t
   :config
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
@@ -52,7 +55,7 @@
   (doom-themes-org-config))
 
 (use-package doom-modeline
-:ensure t
+:straight t
 :straight t
 :init (doom-modeline-mode 1))
 
@@ -75,7 +78,7 @@
 
 (use-package docker
   :straight t
-  :ensure t
+  :straight t
   :bind ("C-c d" . docker))
 
 (let ((elements (split-string (getenv "PATH") ":")))
@@ -283,19 +286,19 @@ should be continued."
 
 (use-package vertico
 :straight t
-:ensure t
+:straight t
 :init
 (vertico-mode))
 
 (use-package marginalia
 :straight t
-:ensure t
+:straight t
 :init
 (marginalia-mode))
 
 (use-package consult
 :straight t
-:ensure t
+:straight t
 :bind
 (("C-s" . consult-line)
  ("C-x b" . consult-buffer)
@@ -717,7 +720,8 @@ the appropriate pre-built binary, and extracts it to `lsp-booster-install-dir'."
 (global-set-key (kbd "C-q a") #'my/ai-map)
 
 (use-package gptel
-  :ensure t
+  :straight t
+  :straight t
   :commands (gptel gptel-send gptel-rewrite)
   :init
   ;; Always set up Ollama backend (might be used for autocomplete)
@@ -766,7 +770,7 @@ the appropriate pre-built binary, and extracts it to `lsp-booster-install-dir'."
   (define-key my/ai-map (kbd "r") #'gptel-rewrite))
 
 (use-package aidermacs
-  :ensure t
+  :straight t
   :commands (aidermacs-transient-menu aidermacs-run-aider)
   :init
   (setq aidermacs-default-chat-mode 'architect)
@@ -789,10 +793,12 @@ the appropriate pre-built binary, and extracts it to `lsp-booster-install-dir'."
 (define-key my/ai-map (kbd "d") #'my/git-diff-staged-to-buffer)
 
 (use-package llm
-  :ensure t)
+  :straight t
+  :straight t)
 
 (use-package ellama
-  :ensure t
+  :straight t
+  :straight t
   :after llm
   :config
   (require 'llm-ollama)

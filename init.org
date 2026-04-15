@@ -2,6 +2,22 @@
 
 #+TITLE: Emacs initialization
 
+* Early initialization
+:PROPERTIES:
+:header-args: :tangle early-init.el
+:END:
+
+Emacs 27+ loads =early-init.el= before =package.el= is initialized and
+before the GUI is drawn. Straight.el replaces =package.el= as the
+package manager, so =package.el= is disabled here to prevent it from
+loading packages at startup (which otherwise triggers a warning from
+straight.el about duplicate package versions).
+
+#+BEGIN_SRC emacs-lisp
+  ;;; -*- lexical-binding: t -*-
+  (setq package-enable-at-startup nil)
+#+END_SRC
+
 * Emacs Initialization
 :PROPERTIES:
 :header-args: :tangle init.el
@@ -65,6 +81,17 @@ configure different LLM backends (Bedrock, Claude API, Ollama) in
       (goto-char (point-max))
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
+#+END_SRC
+
+Install =use-package= via straight and make =:straight t= the implicit
+default for every =use-package= form. Without this, a bare
+=use-package= falls back to =package.el= (=:straight t=), which loads
+=package.el= alongside straight and produces the "package.el was
+loaded when straight.el was already loaded" warning.
+
+#+BEGIN_SRC emacs-lisp
+  (straight-use-package 'use-package)
+  (setq straight-use-package-by-default t)
 #+END_SRC
 
 ** Appearance
@@ -131,7 +158,7 @@ used by the Org mode.
 #+BEGIN_SRC emacs-lisp
   (use-package doom-themes
     :straight t
-    :ensure t
+    :straight t
     :config
     ;; Global settings (defaults)
     (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
@@ -151,7 +178,7 @@ used by the Org mode.
 
 #+BEGIN_SRC emacs-lisp
   (use-package doom-modeline
-  :ensure t
+  :straight t
   :straight t
   :init (doom-modeline-mode 1))
   
@@ -219,7 +246,7 @@ With wide screen it is a bit complicated to see lower left of the screen. This m
 #+BEGIN_SRC emacs-lisp
 (use-package docker
   :straight t
-  :ensure t
+  :straight t
   :bind ("C-c d" . docker))
   #+END_SRC
   
@@ -570,19 +597,19 @@ So it is unset here to allow it to be re-used later.
 #+BEGIN_SRC emacs-lisp
   (use-package vertico
   :straight t
-  :ensure t
+  :straight t
   :init
   (vertico-mode))
 
   (use-package marginalia
   :straight t
-  :ensure t
+  :straight t
   :init
   (marginalia-mode))
 
   (use-package consult
   :straight t
-  :ensure t
+  :straight t
   :bind
   (("C-s" . consult-line)
    ("C-x b" . consult-buffer)
@@ -1438,7 +1465,8 @@ Configure gptel to use either Bedrock or Claude API based on machine configurati
 
 #+begin_src emacs-lisp
 (use-package gptel
-  :ensure t
+  :straight t
+  :straight t
   :commands (gptel gptel-send gptel-rewrite)
   :init
   ;; Always set up Ollama backend (might be used for autocomplete)
@@ -1503,7 +1531,7 @@ These should be set in your shell profile or in =local-pre-init.el= using:
 
 #+begin_src emacs-lisp
 (use-package aidermacs
-  :ensure t
+  :straight t
   :commands (aidermacs-transient-menu aidermacs-run-aider)
   :init
   (setq aidermacs-default-chat-mode 'architect)
@@ -1532,10 +1560,12 @@ These should be set in your shell profile or in =local-pre-init.el= using:
 *** ellama
 #+begin_src emacs-lisp
 (use-package llm
-  :ensure t)
+  :straight t
+  :straight t)
 
 (use-package ellama
-  :ensure t
+  :straight t
+  :straight t
   :after llm
   :config
   (require 'llm-ollama)
