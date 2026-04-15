@@ -621,6 +621,57 @@ So it is unset here to allow it to be re-used later.
   (setq completion-styles '(orderless)))
 #+END_SRC
 
+** Corfu, Cape, Kind-icon
+
+In-buffer completion UI via =completion-at-point= (capf). Corfu shows a popup
+at point for code completion; Cape adds extra capf sources (dabbrev, file
+names, keywords) so Corfu has something to complete even outside LSP buffers;
+Kind-icon renders icons next to candidates indicating their kind (function,
+variable, snippet, ...). This pairs with Vertico/Consult (same ecosystem,
+same =orderless= filtering) and feeds directly off lsp-mode's
+=lsp-completion-provider :capf=, so no LSP config changes are required.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package corfu
+    :straight t
+    :init
+    (global-corfu-mode)
+    (corfu-popupinfo-mode)
+    :custom
+    (corfu-auto t)
+    (corfu-auto-delay 0.15)
+    (corfu-auto-prefix 2)
+    (corfu-cycle t)
+    (corfu-preselect 'prompt)
+    (corfu-popupinfo-delay '(0.5 . 0.2)))
+
+  (use-package cape
+    :straight t
+    :init
+    (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+    (add-to-list 'completion-at-point-functions #'cape-file)
+    (add-to-list 'completion-at-point-functions #'cape-keyword))
+
+  (use-package kind-icon
+    :straight t
+    :after corfu
+    :custom
+    (kind-icon-default-face 'corfu-default)
+    :config
+    (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
+#+END_SRC
+
+=orderless= works well during completion, but for capf it helps to let the
+basic style match literal prefixes first, so LSP's own sorting is not
+disrupted. Configure per-category overrides:
+
+#+BEGIN_SRC emacs-lisp
+  (setq completion-category-overrides
+        '((file (styles basic partial-completion))
+          (eglot (styles orderless))
+          (lsp-capf (styles orderless))))
+#+END_SRC
+
 ** Misc
 
 
@@ -1025,6 +1076,12 @@ Language Server Protocol support for code intelligence features. LSP keybindings
 are under =C-c l= prefix. Completion uses =completion-at-point= (capf) so it
 integrates with whatever completion framework is active (e.g. Vertico/Corfu).
 
+=lsp-completion-provider= is set to =:none= so lsp-mode does not attempt to
+autoconfigure company-mode (which would emit a warning on every LSP start
+when Corfu is used instead). =lsp-completion-mode= still registers
+=lsp-completion-at-point= into =completion-at-point-functions=, which Corfu
+picks up.
+
 #+BEGIN_SRC emacs-lisp
 (setenv "LSP_USE_PLISTS" "true")
 (setq lsp-use-plists t)
@@ -1043,7 +1100,7 @@ integrates with whatever completion framework is active (e.g. Vertico/Corfu).
         lsp-headerline-breadcrumb-enable t
         lsp-modeline-code-actions-enable t
         lsp-diagnostics-provider :auto
-        lsp-completion-provider :capf
+        lsp-completion-provider :none
         lsp-idle-delay 0.5)
   :hook
   ((lsp-mode . lsp-enable-which-key-integration)))

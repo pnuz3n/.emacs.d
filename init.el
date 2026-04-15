@@ -309,6 +309,39 @@ should be continued."
 :init
 (setq completion-styles '(orderless)))
 
+(use-package corfu
+  :straight t
+  :init
+  (global-corfu-mode)
+  (corfu-popupinfo-mode)
+  :custom
+  (corfu-auto t)
+  (corfu-auto-delay 0.15)
+  (corfu-auto-prefix 2)
+  (corfu-cycle t)
+  (corfu-preselect 'prompt)
+  (corfu-popupinfo-delay '(0.5 . 0.2)))
+
+(use-package cape
+  :straight t
+  :init
+  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+  (add-to-list 'completion-at-point-functions #'cape-file)
+  (add-to-list 'completion-at-point-functions #'cape-keyword))
+
+(use-package kind-icon
+  :straight t
+  :after corfu
+  :custom
+  (kind-icon-default-face 'corfu-default)
+  :config
+  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
+
+(setq completion-category-overrides
+      '((file (styles basic partial-completion))
+        (eglot (styles orderless))
+        (lsp-capf (styles orderless))))
+
 ;;; turn on syntax highlighting
 (global-font-lock-mode 1)
 
@@ -484,7 +517,7 @@ should be continued."
         lsp-headerline-breadcrumb-enable t
         lsp-modeline-code-actions-enable t
         lsp-diagnostics-provider :auto
-        lsp-completion-provider :capf
+        lsp-completion-provider :none
         lsp-idle-delay 0.5)
   :hook
   ((lsp-mode . lsp-enable-which-key-integration)))
