@@ -626,16 +626,53 @@ the appropriate pre-built binary, and extracts it to `lsp-booster-install-dir'."
 (use-package lsp-java
   :straight t
   :after lsp-mode
+  :preface
+  (defun my/detect-java-runtimes ()
+    "Return a vector for `lsp-java-configuration-runtimes' by scanning
+common JVM install roots.  Each detected JDK becomes a JavaSE-<version>
+entry; the newest version is marked as default."
+    (let* ((roots '("/usr/lib/jvm"
+                    "/usr/java"
+                    "/Library/Java/JavaVirtualMachines"))
+           (re "\\`\\(?:java-\\|jdk-?\\|openjdk-\\)\\(?:1\\.\\)?\\([0-9]+\\)")
+           (best (make-hash-table :test 'eql)))
+      (dolist (root roots)
+        (when (file-directory-p root)
+          (dolist (entry (directory-files root t "\\`[^.]"))
+            (let ((base (file-name-nondirectory entry)))
+              (when (and (file-directory-p entry)
+                         (not (file-symlink-p entry))
+                         (string-match re base))
+                (let* ((ver (string-to-number (match-string 1 base)))
+                       (mac-home (expand-file-name "Contents/Home" entry))
+                       (home (if (file-directory-p mac-home) mac-home entry))
+                       (java-bin (expand-file-name "bin/java" home))
+                       (existing (gethash ver best)))
+                  (when (and (file-executable-p java-bin)
+                             (or (null existing)
+                                 (< (length home) (length existing))))
+                    (puthash ver home best))))))))
+      (let* ((versions (sort (hash-table-keys best) #'<))
+             (newest (car (last versions))))
+        (apply #'vector
+               (mapcar (lambda (v)
+                         (let ((name (format "JavaSE-%s" (if (= v 8) "1.8" v)))
+                               (path (gethash v best)))
+                           (if (= v newest)
+                               (list :name name :path path :default t)
+                             (list :name name :path path))))
+                       versions)))))
+
+  (defun my/detect-java-path ()
+    "Path of the newest `java' executable detected by
+`my/detect-java-runtimes', or nil when no JDK is found."
+    (let ((default (seq-find (lambda (r) (plist-get r :default))
+                             (append (my/detect-java-runtimes) nil))))
+      (when default
+        (expand-file-name "bin/java" (plist-get default :path)))))
   :config
   (setq lsp-java-server-install-dir "~/.emacs.d/lsp-java/"
         lsp-java-workspace-dir (expand-file-name "~/.emacs.d/lsp-java-workspace/")
-        lsp-java-java-path "/usr/lib/jvm/java-21-openjdk-amd64/bin/java"
-        lsp-java-configuration-runtimes
-        '[(:name "JavaSE-1.8"
-         :path "/usr/lib/jvm/java-8-openjdk-amd64"
-         :default t)
-        (:name "JavaSE-21"
-         :path "/usr/lib/jvm/java-21-openjdk-amd64")]
         lsp-java-import-gradle-enabled t
         lsp-java-import-maven-enabled t
         lsp-java-maven-download-sources t
@@ -644,6 +681,12 @@ the appropriate pre-built binary, and extracts it to `lsp-booster-install-dir'."
         lsp-java-format-settings-url nil
         lsp-java-format-settings-profile nil
         lsp-java-code-generation-use-blocks t)
+  (let ((runtimes (my/detect-java-runtimes))
+        (java-path (my/detect-java-path)))
+    (when (> (length runtimes) 0)
+      (setq lsp-java-configuration-runtimes runtimes))
+    (when java-path
+      (setq lsp-java-java-path java-path)))
   :hook
   (java-mode . (lambda ()
                  (require 'lsp-java)
