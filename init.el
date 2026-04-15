@@ -1,3 +1,4 @@
+;;; -*- lexical-binding: t -*-
 (setq local-pre-init-file "~/.emacs.d/local-pre-init.el")
 (if (file-exists-p local-pre-init-file)
 (load local-pre-init-file)
@@ -462,6 +463,155 @@ should be continued."
   :bind ("C-x g" . magit-status))
 
 (use-package treemacs-magit  :straight t :after (treemacs magit))
+
+(setenv "LSP_USE_PLISTS" "true")
+(setq lsp-use-plists t)
+
+(use-package lsp-mode
+  :straight t
+  :commands (lsp lsp-deferred)
+  :init
+  (setq lsp-keymap-prefix "C-c l")
+  :config
+  (setq lsp-enable-snippet t
+        lsp-enable-symbol-highlighting t
+        lsp-enable-links t
+        lsp-signature-auto-activate t
+        lsp-signature-render-documentation t
+        lsp-headerline-breadcrumb-enable t
+        lsp-modeline-code-actions-enable t
+        lsp-diagnostics-provider :auto
+        lsp-completion-provider :capf
+        lsp-idle-delay 0.5)
+  :hook
+  ((lsp-mode . lsp-enable-which-key-integration)))
+
+(use-package lsp-ui
+  :straight t
+  :commands lsp-ui-mode
+  :config
+  (setq lsp-ui-doc-enable t
+        lsp-ui-doc-position 'at-point
+        lsp-ui-doc-show-with-cursor t
+        lsp-ui-sideline-enable t
+        lsp-ui-sideline-show-hover t))
+
+(use-package lsp-treemacs
+  :straight t
+  :after (lsp-mode treemacs)
+  :commands lsp-treemacs-errors-list)
+
+(use-package consult-lsp
+  :straight t
+  :after (consult lsp-mode)
+  :commands (consult-lsp-symbols consult-lsp-diagnostics consult-lsp-file-symbols))
+
+(defvar lsp-booster-install-dir
+    (expand-file-name "lsp-booster" user-emacs-directory)
+    "Directory where emacs-lsp-booster binary will be installed.")
+
+  (defun lsp-booster--github-asset-name ()
+    "Return the expected release asset name suffix for this platform."
+    (let ((arch (car (split-string system-configuration "-"))))
+      (cond
+       ((and (eq system-type 'gnu/linux) (string= arch "x86_64"))
+        "x86_64-unknown-linux-musl.zip")
+       ((and (eq system-type 'darwin) (string= arch "x86_64"))
+        "x86_64-apple-darwin.zip")
+       (t nil))))
+
+  (defun lsp-booster--ensure-installed ()
+    "Download and install emacs-lsp-booster if not already on PATH.
+Queries the GitHub releases API for the latest version, downloads
+the appropriate pre-built binary, and extracts it to `lsp-booster-install-dir'."
+    (when (and (not (executable-find "emacs-lsp-booster"))
+               (lsp-booster--github-asset-name))
+      (let ((install-dir lsp-booster-install-dir))
+        (unless (file-directory-p install-dir)
+          (make-directory install-dir t))
+        (unless (member install-dir exec-path)
+          (add-to-list 'exec-path install-dir)
+          (setenv "PATH" (concat install-dir ":" (getenv "PATH"))))
+        (message "emacs-lsp-booster not found, downloading from GitHub...")
+        (url-retrieve
+         "https://api.github.com/repos/blahgeek/emacs-lsp-booster/releases/latest"
+         (lambda (_status)
+           (goto-char url-http-end-of-headers)
+           (let* ((release (json-parse-buffer :object-type 'alist))
+                  (assets (alist-get 'assets release))
+                  (suffix (lsp-booster--github-asset-name))
+                  (asset (seq-find
+                          (lambda (a)
+                            (and (string-suffix-p suffix (alist-get 'name a))
+                                 (not (string-suffix-p ".sha256sum" (alist-get 'name a)))))
+                          assets))
+                  (url (alist-get 'browser_download_url asset)))
+             (if (not url)
+                 (message "emacs-lsp-booster: no matching release asset found for %s" suffix)
+               (let ((zip-file (expand-file-name "emacs-lsp-booster.zip" temporary-file-directory)))
+                 (url-copy-file url zip-file t)
+                 (call-process "unzip" nil nil nil "-o" zip-file "-d" lsp-booster-install-dir)
+                 (let ((binary (expand-file-name "emacs-lsp-booster" lsp-booster-install-dir)))
+                   (set-file-modes binary #o755)
+                   (delete-file zip-file)
+                   (message "emacs-lsp-booster installed to %s" binary))))))
+         nil t))))
+
+  (lsp-booster--ensure-installed)
+
+(defun lsp-booster--advice-json-parse (old-fn &rest args)
+  "Try to parse bytecode instead of json."
+  (or
+   (when (equal (following-char) ?#)
+     (let ((bytecode (read (current-buffer))))
+       (when (byte-code-function-p bytecode)
+         (funcall bytecode))))
+   (apply old-fn args)))
+(advice-add (if (progn (require 'json)
+                       (fboundp 'json-parse-buffer))
+                'json-parse-buffer
+              'json-read)
+            :around
+            #'lsp-booster--advice-json-parse)
+
+(defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
+  "Prepend emacs-lsp-booster command to lsp CMD."
+  (let ((orig-result (funcall old-fn cmd test?)))
+    (if (and (not test?)
+             (not (file-remote-p default-directory))
+             (not (functionp 'json-rpc-connection))
+             (executable-find "emacs-lsp-booster"))
+        (progn
+          (message "Using emacs-lsp-booster for %s!" orig-result)
+          (cons "emacs-lsp-booster" orig-result))
+      orig-result)))
+(advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command)
+
+(use-package lsp-java
+  :straight t
+  :after lsp-mode
+  :config
+  (setq lsp-java-server-install-dir "~/.emacs.d/lsp-java/"
+        lsp-java-workspace-dir (expand-file-name "~/.emacs.d/lsp-java-workspace/")
+        lsp-java-java-path "/usr/lib/jvm/java-21-openjdk-amd64/bin/java"
+        lsp-java-configuration-runtimes
+        '[(:name "JavaSE-1.8"
+         :path "/usr/lib/jvm/java-8-openjdk-amd64"
+         :default t)
+        (:name "JavaSE-21"
+         :path "/usr/lib/jvm/java-21-openjdk-amd64")]
+        lsp-java-import-gradle-enabled t
+        lsp-java-import-maven-enabled t
+        lsp-java-maven-download-sources t
+        lsp-java-autobuild-enabled t
+        lsp-java-format-enabled t
+        lsp-java-format-settings-url nil
+        lsp-java-format-settings-profile nil
+        lsp-java-code-generation-use-blocks t)
+  :hook
+  (java-mode . (lambda ()
+                 (require 'lsp-java)
+                 (lsp-deferred))))
 
 (setq default-fill-column 80)
 
