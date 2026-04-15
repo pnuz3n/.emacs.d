@@ -1,0 +1,48 @@
+# Emacs auto-generated
+ac-comphist.dat
+auto-save-list/
+bookmarks
+.dap-breakpoints
+.lsp-session-v1
+.mc-lists.el
+.org-id-locations
+network-security.data
+srecode-map.el
+tramp
+transient/
+url/
+
+# Emacs lock/auto-save files
+\#*\#
+*~
+
+# Native compilation cache
+eln-cache/
+
+# Package managers
+el-get/
+elpa/
+straight/
+
+# Session files
+session.*
+
+# Backups
+backups/
+
+# Machine-specific config
+local-init.el
+local-pre-init.el
+
+# LSP / Java
+eclipse.jdt.ls/
+lsp-java/
+.cache/
+
+# External tools
+plantuml.jar
+request/
+projects
+
+# Aider
+.aider.*
