@@ -931,7 +931,12 @@ entry; the newest version is marked as default."
   :commands (vterm vterm-other-window)
   :init
   ;; Optional: pick a convenient key
-  (global-set-key (kbd "C-c t") #'vterm))
+  (global-set-key (kbd "C-c t") #'vterm)
+  :hook
+  ;; Claude Code draws spinners and progress indicators whose width
+  ;; fluctuates. Without this Emacs visually wraps long lines onto the
+  ;; next row and the TUI jitters constantly.
+  (vterm-mode . (lambda () (setq-local truncate-lines t))))
 
 (use-package claude-code-ide
   :straight (:type git :host github :repo "manzaltu/claude-code-ide.el")

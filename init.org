@@ -1776,7 +1776,12 @@ in your shell profile or in =local-pre-init.el=:
   :commands (vterm vterm-other-window)
   :init
   ;; Optional: pick a convenient key
-  (global-set-key (kbd "C-c t") #'vterm))
+  (global-set-key (kbd "C-c t") #'vterm)
+  :hook
+  ;; Claude Code draws spinners and progress indicators whose width
+  ;; fluctuates. Without this Emacs visually wraps long lines onto the
+  ;; next row and the TUI jitters constantly.
+  (vterm-mode . (lambda () (setq-local truncate-lines t))))
 #+end_src
 
 #+begin_src emacs-lisp
