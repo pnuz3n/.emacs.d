@@ -279,6 +279,18 @@ integration which depends on all-the-icons fonts.
     :config
     (treemacs-load-theme "nerd-icons"))
   #+END_SRC
+
+Switching projects with projectile updates treemacs to display the new project
+exclusively, keeping the file tree in sync.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package treemacs-projectile
+    :straight t
+    :after (treemacs projectile)
+    :config
+    (add-hook 'projectile-after-switch-project-hook
+              #'treemacs-add-and-display-current-project-exclusively))
+#+END_SRC
 ** Docker
 
 #+BEGIN_SRC emacs-lisp

@@ -97,6 +97,13 @@
   :config
   (treemacs-load-theme "nerd-icons"))
 
+(use-package treemacs-projectile
+  :straight t
+  :after (treemacs projectile)
+  :config
+  (add-hook 'projectile-after-switch-project-hook
+            #'treemacs-add-and-display-current-project-exclusively))
+
 (use-package docker
   :straight t
   :straight t
