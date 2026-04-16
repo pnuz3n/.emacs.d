@@ -849,6 +849,56 @@ This function can be binded to key sequence when shell is activated.
                               ))
 
 #+end_src
+*** Fish-powered shell completion with annotations
+
+Emacs =shell-mode= normally gets completions from bash, which provides
+only bare candidate names without descriptions. The capf below calls
+fish directly and returns a completion table with an annotation
+function, so Corfu displays descriptions next to each candidate. Fish
+must be installed (=apt install fish=) but is not used as the default
+shell --- it runs behind the scenes only for completion queries.
+
+#+begin_src emacs-lisp
+  (defvar ps/fish-executable (executable-find "fish")
+    "Path to the fish shell, or nil if not installed.")
+
+  (defun ps/fish-completion-at-point ()
+    "Completion-at-point function that queries fish for annotated candidates."
+    (when (get-buffer-process (current-buffer))
+      (let* ((end (point))
+             (start (save-excursion
+                      (skip-chars-backward "^ \t\n")
+                      (point)))
+             (line (buffer-substring-no-properties
+                    (save-excursion (comint-bol) (point))
+                    end))
+             (raw (with-output-to-string
+                    (with-current-buffer standard-output
+                      (call-process ps/fish-executable nil t nil
+                                    "-c" (format "complete -C%s"
+                                                 (shell-quote-argument line))))))
+             (results (mapcar (lambda (l)
+                                (let ((parts (split-string l "\t")))
+                                  (cons (car parts) (cadr parts))))
+                              (split-string raw "\n" t))))
+        (when results
+          (list start end
+                (mapcar #'car results)
+                :annotation-function
+                (lambda (c)
+                  (when-let* ((desc (cdr (assoc c results))))
+                    (concat "  " desc))))))))
+
+  (if ps/fish-executable
+      (add-hook 'shell-mode-hook
+                (lambda ()
+                  (add-hook 'completion-at-point-functions
+                            #'ps/fish-completion-at-point nil t)))
+    (display-warning 'fish-completion
+                     "fish shell not found; install it for shell completion descriptions"
+                     :warning))
+#+end_src
+
 *** No passwords in shell
 
 #+BEGIN_SRC emacs-lisp 

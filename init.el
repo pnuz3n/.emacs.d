@@ -482,6 +482,45 @@ should be continued."
                             (define-key dired-mode-map (kbd "C-q c r") 'pw/dired-cd-to-vc-root)
                             ))
 
+(defvar ps/fish-executable (executable-find "fish")
+  "Path to the fish shell, or nil if not installed.")
+
+(defun ps/fish-completion-at-point ()
+  "Completion-at-point function that queries fish for annotated candidates."
+  (when (get-buffer-process (current-buffer))
+    (let* ((end (point))
+           (start (save-excursion
+                    (skip-chars-backward "^ \t\n")
+                    (point)))
+           (line (buffer-substring-no-properties
+                  (save-excursion (comint-bol) (point))
+                  end))
+           (raw (with-output-to-string
+                  (with-current-buffer standard-output
+                    (call-process ps/fish-executable nil t nil
+                                  "-c" (format "complete -C%s"
+                                               (shell-quote-argument line))))))
+           (results (mapcar (lambda (l)
+                              (let ((parts (split-string l "\t")))
+                                (cons (car parts) (cadr parts))))
+                            (split-string raw "\n" t))))
+      (when results
+        (list start end
+              (mapcar #'car results)
+              :annotation-function
+              (lambda (c)
+                (when-let* ((desc (cdr (assoc c results))))
+                  (concat "  " desc))))))))
+
+(if ps/fish-executable
+    (add-hook 'shell-mode-hook
+              (lambda ()
+                (add-hook 'completion-at-point-functions
+                          #'ps/fish-completion-at-point nil t)))
+  (display-warning 'fish-completion
+                   "fish shell not found; install it for shell completion descriptions"
+                   :warning))
+
 ;; No passwords show in shell
 (add-hook 'comint-output-filter-functions
           'comint-watch-for-password-prompt)
