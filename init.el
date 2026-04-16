@@ -578,6 +578,27 @@ should be continued."
         ("C-." . avy-goto-char)
         ("C-q q". avy-pop-mark)))
 
+(defun my/pop-global-mark-smart ()
+  "Pop global mark, reusing existing window if buffer is already visible."
+  (interactive)
+  (let ((ring global-mark-ring))
+    (while (and ring (not (marker-buffer (car ring))))
+      (setq global-mark-ring (cdr global-mark-ring))
+      (setq ring global-mark-ring))
+    (if (not ring)
+        (message "No global mark set")
+      (let* ((mark (car ring))
+             (buf (marker-buffer mark))
+             (pos (marker-position mark))
+             (win (get-buffer-window buf)))
+        (setq global-mark-ring (nconc (cdr ring) (list mark)))
+        (if win
+            (progn (select-window win) (goto-char pos))
+          (switch-to-buffer buf)
+          (goto-char pos))))))
+
+(global-set-key (kbd "C-x C-SPC") #'my/pop-global-mark-smart)
+
 (global-set-key (kbd "C-z")  'mode-line-other-buffer)
 
 (global-set-key (kbd "C-x C-b") 'ibuffer)

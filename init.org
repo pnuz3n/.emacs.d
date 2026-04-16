@@ -992,6 +992,34 @@ directory listings, and other output.
   (define-key global-map (kbd "C-q q") 'ace-jump-mode-pop-mark)
   (define-key global-map (kbd "C-.") 'ace-jump-mode)
 #+END_SRC
+** Smart jump back
+
+Pop the global mark ring, but reuse an existing window if the target buffer is
+already visible rather than switching the current window's buffer.
+
+#+BEGIN_SRC emacs-lisp
+  (defun my/pop-global-mark-smart ()
+    "Pop global mark, reusing existing window if buffer is already visible."
+    (interactive)
+    (let ((ring global-mark-ring))
+      (while (and ring (not (marker-buffer (car ring))))
+        (setq global-mark-ring (cdr global-mark-ring))
+        (setq ring global-mark-ring))
+      (if (not ring)
+          (message "No global mark set")
+        (let* ((mark (car ring))
+               (buf (marker-buffer mark))
+               (pos (marker-position mark))
+               (win (get-buffer-window buf)))
+          (setq global-mark-ring (nconc (cdr ring) (list mark)))
+          (if win
+              (progn (select-window win) (goto-char pos))
+            (switch-to-buffer buf)
+            (goto-char pos))))))
+
+  (global-set-key (kbd "C-x C-SPC") #'my/pop-global-mark-smart)
+#+END_SRC
+
 ** COMMENT File editing modes
 *** COMMENT CSV-mode
 #+BEGIN_SRC emacs-lisp 
