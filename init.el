@@ -1084,13 +1084,14 @@ entry; the newest version is marked as default."
       (with-current-buffer buf
         (revert-buffer t t))))
   ;; Accept all changes and quit ediff without confirmation prompts.
-  (with-eval-after-load 'ediff-util
-    (define-key ediff-mode-map (kbd "C-c C-c")
-      (lambda ()
-        (interactive)
-        (cl-letf (((symbol-function 'y-or-n-p) (lambda (&rest _) t))
-                  ((symbol-function 'yes-or-no-p) (lambda (&rest _) t)))
-          (ediff-quit nil))))))
+  (add-hook 'ediff-keymap-setup-hook
+    (lambda ()
+      (define-key ediff-mode-map (kbd "C-c C-c")
+        (lambda ()
+          (interactive)
+          (cl-letf (((symbol-function 'y-or-n-p) (lambda (&rest _) t))
+                    ((symbol-function 'yes-or-no-p) (lambda (&rest _) t)))
+            (ediff-quit nil)))))))
 
 (straight-use-package 'exec-path-from-shell)
 (require 'exec-path-from-shell)
