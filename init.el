@@ -1080,9 +1080,11 @@ entry; the newest version is marked as default."
   (define-advice claude-code-ide-mcp--create-diff-buffers
       (:before (old-file-path &rest _) auto-revert)
     "Silently revert buffer visiting OLD-FILE-PATH before diffing."
-    (when-let ((buf (find-buffer-visiting old-file-path)))
-      (with-current-buffer buf
-        (revert-buffer t t))))
+    (condition-case nil
+        (when-let ((buf (find-buffer-visiting old-file-path)))
+          (with-current-buffer buf
+            (revert-buffer t t)))
+      (error nil)))
   ;; Accept all changes and quit ediff without confirmation prompts.
   (add-hook 'ediff-keymap-setup-hook
     (lambda ()
