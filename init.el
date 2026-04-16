@@ -1084,7 +1084,7 @@ entry; the newest version is marked as default."
       (with-current-buffer buf
         (revert-buffer t t))))
   ;; Accept all changes and quit ediff without confirmation prompts.
-  (with-eval-after-load 'ediff
+  (with-eval-after-load 'ediff-util
     (define-key ediff-mode-map (kbd "C-c C-c")
       (lambda ()
         (interactive)
