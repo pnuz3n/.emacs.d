@@ -1249,6 +1249,22 @@ Keep everything in a single frame — no separate control frame.
   (use-package treemacs-magit  :straight t :after (treemacs magit))
 #+END_SRC
 
+** Projectile
+
+Project management with automatic project type detection. Projectile recognises
+build files (=Makefile=, =pom.xml=, =build.gradle=, =package.json=,
+=Cargo.toml=, etc.) and provides compile, test, and run commands for each. The
+keymap is bound to =C-c p=.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package projectile
+    :straight t
+    :init
+    (projectile-mode +1)
+    :bind-keymap
+    ("C-c p" . projectile-command-map))
+#+END_SRC
+
 ** LSP Mode
 
 Language Server Protocol support for code intelligence features. LSP keybindings

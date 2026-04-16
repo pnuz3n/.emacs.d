@@ -627,6 +627,13 @@ should be continued."
 
 (use-package treemacs-magit  :straight t :after (treemacs magit))
 
+(use-package projectile
+  :straight t
+  :init
+  (projectile-mode +1)
+  :bind-keymap
+  ("C-c p" . projectile-command-map))
+
 (setenv "LSP_USE_PLISTS" "true")
 (setq lsp-use-plists t)
 
