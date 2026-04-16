@@ -957,7 +957,17 @@ entry; the newest version is marked as default."
   (exec-path-from-shell-copy-env "CLAUDE_CODE_USE_BEDROCK")
   (exec-path-from-shell-copy-env "ANTHROPIC_API_KEY")
   (setq claude-code-ide-terminal-backend 'vterm)
-  (claude-code-ide-emacs-tools-setup))
+  (setq claude-code-ide-focus-claude-after-ediff nil)
+  (claude-code-ide-emacs-tools-setup)
+  ;; Silently revert an already-open buffer before diffing so that
+  ;; find-file-noselect does not prompt "revert buffer?" in the
+  ;; minibuffer and block the diff view.
+  (define-advice claude-code-ide-mcp--create-diff-buffers
+      (:before (old-file-path &rest _) auto-revert)
+    "Silently revert buffer visiting OLD-FILE-PATH before diffing."
+    (when-let ((buf (find-buffer-visiting old-file-path)))
+      (with-current-buffer buf
+        (revert-buffer t t)))))
 
 (straight-use-package 'exec-path-from-shell)
 (require 'exec-path-from-shell)

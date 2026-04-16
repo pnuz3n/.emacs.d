@@ -687,7 +687,7 @@ disrupted. Configure per-category overrides:
 ** Misc
 
 
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
   ;;; turn on syntax highlighting
   (global-font-lock-mode 1)
 
@@ -1782,7 +1782,7 @@ in your shell profile or in =local-pre-init.el=:
 
 **** Vterm terminal emulator
 
-#+begin_src elisp
+#+begin_src emacs-lisp
 (use-package vterm
   :straight t
   :commands (vterm vterm-other-window)
@@ -1796,6 +1796,23 @@ in your shell profile or in =local-pre-init.el=:
   (vterm-mode . (lambda () (setq-local truncate-lines t))))
 #+end_src
 
+**** Claude Code IDE integration
+
+The =claude-code-ide= package connects Emacs to the Claude Code CLI
+via MCP over WebSocket. It provides an ediff-based diff view,
+diagnostics forwarding, and Emacs-side tools (xref, imenu, etc.)
+that Claude can call.
+
+Focus stays on the ediff buffer when a diff opens so that hunk
+navigation (=n= / =p=) works immediately instead of landing in the
+Claude Code vterm window.
+
+When Claude edits a file that is already open in Emacs, the diff
+handler would normally trigger a "revert buffer?" prompt in the
+minibuffer, hiding the diff. A =:before= advice on the diff-buffer
+creation function silently reverts the stale buffer so the prompt
+never appears.
+
 #+begin_src emacs-lisp
 (use-package claude-code-ide
   :straight (:type git :host github :repo "manzaltu/claude-code-ide.el")
@@ -1806,7 +1823,17 @@ in your shell profile or in =local-pre-init.el=:
   (exec-path-from-shell-copy-env "CLAUDE_CODE_USE_BEDROCK")
   (exec-path-from-shell-copy-env "ANTHROPIC_API_KEY")
   (setq claude-code-ide-terminal-backend 'vterm)
-  (claude-code-ide-emacs-tools-setup))
+  (setq claude-code-ide-focus-claude-after-ediff nil)
+  (claude-code-ide-emacs-tools-setup)
+  ;; Silently revert an already-open buffer before diffing so that
+  ;; find-file-noselect does not prompt "revert buffer?" in the
+  ;; minibuffer and block the diff view.
+  (define-advice claude-code-ide-mcp--create-diff-buffers
+      (:before (old-file-path &rest _) auto-revert)
+    "Silently revert buffer visiting OLD-FILE-PATH before diffing."
+    (when-let ((buf (find-buffer-visiting old-file-path)))
+      (with-current-buffer buf
+        (revert-buffer t t)))))
 #+end_src
 
 
