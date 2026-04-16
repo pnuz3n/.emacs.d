@@ -1972,7 +1972,8 @@ that Claude can call.
 
 Focus stays on the ediff buffer when a diff opens so that hunk
 navigation (=n= / =p=) works immediately. Use =C-c C-c= to accept
-all changes and quit without confirmation prompts. The binding is set
+all changes and quit without confirmation prompts, or =C-c C-k= to
+cancel and revert the file to its saved state. Both bindings are set
 via =ediff-keymap-setup-hook=, which runs after =ediff-set-keys=
 creates the keymap (the map is =nil= until then, so earlier hooks
 and =with-eval-after-load= do not work).
@@ -2007,7 +2008,7 @@ revert failure does not prevent the diff from opening.
           (with-current-buffer buf
             (revert-buffer t t)))
       (error nil)))
-  ;; Accept all changes and quit ediff without confirmation prompts.
+  ;; Accept or cancel ediff without confirmation prompts.
   (add-hook 'ediff-keymap-setup-hook
     (lambda ()
       (define-key ediff-mode-map (kbd "C-c C-c")
@@ -2015,7 +2016,17 @@ revert failure does not prevent the diff from opening.
           (interactive)
           (cl-letf (((symbol-function 'y-or-n-p) (lambda (&rest _) t))
                     ((symbol-function 'yes-or-no-p) (lambda (&rest _) t)))
-            (ediff-quit nil)))))))
+            (ediff-quit nil))))
+      (define-key ediff-mode-map (kbd "C-c C-k")
+        (lambda ()
+          (interactive)
+          (let ((buf ediff-buffer-A))
+            (cl-letf (((symbol-function 'y-or-n-p) (lambda (&rest _) t))
+                      ((symbol-function 'yes-or-no-p) (lambda (&rest _) t)))
+              (ediff-quit nil))
+            (when (buffer-live-p buf)
+              (with-current-buffer buf
+                (revert-buffer t t)))))))))
 #+end_src
 
 

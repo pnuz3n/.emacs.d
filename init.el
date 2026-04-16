@@ -1087,7 +1087,7 @@ entry; the newest version is marked as default."
           (with-current-buffer buf
             (revert-buffer t t)))
       (error nil)))
-  ;; Accept all changes and quit ediff without confirmation prompts.
+  ;; Accept or cancel ediff without confirmation prompts.
   (add-hook 'ediff-keymap-setup-hook
     (lambda ()
       (define-key ediff-mode-map (kbd "C-c C-c")
@@ -1095,7 +1095,17 @@ entry; the newest version is marked as default."
           (interactive)
           (cl-letf (((symbol-function 'y-or-n-p) (lambda (&rest _) t))
                     ((symbol-function 'yes-or-no-p) (lambda (&rest _) t)))
-            (ediff-quit nil)))))))
+            (ediff-quit nil))))
+      (define-key ediff-mode-map (kbd "C-c C-k")
+        (lambda ()
+          (interactive)
+          (let ((buf ediff-buffer-A))
+            (cl-letf (((symbol-function 'y-or-n-p) (lambda (&rest _) t))
+                      ((symbol-function 'yes-or-no-p) (lambda (&rest _) t)))
+              (ediff-quit nil))
+            (when (buffer-live-p buf)
+              (with-current-buffer buf
+                (revert-buffer t t)))))))))
 
 (straight-use-package 'exec-path-from-shell)
 (require 'exec-path-from-shell)
