@@ -899,9 +899,64 @@ shell --- it runs behind the scenes only for completion queries.
                      :warning))
 #+end_src
 
+*** GPTel autocomplete in shell-mode
+
+GPTel autocomplete works in shell buffers with two safety guards:
+it only triggers when the cursor is at the command prompt (after the
+process mark, not up in scrollback) and when the shell is idle (no
+command currently producing output).  Recent terminal output provides
+context so the LLM can suggest commands informed by error messages,
+directory listings, and other output.
+
+#+begin_src emacs-lisp
+  (defvar ps/gptel-shell-context-lines 100
+    "Lines of recent shell output to include as context for gptel autocomplete.")
+
+  (defvar ps/gptel-shell-idle-threshold 1.0
+    "Seconds since last output before the shell is considered idle.")
+
+  (defvar-local ps/shell-last-output-time nil
+    "Time of last comint output in this buffer.")
+
+  (defun ps/shell-track-output (&rest _)
+    "Record the time of the latest shell output."
+    (setq ps/shell-last-output-time (current-time)))
+
+  (add-hook 'shell-mode-hook
+            (lambda ()
+              (add-hook 'comint-output-filter-functions
+                        #'ps/shell-track-output nil t)))
+
+  (defun ps/gptel-shell-idle-prompt-p ()
+    "Non-nil when point is at an idle shell prompt."
+    (and (derived-mode-p 'shell-mode)
+         (comint-after-pmark-p)
+         (or (null ps/shell-last-output-time)
+             (> (float-time (time-since ps/shell-last-output-time))
+                ps/gptel-shell-idle-threshold))))
+
+  (defun ps/gptel-shell-guard (orig &rest args)
+    "In shell-mode, only trigger gptel autocomplete at an idle prompt."
+    (if (derived-mode-p 'shell-mode)
+        (when (ps/gptel-shell-idle-prompt-p)
+          (apply orig args))
+      (apply orig args)))
+
+  (defun ps/gptel-shell-context (orig &rest args)
+    "Override context line count for shell-mode buffers."
+    (if (derived-mode-p 'shell-mode)
+        (let ((gptel-autocomplete-before-context-lines ps/gptel-shell-context-lines)
+              (gptel-autocomplete-after-context-lines 0))
+          (apply orig args))
+      (apply orig args)))
+
+  (advice-add 'gptel--post-command :around #'ps/gptel-shell-guard)
+  (advice-add 'gptel-complete :around #'ps/gptel-shell-context)
+#+end_src
+
 *** No passwords in shell
 
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 ;; No passwords show in shell
 (add-hook 'comint-output-filter-functions
           'comint-watch-for-password-prompt)
