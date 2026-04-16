@@ -1963,14 +1963,18 @@ diagnostics forwarding, and Emacs-side tools (xref, imenu, etc.)
 that Claude can call.
 
 Focus stays on the ediff buffer when a diff opens so that hunk
-navigation (=n= / =p=) works immediately instead of landing in the
-Claude Code vterm window.
+navigation (=n= / =p=) works immediately. Use =C-c C-c= to accept
+all changes and quit without confirmation prompts. The binding is set
+via =ediff-keymap-setup-hook=, which runs after =ediff-set-keys=
+creates the keymap (the map is =nil= until then, so earlier hooks
+and =with-eval-after-load= do not work).
 
 When Claude edits a file that is already open in Emacs, the diff
 handler would normally trigger a "revert buffer?" prompt in the
 minibuffer, hiding the diff. A =:before= advice on the diff-buffer
 creation function silently reverts the stale buffer so the prompt
-never appears.
+never appears. The advice is wrapped in =condition-case= so any
+revert failure does not prevent the diff from opening.
 
 #+begin_src emacs-lisp
 (use-package claude-code-ide
