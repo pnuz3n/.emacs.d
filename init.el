@@ -26,6 +26,18 @@
 (use-package all-the-icons
 :straight t)
 
+(use-package nerd-icons
+  :straight t
+  :config
+  (let ((font-dest (concat (or (getenv "XDG_DATA_HOME")
+                               (concat (getenv "HOME") "/.local/share"))
+                           "/fonts/"
+                           nerd-icons-fonts-subdirectory)))
+    (unless (cl-every (lambda (font)
+                        (file-exists-p (expand-file-name font font-dest)))
+                      nerd-icons-font-names)
+      (nerd-icons-install-fonts t))))
+
 (setq inhibit-startup-message t)
 (setq inhibit-splash-screen t)
 
@@ -72,9 +84,7 @@
   :bind
   ("C-x t t" . treemacs)
   :config
-  (setq treemacs-width 30)
-  (setq treemacs-no-png-images t
-      treemacs--icon-size-check nil))
+  (setq treemacs-width 30))
 
 (use-package docker
   :straight t

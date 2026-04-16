@@ -100,6 +100,25 @@ loaded when straight.el was already loaded" warning.
   (use-package all-the-icons
   :straight t)
 #+END_SRC
+
+*** Nerd icons
+
+Nerd icons are used by doom-themes treemacs theme and doom-modeline.
+Fonts are installed automatically on first launch if missing.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package nerd-icons
+    :straight t
+    :config
+    (let ((font-dest (concat (or (getenv "XDG_DATA_HOME")
+                                 (concat (getenv "HOME") "/.local/share"))
+                             "/fonts/"
+                             nerd-icons-fonts-subdirectory)))
+      (unless (cl-every (lambda (font)
+                          (file-exists-p (expand-file-name font font-dest)))
+                        nerd-icons-font-names)
+        (nerd-icons-install-fonts t))))
+#+END_SRC
 *** Minimalistic user interface
 
 Emacs shows startup screen. It gets anoying after a while, so they
@@ -184,9 +203,6 @@ used by the Org mode.
   
  #+END_SRC
 
- It might be necessary to install fonts (use M-x nerd-icons-install-fonts).
-
- 
 
   Of course we can choose what kind of faces ~variable-pitch~ and ~fixed-pitch~ are.
  #+BEGIN_SRC emacs-lisp :tangle no
@@ -235,12 +251,8 @@ With wide screen it is a bit complicated to see lower left of the screen. This m
     :bind
     ("C-x t t" . treemacs)
     :config
-    (setq treemacs-width 30)
-    (setq treemacs-no-png-images t
-        treemacs--icon-size-check nil))
+    (setq treemacs-width 30))
   #+END_SRC
-
-  Needs fronts from https://www.nerdfonts.com/font-downloads
 ** Docker
 
 #+BEGIN_SRC emacs-lisp
