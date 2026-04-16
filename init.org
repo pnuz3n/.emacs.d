@@ -1231,6 +1231,14 @@ Set up wcheck mode for spell checking
 
 #+END_SRC
 
+** Ediff
+
+Keep everything in a single frame — no separate control frame.
+
+#+begin_src emacs-lisp
+(setq ediff-window-setup-function 'ediff-setup-windows-plain)
+#+end_src
+
 ** Magit for using git
 
 #+BEGIN_SRC emacs-lisp

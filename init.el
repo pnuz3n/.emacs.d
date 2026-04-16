@@ -619,6 +619,8 @@ should be continued."
                            (mode . term-mode)
                            ))))))
 
+(setq ediff-window-setup-function 'ediff-setup-windows-plain)
+
 (use-package magit
   :straight t
   :bind ("C-x g" . magit-status))
