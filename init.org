@@ -261,8 +261,7 @@ dark background of doom-acario-dark.
   (use-package treemacs
     :straight t
     :bind
-    ("C-x t t" . treemacs)
-    ("C-q t" . treemacs-select-window)
+    ("C-x t t" . treemacs-select-window)
     :config
     (setq treemacs-width 30)
     (set-face-attribute 'treemacs-hl-line-face nil
