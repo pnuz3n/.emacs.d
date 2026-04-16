@@ -85,7 +85,7 @@
   :straight t
   :bind
   ("C-x t t" . treemacs)
-  ("C-x t s" . treemacs-select-window)
+  ("C-q t" . treemacs-select-window)
   :config
   (setq treemacs-width 30)
   (set-face-attribute 'treemacs-hl-line-face nil
