@@ -627,6 +627,17 @@ should be continued."
 
 (use-package treemacs-magit  :straight t :after (treemacs magit))
 
+(setq compilation-scroll-output t)
+
+(defun my/compilation-auto-close (buf status)
+  (when (string= status "finished\n")
+    (run-at-time 2 nil
+                 (lambda ()
+                   (when-let (win (get-buffer-window buf t))
+                     (delete-window win))))))
+
+(add-hook 'compilation-finish-functions #'my/compilation-auto-close)
+
 (use-package projectile
   :straight t
   :init

@@ -1249,6 +1249,24 @@ Keep everything in a single frame — no separate control frame.
   (use-package treemacs-magit  :straight t :after (treemacs magit))
 #+END_SRC
 
+** Compilation
+
+Scroll the compilation buffer to follow output as it arrives. On a successful
+build, automatically close the compilation window after a short delay.
+
+#+BEGIN_SRC emacs-lisp
+  (setq compilation-scroll-output t)
+
+  (defun my/compilation-auto-close (buf status)
+    (when (string= status "finished\n")
+      (run-at-time 2 nil
+                   (lambda ()
+                     (when-let (win (get-buffer-window buf t))
+                       (delete-window win))))))
+
+  (add-hook 'compilation-finish-functions #'my/compilation-auto-close)
+#+END_SRC
+
 ** Projectile
 
 Project management with automatic project type detection. Projectile recognises
