@@ -631,6 +631,10 @@ should be continued."
   :straight t
   :init
   (projectile-mode +1)
+  :config
+  (setq compilation-read-command nil)
+  (setq projectile-project-search-path '("~/src"))
+  (projectile-add-known-project "~/.emacs.d/")
   :bind-keymap
   ("C-c p" . projectile-command-map))
 
