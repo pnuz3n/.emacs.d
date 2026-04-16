@@ -60,9 +60,6 @@
   (doom-themes-visual-bell-config)
   ;; Enable custom neotree theme (nerd-icons must be installed!)
   (doom-themes-neotree-config)
-  ;; or for treemacs users
-  (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
-  (doom-themes-treemacs-config)
   ;; Corrects (and improves) org-mode's native fontification.
   (doom-themes-org-config))
 
@@ -85,6 +82,12 @@
   ("C-x t t" . treemacs)
   :config
   (setq treemacs-width 30))
+
+(use-package treemacs-nerd-icons
+  :straight t
+  :after treemacs
+  :config
+  (treemacs-load-theme "nerd-icons"))
 
 (use-package docker
   :straight t
