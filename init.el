@@ -684,7 +684,8 @@ should be continued."
 (use-package lsp-treemacs
   :straight t
   :after (lsp-mode treemacs)
-  :commands lsp-treemacs-errors-list)
+  :commands lsp-treemacs-errors-list
+  :hook (lsp-mode . lsp-treemacs-sync-mode))
 
 (use-package consult-lsp
   :straight t
