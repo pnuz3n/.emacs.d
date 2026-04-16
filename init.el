@@ -86,7 +86,10 @@
   :bind
   ("C-x t t" . treemacs)
   :config
-  (setq treemacs-width 30))
+  (setq treemacs-width 30)
+  (set-face-attribute 'treemacs-hl-line-face nil
+                      :background "#2a2a3e"
+                      :extend t))
 
 (use-package treemacs-nerd-icons
   :straight t

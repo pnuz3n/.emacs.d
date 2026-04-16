@@ -254,13 +254,19 @@ With wide screen it is a bit complicated to see lower left of the screen. This m
 
 ** Treemacs
 
+The highlight line face is brightened so it is visible against the
+dark background of doom-acario-dark.
+
 #+BEGIN_SRC emacs-lisp
   (use-package treemacs
     :straight t
     :bind
     ("C-x t t" . treemacs)
     :config
-    (setq treemacs-width 30))
+    (setq treemacs-width 30)
+    (set-face-attribute 'treemacs-hl-line-face nil
+                        :background "#2a2a3e"
+                        :extend t))
 #+END_SRC
 
 Nerd-icons theme for treemacs replaces the doom-themes treemacs
