@@ -68,6 +68,11 @@
 :straight t
 :init (doom-modeline-mode 1))
 
+(setq window-divider-default-right-width 4
+      window-divider-default-bottom-width 4)
+(set-face-foreground 'window-divider "#2E3044")
+(window-divider-mode 1)
+
 (use-package vertico-posframe
   :straight t
   :after vertico

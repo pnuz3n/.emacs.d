@@ -226,6 +226,18 @@ While we are at it we could make Org-mode look a little better in general.
 (set-face-attribute 'org-level-3 nil :height 1.1)
 #+END_SRC
 
+*** Gaps between windows
+
+Small gaps between windows make it easier to see where one window
+ends and the next begins.
+
+#+BEGIN_SRC emacs-lisp
+  (setq window-divider-default-right-width 4
+        window-divider-default-bottom-width 4)
+  (set-face-foreground 'window-divider "#2E3044")
+  (window-divider-mode 1)
+#+END_SRC
+
 *** Minibuffer to center of the screen
 
 With wide screen it is a bit complicated to see lower left of the screen. This moves minibuffer to center.
