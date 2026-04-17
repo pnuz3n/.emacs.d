@@ -2118,10 +2118,10 @@ Model selection uses the =provider/model= format ECA expects (e.g. =ollama/qwen2
   :straight '(:type git :host github :repo "editor-code-assistant/eca-emacs")
   :commands (eca)
   :config
-  (setq eca-chat-custom-model (format "ollama/%s" my/ollama-utility-model))
+  (setq eca-chat-custom-model (format "anthropic/%s" (symbol-name my/claude-model)))
   (setenv "ECA_CONFIG"
           (json-encode
-           `(("providers" . (("ollama" . (("url" . ,(format "http://%s" my/ollama-host)))))))))
+           `(("providers" . (("anthropic" . (("key" . ,my/claude-api-key))))))))
   (define-key my/ai-map (kbd "E") #'eca))
 #+end_src
 
