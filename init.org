@@ -2080,6 +2080,43 @@ revert failure does not prevent the diff from opening.
                 (revert-buffer t t)))))))))
 #+end_src
 
+**** Claude Code IDE extras
+
+The =claude-code-ide-extras= package extends the base integration with
+additional MCP tools grouped into four modules: Emacs introspection
+(symbol docs, buffer search, elisp eval), LSP (format buffer, hover
+info), Projectile (non-blocking task execution, project file/buffer
+discovery), and meta (per-project tool advice via
+=get_mcp_custom_advice=).
+
+The Projectile module starts tasks in a per-project compilation buffer.
+Setting =projectile-per-project-compilation-buffer= ensures parallel
+tasks across projects do not clobber each other's output.
+
+#+begin_src emacs-lisp
+(use-package claude-code-ide-extras
+  :straight (:type git :host github :repo "acmorrow/claude-code-ide-extras")
+  :after claude-code-ide
+  :config
+  (setq projectile-per-project-compilation-buffer t)
+  (claude-code-ide-extras-setup))
+#+end_src
+
+*** eca
+
+ECA (Editor Code Assistant) is an open-source AI pair programming tool. It
+launches a local server process (downloaded automatically on first use) and
+opens an interactive chat window. Model and provider are configured in the
+ECA server settings; no Emacs-side API keys are needed.
+
+#+begin_src emacs-lisp
+(use-package eca
+  :straight '(:type git :host github :repo "editor-code-assistant/eca-emacs")
+  :commands (eca)
+  :config
+  (define-key my/ai-map (kbd "E") #'eca))
+#+end_src
+
 
 
 ** Grab environment variables from shell

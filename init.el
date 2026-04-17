@@ -1137,6 +1137,19 @@ entry; the newest version is marked as default."
               (with-current-buffer buf
                 (revert-buffer t t)))))))))
 
+(use-package claude-code-ide-extras
+  :straight (:type git :host github :repo "acmorrow/claude-code-ide-extras")
+  :after claude-code-ide
+  :config
+  (setq projectile-per-project-compilation-buffer t)
+  (claude-code-ide-extras-setup))
+
+(use-package eca
+  :straight '(:type git :host github :repo "editor-code-assistant/eca-emacs")
+  :commands (eca)
+  :config
+  (define-key my/ai-map (kbd "E") #'eca))
+
 (straight-use-package 'exec-path-from-shell)
 (require 'exec-path-from-shell)
 (exec-path-from-shell-copy-env "AWS_REGION")
