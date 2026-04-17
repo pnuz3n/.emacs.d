@@ -2125,7 +2125,20 @@ Model selection uses the =provider/model= format ECA expects (e.g. =ollama/qwen2
   (define-key my/ai-map (kbd "E") #'eca))
 #+end_src
 
+*** agent-shell
 
+Agent Shell runs AI coding agents (Claude Code, Gemini CLI, Codex, Goose) inside
+a native Emacs comint buffer via the ACP (AI Control Protocol) standard. The
+=agent-shell= command prompts for which agent to launch.
+
+#+begin_src emacs-lisp
+(use-package agent-shell
+  :straight t
+  :commands (agent-shell)
+  :config
+  (setq agent-shell-anthropic-claude-acp-command '("npx" "@agentclientprotocol/claude-agent-acp"))
+  (define-key my/ai-map (kbd "S") #'agent-shell))
+#+end_src
 
 ** Grab environment variables from shell
 

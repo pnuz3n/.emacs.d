@@ -1154,6 +1154,13 @@ entry; the newest version is marked as default."
            `(("providers" . (("ollama" . (("url" . ,(format "http://%s" my/ollama-host)))))))))
   (define-key my/ai-map (kbd "E") #'eca))
 
+(use-package agent-shell
+  :straight t
+  :commands (agent-shell)
+  :config
+  (setq agent-shell-anthropic-claude-acp-command '("npx" "@agentclientprotocol/claude-agent-acp"))
+  (define-key my/ai-map (kbd "S") #'agent-shell))
+
 (straight-use-package 'exec-path-from-shell)
 (require 'exec-path-from-shell)
 (exec-path-from-shell-copy-env "AWS_REGION")
