@@ -1149,9 +1149,7 @@ entry; the newest version is marked as default."
   :commands (eca)
   :config
   (setq eca-chat-custom-model (format "anthropic/%s" (symbol-name my/claude-model)))
-  (setenv "ECA_CONFIG"
-          (json-encode
-           `(("providers" . (("anthropic" . (("key" . ,my/claude-api-key))))))))
+  (setenv "ANTHROPIC_API_KEY" my/claude-api-key)
   (define-key my/ai-map (kbd "E") #'eca))
 
 (use-package agent-shell
