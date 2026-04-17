@@ -653,6 +653,7 @@ should be continued."
   (setq compilation-read-command nil)
   (setq projectile-project-search-path '("~/src"))
   (projectile-add-known-project "~/.emacs.d/")
+  (projectile-discover-projects-in-search-path)
   :bind-keymap
   ("C-c p" . projectile-command-map))
 
