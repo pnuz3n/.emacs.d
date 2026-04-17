@@ -348,7 +348,10 @@ should be continued."
   (corfu-auto-prefix 2)
   (corfu-cycle t)
   (corfu-preselect 'prompt)
-  (corfu-popupinfo-delay '(0.5 . 0.2)))
+  (corfu-popupinfo-delay '(0.5 . 0.2))
+  ;; Vertico handles minibuffer completion; disabling Corfu there avoids
+  ;; popup-positioning errors (number-or-marker-p nil) when both compete.
+  (global-corfu-minibuffer nil))
 
 (use-package cape
   :straight t
