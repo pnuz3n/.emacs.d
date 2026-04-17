@@ -1148,6 +1148,10 @@ entry; the newest version is marked as default."
   :straight '(:type git :host github :repo "editor-code-assistant/eca-emacs")
   :commands (eca)
   :config
+  (setq eca-chat-custom-model (format "ollama/%s" my/ollama-utility-model))
+  (setenv "ECA_CONFIG"
+          (json-encode
+           `(("providers" . (("ollama" . (("url" . ,(format "http://%s" my/ollama-host)))))))))
   (define-key my/ai-map (kbd "E") #'eca))
 
 (straight-use-package 'exec-path-from-shell)

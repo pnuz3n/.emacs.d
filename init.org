@@ -2106,14 +2106,22 @@ tasks across projects do not clobber each other's output.
 
 ECA (Editor Code Assistant) is an open-source AI pair programming tool. It
 launches a local server process (downloaded automatically on first use) and
-opens an interactive chat window. Model and provider are configured in the
-ECA server settings; no Emacs-side API keys are needed.
+opens an interactive chat window.
+
+It uses the Ollama utility model (=my/ollama-utility-model=) and points at the
+same Ollama host as the rest of the config. The Ollama URL is injected via
+=ECA_CONFIG= so the ECA server inherits it without touching =~/.config/eca/config.json=.
+Model selection uses the =provider/model= format ECA expects (e.g. =ollama/qwen2.5-coder:14b=).
 
 #+begin_src emacs-lisp
 (use-package eca
   :straight '(:type git :host github :repo "editor-code-assistant/eca-emacs")
   :commands (eca)
   :config
+  (setq eca-chat-custom-model (format "ollama/%s" my/ollama-utility-model))
+  (setenv "ECA_CONFIG"
+          (json-encode
+           `(("providers" . (("ollama" . (("url" . ,(format "http://%s" my/ollama-host)))))))))
   (define-key my/ai-map (kbd "E") #'eca))
 #+end_src
 
