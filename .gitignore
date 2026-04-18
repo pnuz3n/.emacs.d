@@ -7,6 +7,7 @@ bookmarks
 .mc-lists.el
 .org-id-locations
 network-security.data
+projectile-bookmarks.eld
 srecode-map.el
 tramp
 transient/
@@ -46,6 +47,10 @@ plantuml.jar
 request/
 projects
 
-# Aider
+# AI tooling state
 .aider.*
 /.agent-shell/
+.ai.code.files/
+agent/
+eca/
+ellama-sessions/
