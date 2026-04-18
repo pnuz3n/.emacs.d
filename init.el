@@ -1166,8 +1166,25 @@ entry; the newest version is marked as default."
   :straight '(:type git :host github :repo "editor-code-assistant/eca-emacs")
   :commands (eca)
   :config
-  (setq eca-chat-custom-model (format "anthropic/%s" (symbol-name my/claude-model)))
-  (setenv "ANTHROPIC_API_KEY" my/claude-api-key)
+  (let* ((ollama-url (format "http://%s:%d" my/ollama-host-name my/ollama-port))
+         (ollama-model (format "ollama/%s" my/ollama-utility-model))
+         (claude-model (format "anthropic/%s" (symbol-name my/claude-model))))
+    ;; Point ECA's built-in ollama provider at our Ollama host and pin the
+    ;; completion model to Ollama. Chat/rewrite fall back to the top-level
+    ;; defaultModel (Claude). ECA_CONFIG is read by the server on startup,
+    ;; overriding the default ollama URL (http://localhost:11434) without
+    ;; needing to write ~/.config/eca/config.json.
+    (setenv "ECA_CONFIG"
+            (json-encode
+             `((providers . ((ollama . ((url . ,ollama-url)))))
+               (defaultModel . ,claude-model)
+               (completion . ((model . ,ollama-model))))))
+    ;; Credentials for the chat/rewrite path.
+    (setenv "ANTHROPIC_API_KEY" my/claude-api-key)
+    ;; Also set OLLAMA_API_BASE so any code path that reads the env var picks
+    ;; up the same host.
+    (setenv "OLLAMA_API_BASE" ollama-url)
+    (setq eca-chat-custom-model claude-model))
   (define-key my/ai-map (kbd "E") #'eca))
 
 (use-package agent-shell
