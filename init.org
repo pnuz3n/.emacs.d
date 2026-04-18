@@ -2141,6 +2141,60 @@ a native Emacs comint buffer via the ACP (AI Control Protocol) standard. The
   (define-key my/ai-map (kbd "S") #'agent-shell))
 #+end_src
 
+*** mcp-server
+
+[[https://github.com/rhblind/emacs-mcp-server][emacs-mcp-server]] exposes this Emacs instance as an MCP server over a Unix
+socket. It ships two tools: =eval-elisp= (arbitrary Elisp evaluation) and
+=get-diagnostics= (Flycheck/Flymake errors across project buffers). Start it
+manually with =C-q a M=; the socket lives at
+=~/.emacs.d/emacs-mcp-server.sock=.
+
+Security note: =eval-elisp= runs arbitrary Elisp, so keep the server off unless
+an AI session actively needs it.
+
+To let =agent-shell='s Claude Code session reach the server, register it once
+with the Claude CLI (writes to =~/.claude.json=):
+
+#+begin_example
+claude mcp add emacs --scope user -- \
+  python3 ~/.emacs.d/straight/repos/emacs-mcp-server/mcp-wrapper.py \
+  ~/.emacs.d/emacs-mcp-server.sock
+#+end_example
+
+The bundled =mcp-wrapper.py= is pure-stdlib Python and bridges stdio to the
+Unix socket, avoiding a =socat= dependency.
+
+#+begin_src emacs-lisp
+(use-package mcp-server
+  :straight (:host github :repo "rhblind/emacs-mcp-server"
+             :files ("*.el" "tools/*.el"))
+  :commands (mcp-server-start-unix)
+  :config
+  (define-key my/ai-map (kbd "M") #'mcp-server-start-unix))
+#+end_src
+
+*** ai-code-interface
+
+AI Code Interface provides a unified workflow across AI coding CLIs and an
+Emacs MCP server. When a Claude Code session starts via =ai-code-cli-start=,
+the package automatically launches a local MCP HTTP server and injects
+session-scoped credentials into the agent, giving Claude Code access to
+Emacs tools: buffer contents, project files, Flycheck/Flymake diagnostics,
+imenu symbols, xref references, and tree-sitter AST inspection.
+
+Editor-session tools (=editor_state=, =visible_buffers=, =messages_tail=,
+=eval_elisp=) are enabled via =ai-code-mcp-editor-tools-enabled=.
+
+#+begin_src emacs-lisp
+(use-package ai-code
+  :straight (:host github :repo "tninja/ai-code-interface.el")
+  :commands (ai-code-menu ai-code-cli-start)
+  :config
+  (ai-code-set-backend 'agent-shell)
+  (setq ai-code-mcp-editor-tools-enabled t)
+  (define-key my/ai-map (kbd "I") #'ai-code-menu))
+#+end_src
+
 ** Grab environment variables from shell
 
 #+BEGIN_SRC emacs-lisp

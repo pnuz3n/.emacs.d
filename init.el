@@ -1162,6 +1162,21 @@ entry; the newest version is marked as default."
   (setq agent-shell-anthropic-claude-acp-command '("npx" "@agentclientprotocol/claude-agent-acp"))
   (define-key my/ai-map (kbd "S") #'agent-shell))
 
+(use-package mcp-server
+  :straight (:host github :repo "rhblind/emacs-mcp-server"
+             :files ("*.el" "tools/*.el"))
+  :commands (mcp-server-start-unix)
+  :config
+  (define-key my/ai-map (kbd "M") #'mcp-server-start-unix))
+
+(use-package ai-code
+  :straight (:host github :repo "tninja/ai-code-interface.el")
+  :commands (ai-code-menu ai-code-cli-start)
+  :config
+  (ai-code-set-backend 'agent-shell)
+  (setq ai-code-mcp-editor-tools-enabled t)
+  (define-key my/ai-map (kbd "I") #'ai-code-menu))
+
 (straight-use-package 'exec-path-from-shell)
 (require 'exec-path-from-shell)
 (exec-path-from-shell-copy-env "AWS_REGION")
