@@ -20,6 +20,9 @@ url/
 # Native compilation cache
 eln-cache/
 
+# Tree-sitter grammar shared libraries (built on demand)
+tree-sitter/
+
 # Package managers
 el-get/
 elpa/

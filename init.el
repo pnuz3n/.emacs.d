@@ -609,6 +609,21 @@ should be continued."
 
 (global-set-key (kbd "C-x C-SPC") #'my/pop-global-mark-smart)
 
+(when (treesit-available-p)
+  (setq treesit-language-source-alist
+        '((yaml       . ("https://github.com/ikatyang/tree-sitter-yaml"))
+          (bash       . ("https://github.com/tree-sitter/tree-sitter-bash"))
+          (json       . ("https://github.com/tree-sitter/tree-sitter-json"))
+          (dockerfile . ("https://github.com/camdencheek/tree-sitter-dockerfile"))
+          (toml       . ("https://github.com/tree-sitter/tree-sitter-toml"))))
+  (dolist (lang (mapcar #'car treesit-language-source-alist))
+    (unless (treesit-language-available-p lang)
+      (condition-case err
+          (treesit-install-language-grammar lang)
+        (error
+         (message "Failed to install tree-sitter grammar for %s: %s"
+                  lang (error-message-string err)))))))
+
 (global-set-key (kbd "C-z")  'mode-line-other-buffer)
 
 (global-set-key (kbd "C-x C-b") 'ibuffer)
