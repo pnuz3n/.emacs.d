@@ -1185,6 +1185,11 @@ entry; the newest version is marked as default."
   :straight t
   :commands (agent-shell)
   :config
+  (setq agent-shell-anthropic-claude-environment
+        (agent-shell-make-environment-variables
+         "CLAUDE_CODE_EXECUTABLE"
+         (or (executable-find "claude")
+             (expand-file-name "~/.local/bin/claude"))))
   (setq agent-shell-anthropic-claude-acp-command '("npx" "@agentclientprotocol/claude-agent-acp"))
   ;; GUI-launched Emacs does not inherit the expanded shell PATH, so the
   ;; opencode binary may be missing from `exec-path'. Search the installer
