@@ -933,15 +933,13 @@ entry; the newest version is marked as default."
 (unless (boundp 'my/ollama-port)
   (defvar my/ollama-port 11434))
 
-;; Ollama model names
+;; Ollama model names. Only two models fit on the GPU at once: one for
+;; chat-style work (gptel, ellama, ECA chat) and one FIM model for inline
+;; completion (gptel-autocomplete, ECA completion).
 (unless (boundp 'my/ollama-chat-model)
-  (defvar my/ollama-chat-model "gpt-oss:20b"))
-(unless (boundp 'my/ollama-fast-model)
-  (defvar my/ollama-fast-model "llama3.1:8b"))
-(unless (boundp 'my/ollama-utility-model)
-  (defvar my/ollama-utility-model "qwen2.5-coder:14b"))
-(unless (boundp 'my/ollama-embedding-model)
-  (defvar my/ollama-embedding-model "nomic-embed-text"))
+  (defvar my/ollama-chat-model "qwen3.8-96k"))
+(unless (boundp 'my/ollama-completion-model)
+  (defvar my/ollama-completion-model "qwen2.5-coder-fim"))
 
 ;; Derived variable
 (defvar my/ollama-host
@@ -983,8 +981,7 @@ entry; the newest version is marked as default."
          :stream t
          :models (mapcar #'intern
                         (list my/ollama-chat-model
-                              my/ollama-fast-model
-                              my/ollama-utility-model))))
+                              my/ollama-completion-model))))
 
   ;; Set up the main backend based on configuration
   (if my/use-bedrock-gptel
@@ -1058,8 +1055,7 @@ entry; the newest version is marked as default."
         (make-llm-ollama
          :host my/ollama-host-name
          :port my/ollama-port
-         :chat-model my/ollama-utility-model
-         :embedding-model my/ollama-embedding-model))
+         :chat-model my/ollama-chat-model))
 
 
   (setq ellama-language "English")
@@ -1076,7 +1072,7 @@ entry; the newest version is marked as default."
         (gptel-make-ollama
          "autocomplete"
          :host my/ollama-host
-         :models (list my/ollama-utility-model))))
+         :models (list my/ollama-completion-model))))
 
 ;; If not using Ollama, use the main backend
 (unless (boundp 'my/gptel-autocompletion-backend)
@@ -1167,7 +1163,7 @@ entry; the newest version is marked as default."
   :commands (eca)
   :config
   (let* ((ollama-url (format "http://%s:%d" my/ollama-host-name my/ollama-port))
-         (ollama-model (format "ollama/%s" my/ollama-utility-model))
+         (ollama-model (format "ollama/%s" my/ollama-completion-model))
          (claude-model (format "anthropic/%s" (symbol-name my/claude-model))))
     ;; Point ECA's built-in ollama provider at our Ollama host and pin the
     ;; completion model to Ollama. Chat/rewrite fall back to the top-level
