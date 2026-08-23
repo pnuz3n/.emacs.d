@@ -939,6 +939,13 @@ The guard plugs into the completion engine's block predicates (registered
 in the minuet section below) so no automatic suggestion fires outside an
 idle prompt.  Manual requests still work anywhere in a shell buffer.
 
+A shell completion is also limited to a single line.  A FIM model sees
+the session transcript as its context, so left unchecked it happily
+continues the "document" with invented prompts and command output.  A
+request transform (registered in the minuet section below) adds a
+newline stop sequence when the completion originates from a shell
+buffer, so generation ends with the current command line.
+
 #+begin_src emacs-lisp
   (defvar ps/shell-idle-threshold 1.0
     "Seconds since last output before the shell is considered idle.")
@@ -969,6 +976,18 @@ A block predicate for `minuet-auto-suggestion-block-predicates';
 returning non-nil suppresses the automatic suggestion."
     (and (derived-mode-p 'shell-mode)
          (not (ps/shell-idle-prompt-p))))
+
+  (defun ps/minuet-shell-single-line-transform (request)
+    "Stop generation at end of line when completing in a shell buffer.
+A request transform for the minuet provider options: REQUEST is a
+plist with :end-point, :headers and :body.  In shell buffers the
+completion target is the current command line only, so add a newline
+stop sequence to keep the model from continuing the session transcript
+with invented prompts and output."
+    (when (derived-mode-p 'shell-mode)
+      (plist-put request :body
+                 (plist-put (plist-get request :body) :stop ["\n"])))
+    request)
  #+end_src
 
 *** No passwords in shell
@@ -1999,6 +2018,10 @@ dismisses.
           (plist-put opts :api-key "MINUET_OLLAMA_API_KEY")
           (plist-put opts :name "Ollama")
           (plist-put opts :model my/ollama-completion-model)
+          ;; Shell buffers get a newline stop sequence (see the shell-mode
+          ;; section above).
+          (plist-put opts :transform
+                     (list #'ps/minuet-shell-single-line-transform))
           opts))
   (minuet-set-optional-options minuet-openai-fim-compatible-options
                                :max_tokens 64)

@@ -566,6 +566,18 @@ returning non-nil suppresses the automatic suggestion."
     (and (derived-mode-p 'shell-mode)
          (not (ps/shell-idle-prompt-p))))
 
+  (defun ps/minuet-shell-single-line-transform (request)
+    "Stop generation at end of line when completing in a shell buffer.
+A request transform for the minuet provider options: REQUEST is a
+plist with :end-point, :headers and :body.  In shell buffers the
+completion target is the current command line only, so add a newline
+stop sequence to keep the model from continuing the session transcript
+with invented prompts and output."
+    (when (derived-mode-p 'shell-mode)
+      (plist-put request :body
+                 (plist-put (plist-get request :body) :stop ["\n"])))
+    request)
+
 ;; No passwords show in shell
 (add-hook 'comint-output-filter-functions
           'comint-watch-for-password-prompt)
@@ -1066,6 +1078,10 @@ entry; the newest version is marked as default."
           (plist-put opts :api-key "MINUET_OLLAMA_API_KEY")
           (plist-put opts :name "Ollama")
           (plist-put opts :model my/ollama-completion-model)
+          ;; Shell buffers get a newline stop sequence (see the shell-mode
+          ;; section above).
+          (plist-put opts :transform
+                     (list #'ps/minuet-shell-single-line-transform))
           opts))
   (minuet-set-optional-options minuet-openai-fim-compatible-options
                                :max_tokens 64)
