@@ -1988,10 +1988,11 @@ The completion model is =my/ollama-completion-model= (set in
 =local-pre-init.el=); keep it a FIM-capable model such as
 =qwen2.5-coder-fim=.
 
-Toggle automatic suggestions with =C-q a TAB=; while a suggestion is
-shown, TAB accepts it, =M-a= accepts one line (with a prefix, more lines),
-=M-w= accepts one word, =M-n=/=M-p= cycle alternatives and =M-e=
-dismisses.
+Toggle automatic suggestions with =C-q a TAB=; =C-q a p= requests a
+suggestion immediately without waiting for the idle delay. While a
+suggestion is shown, TAB accepts it, =M-a= accepts one line (with a
+prefix, more lines), =M-w= accepts one word, =M-n=/=M-p= cycle
+alternatives and =M-e= dismisses.
 
 #+begin_src emacs-lisp
 (use-package minuet
@@ -2032,7 +2033,8 @@ dismisses.
   (keymap-set minuet-active-mode-map "<tab>" #'minuet-accept-suggestion)
   (keymap-set minuet-active-mode-map "C-e" #'minuet-accept-suggestion)
   (keymap-set minuet-active-mode-map "M-e" #'minuet-dismiss-suggestion)
-  (define-key my/ai-map (kbd "<tab>") #'minuet-auto-suggestion-mode))
+  (define-key my/ai-map (kbd "<tab>") #'minuet-auto-suggestion-mode)
+  (define-key my/ai-map (kbd "p") #'minuet-show-suggestion))
  #+end_src
 
 *** Claude code support

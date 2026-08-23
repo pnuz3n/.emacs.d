@@ -1092,7 +1092,8 @@ entry; the newest version is marked as default."
   (keymap-set minuet-active-mode-map "<tab>" #'minuet-accept-suggestion)
   (keymap-set minuet-active-mode-map "C-e" #'minuet-accept-suggestion)
   (keymap-set minuet-active-mode-map "M-e" #'minuet-dismiss-suggestion)
-  (define-key my/ai-map (kbd "<tab>") #'minuet-auto-suggestion-mode))
+  (define-key my/ai-map (kbd "<tab>") #'minuet-auto-suggestion-mode)
+  (define-key my/ai-map (kbd "p") #'minuet-show-suggestion))
 
 (use-package vterm
   :straight t
