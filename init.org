@@ -920,20 +920,21 @@ shell --- it runs behind the scenes only for completion queries.
                      :warning))
 #+end_src
 
-*** GPTel autocomplete in shell-mode
+*** LLM inline completion in shell-mode
 
-GPTel autocomplete works in shell buffers with two safety guards:
+Inline completion works in shell buffers with two safety guards:
 it only triggers when the cursor is at the command prompt (after the
 process mark, not up in scrollback) and when the shell is idle (no
 command currently producing output).  Recent terminal output provides
-context so the LLM can suggest commands informed by error messages,
+context so the model can suggest commands informed by error messages,
 directory listings, and other output.
 
-#+begin_src emacs-lisp
-  (defvar ps/gptel-shell-context-lines 100
-    "Lines of recent shell output to include as context for gptel autocomplete.")
+The guard plugs into the completion engine's block predicates (registered
+in the minuet section below) so no automatic suggestion fires outside an
+idle prompt.  Manual requests still work anywhere in a shell buffer.
 
-  (defvar ps/gptel-shell-idle-threshold 1.0
+#+begin_src emacs-lisp
+  (defvar ps/shell-idle-threshold 1.0
     "Seconds since last output before the shell is considered idle.")
 
   (defvar-local ps/shell-last-output-time nil
@@ -948,32 +949,21 @@ directory listings, and other output.
               (add-hook 'comint-output-filter-functions
                         #'ps/shell-track-output nil t)))
 
-  (defun ps/gptel-shell-idle-prompt-p ()
+  (defun ps/shell-idle-prompt-p ()
     "Non-nil when point is at an idle shell prompt."
     (and (derived-mode-p 'shell-mode)
          (comint-after-pmark-p)
          (or (null ps/shell-last-output-time)
              (> (float-time (time-since ps/shell-last-output-time))
-                ps/gptel-shell-idle-threshold))))
+                ps/shell-idle-threshold))))
 
-  (defun ps/gptel-shell-guard (orig &rest args)
-    "In shell-mode, only trigger gptel autocomplete at an idle prompt."
-    (if (derived-mode-p 'shell-mode)
-        (when (ps/gptel-shell-idle-prompt-p)
-          (apply orig args))
-      (apply orig args)))
-
-  (defun ps/gptel-shell-context (orig &rest args)
-    "Override context line count for shell-mode buffers."
-    (if (derived-mode-p 'shell-mode)
-        (let ((gptel-autocomplete-before-context-lines ps/gptel-shell-context-lines)
-              (gptel-autocomplete-after-context-lines 0))
-          (apply orig args))
-      (apply orig args)))
-
-  (advice-add 'gptel--post-command :around #'ps/gptel-shell-guard)
-  (advice-add 'gptel-complete :around #'ps/gptel-shell-context)
-#+end_src
+  (defun ps/minuet-shell-block-predicate ()
+    "Block inline completion in shell buffers outside an idle prompt.
+A block predicate for `minuet-auto-suggestion-block-predicates';
+returning non-nil suppresses the automatic suggestion."
+    (and (derived-mode-p 'shell-mode)
+         (not (ps/shell-idle-prompt-p))))
+ #+end_src
 
 *** No passwords in shell
 
@@ -1770,15 +1760,12 @@ The following variables control which LLM backend is used and should be set in
 (defvar my/bedrock-region "eu-west-1")
 (defvar my/bedrock-model-region 'eu)
 (defvar my/bedrock-model 'claude-opus-4-6)
-
-;; Use Ollama for autocomplete
-(defvar my/use-ollama-autocomplete t)
 #+END_EXAMPLE
 
 **** Personal Machine Example (Claude API + Ollama)
 #+BEGIN_EXAMPLE emacs-lisp
 ;; In local-pre-init.el for personal machine:
-;; Use Claude API directly, Ollama for autocomplete
+;; Use Claude API directly, Ollama for inline completion
 
 ;; Ollama configuration
 (defvar my/ollama-host-name "127.0.0.1")
@@ -1790,9 +1777,6 @@ The following variables control which LLM backend is used and should be set in
 (defvar my/use-bedrock-gptel nil)
 (defvar my/claude-api-key "your-api-key-here")  ; Or use auth-source
 (defvar my/claude-model 'claude-sonnet-4-20250514)
-
-;; Use Ollama for autocomplete
-(defvar my/use-ollama-autocomplete t)
 #+END_EXAMPLE
 
 *** Default Values (used if not set in local-pre-init.el)
@@ -1806,7 +1790,7 @@ The following variables control which LLM backend is used and should be set in
 
 ;; Ollama model names. Only two models fit on the GPU at once: one for
 ;; chat-style work (gptel, ellama, ECA chat) and one FIM model for inline
-;; completion (gptel-autocomplete, ECA completion).
+;; completion (minuet).
 (unless (boundp 'my/ollama-chat-model)
   (defvar my/ollama-chat-model "qwen3.8-96k"))
 (unless (boundp 'my/ollama-completion-model)
@@ -1819,8 +1803,6 @@ The following variables control which LLM backend is used and should be set in
 ;; Backend selection defaults
 (unless (boundp 'my/use-bedrock-gptel)
   (defvar my/use-bedrock-gptel t))  ; Default to Bedrock
-(unless (boundp 'my/use-ollama-autocomplete)
-  (defvar my/use-ollama-autocomplete t))
 
 ;; Bedrock configuration defaults
 (unless (boundp 'my/bedrock-region)
@@ -1853,16 +1835,6 @@ Configure gptel to use either Bedrock or Claude API based on machine configurati
   :straight t
   :commands (gptel gptel-send gptel-rewrite)
   :init
-  ;; Always set up Ollama backend (might be used for autocomplete)
-  (setq my/gptel-ollama
-        (gptel-make-ollama
-         "Ollama"
-         :host my/ollama-host
-         :stream t
-         :models (mapcar #'intern
-                        (list my/ollama-chat-model
-                              my/ollama-completion-model))))
-
   ;; Set up the main backend based on configuration
   (if my/use-bedrock-gptel
       ;; Use AWS Bedrock
@@ -1969,43 +1941,63 @@ These should be set in your shell profile or in =local-pre-init.el= using:
   (define-key my/ai-map (kbd "m") #'ellama-summarize))
 #+end_src
 
-*** gptel autocomplete
+*** Inline completion (minuet)
 
-Autocomplete can use either Ollama (faster, local) or the main backend.
-Set =my/use-ollama-autocomplete= in =local-pre-init.el= to control this.
+[minuet](https://github.com/milanglacier/minuet-ai.el) provides inline
+"as-you-type" ghost-text completions. It is configured with the
+=openai-fim-compatible= provider, which sends a true fill-in-the-middle
+request (=prompt= + =suffix=) to the =/v1/completions= endpoint. Ollama
+handles that natively for FIM templates, so the local model can use its
+native FIM tokens instead of an instruction-based marker protocol: base
+models do not reliably follow marker tokens (they echo them back into
+the completion), while a FIM template always does.
+
+The completion model is =my/ollama-completion-model= (set in
+=local-pre-init.el=); keep it a FIM-capable model such as
+=qwen2.5-coder-fim=.
+
+Toggle automatic suggestions with =C-q a TAB=; while a suggestion is
+shown, TAB accepts it, =M-a= accepts one line (with a prefix, more lines),
+=M-w= accepts one word, =M-n=/=M-p= cycle alternatives and =M-e=
+dismisses.
 
 #+begin_src emacs-lisp
-;; Set up autocomplete backend based on configuration
-(when my/use-ollama-autocomplete
-  (setq my/gptel-autocompletion-backend
-        (gptel-make-ollama
-         "autocomplete"
-         :host my/ollama-host
-         :models (list my/ollama-completion-model))))
-
-;; If not using Ollama, use the main backend
-(unless (boundp 'my/gptel-autocompletion-backend)
-  (setq my/gptel-autocompletion-backend my/gptel-main-backend))
-
-(use-package gptel-autocomplete
-  :straight '(:type git :host github :repo "JDNdeveloper/gptel-autocomplete")
+(use-package minuet
+  :straight t
   :config
-  (require 'gptel-autocomplete)
-  (setq gptel-autocomplete-before-context-lines 100
-        gptel-autocomplete-after-context-lines 20
-        gptel-autocomplete-temperature 0.1
-        gptel-autocomplete-use-context t
-        gptel-autocomplete-idle-delay 0)
-  (keymap-set gptel-autocomplete-completion-map "C-e" #'gptel-accept-completion)
-  (keymap-set gptel-autocomplete-completion-map "<tab>" #'gptel-accept-completion)
-  (keymap-set gptel-autocomplete-completion-map "M-f" #'gptel-accept-word)
-  (define-key my/ai-map (kbd "<tab>") #'gptel-autocomplete-mode)
-
-  (defun my/gptel-autocomplete-backend (orig &rest args)
-    (let ((gptel-backend my/gptel-autocompletion-backend))
-      (apply orig args)))
-  (advice-add 'gptel-complete :around #'my/gptel-autocomplete-backend))
-#+end_src
+  ;; Minuet resolves :api-key through the environment.  Ollama does not
+  ;; authenticate this endpoint, but Minuet still sends a bearer value.
+  ;; Use a fixed placeholder so a remote Ollama host never receives a
+  ;; value such as the user's home-directory path.
+  (setenv "MINUET_OLLAMA_API_KEY" "ollama")
+  (setq minuet-provider 'openai-fim-compatible
+        minuet-context-window 4096
+        minuet-context-ratio 0.75
+        minuet-n-completions 1
+        minuet-request-timeout 8
+        minuet-auto-suggestion-debounce-delay 0.5
+        minuet-auto-suggestion-throttle-delay 1.0)
+  (setq minuet-openai-fim-compatible-options
+        (let ((opts minuet-openai-fim-compatible-options))
+          (plist-put opts :end-point
+                     (format "http://%s:%d/v1/completions"
+                             my/ollama-host-name my/ollama-port))
+          ;; Minuet reads the bearer value from this environment variable.
+          (plist-put opts :api-key "MINUET_OLLAMA_API_KEY")
+          (plist-put opts :name "Ollama")
+          (plist-put opts :model my/ollama-completion-model)
+          opts))
+  (minuet-set-optional-options minuet-openai-fim-compatible-options
+                               :max_tokens 64)
+  ;; In shell buffers, only suggest at an idle prompt (see the shell-mode
+  ;; section above).
+  (add-hook 'minuet-auto-suggestion-block-predicates
+            #'ps/minuet-shell-block-predicate)
+  (keymap-set minuet-active-mode-map "<tab>" #'minuet-accept-suggestion)
+  (keymap-set minuet-active-mode-map "C-e" #'minuet-accept-suggestion)
+  (keymap-set minuet-active-mode-map "M-e" #'minuet-dismiss-suggestion)
+  (define-key my/ai-map (kbd "<tab>") #'minuet-auto-suggestion-mode))
+ #+end_src
 
 *** Claude code support
 
@@ -2183,6 +2175,18 @@ a native Emacs comint buffer via the ACP (AI Control Protocol) standard. The
   :commands (agent-shell)
   :config
   (setq agent-shell-anthropic-claude-acp-command '("npx" "@agentclientprotocol/claude-agent-acp"))
+  ;; GUI-launched Emacs does not inherit the expanded shell PATH, so the
+  ;; opencode binary may be missing from `exec-path'. Search the installer
+  ;; bin directories and use whatever is found, leaving the variable at
+  ;; its default (a bare "opencode") otherwise so agent-shell reports a
+  ;; missing executable when OpenCode is actually selected.
+  (let ((opencode (executable-find "opencode")))
+    (dolist (install-dir '("~/.opencode/bin" "~/.local/bin"))
+      (when (and (null opencode)
+                 (file-executable-p (expand-file-name "opencode" install-dir)))
+        (setq opencode (expand-file-name "opencode" install-dir))))
+    (when opencode
+      (setq agent-shell-opencode-acp-command (list opencode "acp"))))
   (define-key my/ai-map (kbd "S") #'agent-shell))
 #+end_src
 
