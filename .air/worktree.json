@@ -1,0 +1,13 @@
+{
+  "environment": [
+    {
+      "type": "env",
+      "key": "EMACS_SOCKET_NAME"
+    }
+  ],
+  "setup": {
+    "linux": [
+      "t=$(mktemp); if emacs --batch -l org --eval '(org-babel-tangle-file \"init.org\")' >\"$t\" 2>&1; then git diff --quiet -- init.el early-init.el || { echo 'NOTE: committed init.el/early-init.el out of sync with init.org:'; git diff --name-only -- init.el early-init.el; }; git checkout -- init.el early-init.el; rm -f \"$t\"; else echo 'Tangle failed:'; cat \"$t\"; rm -f \"$t\"; exit 1; fi"
+    ]
+  }
+}

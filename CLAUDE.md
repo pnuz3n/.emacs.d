@@ -19,6 +19,13 @@ Always commit `init.el` together with `init.org` changes. Blocks with `:tangle n
 
 Keybindings under `C-q a` (`my/ai-map`). Backend selection via variables in `local-pre-init.el`. Details in the "AI tool setup" section of `init.org`.
 
+## Emacs Server Socket
+
+`server-socket-dir` is customized to `~/.emacs.d/server`, so plain `emacsclient`
+fails unless `EMACS_SOCKET_NAME` is set. Use:
+
+    emacsclient --socket-name ~/.emacs.d/server/server ...
+
 ## Directory Layout
 
 - `lisp/` -- manually maintained elisp, loaded via `load-path`
