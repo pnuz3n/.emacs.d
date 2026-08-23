@@ -308,7 +308,9 @@ should be continued."
 (add-hook 'diary-display-hook 'diary-fancy-display)
 
 (setq server-socket-dir "~/.emacs.d/server")
-(server-start)
+(require 'server)
+(unless (server-running-p)
+  (server-start))
 
 (global-unset-key (kbd "C-q"))
 
@@ -598,7 +600,7 @@ returning non-nil suppresses the automatic suggestion."
 (when (treesit-available-p)
   (setq treesit-language-source-alist
         '((yaml       . ("https://github.com/ikatyang/tree-sitter-yaml"))
-          (bash       . ("https://github.com/tree-sitter/tree-sitter-bash"))
+          (bash       . ("https://github.com/tree-sitter/tree-sitter-bash" "v0.23.3"))
           (json       . ("https://github.com/tree-sitter/tree-sitter-json"))
           (dockerfile . ("https://github.com/camdencheek/tree-sitter-dockerfile"))
           (toml       . ("https://github.com/tree-sitter/tree-sitter-toml"))))
